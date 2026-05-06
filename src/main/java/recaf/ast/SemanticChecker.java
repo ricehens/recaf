@@ -169,7 +169,9 @@ public class SemanticChecker {
             ASTMethodDecl forward = methods.get(key);
             if (forward == null || !forward.forward())
                 id.ctx().error("identifier " + key + " may not be redeclared");
-            else if (!returnType.equals(forward.returnType()))
+            else if (returnType.isPresent() != forward.returnType().isPresent())
+                id.ctx().error("forward signature mismatch for method " + key);
+            else if (returnType.isPresent() && !equalTypes(returnType.get(), forward.returnType().get()))
                 id.ctx().error("forward signature mismatch for method " + key);
             else if (params.isPresent() != forward.params().isPresent())
                 id.ctx().error("forward signature mismatch for method " + key);
@@ -177,7 +179,7 @@ public class SemanticChecker {
                 if (params.get().size() != forward.params().get().size())
                     id.ctx().error("forward signature mismatch for method " + key);
                 for (int i = 0; i < params.get().size(); i++) {
-                    if (!params.get().get(i).equals(forward.params().get().get(i)))
+                    if (!equalTypes(params.get().get(i).type(), forward.params().get().get(i).type()))
                         id.ctx().error("forward signature mismatch for method " + key);
                 }
             }
@@ -207,6 +209,10 @@ public class SemanticChecker {
         return new ASTMethodDecl(ast.ctx(),
                 returnType, id, params, decls, block,
                 ast.forward(), ast.external(), ast.internal());
+    }
+
+    private boolean equalTypes(ASTType t1, ASTType t2) {
+        return resolveType(t1) == resolveType(t2);
     }
 
     private ASTBlock check(ASTBlock ast) {
