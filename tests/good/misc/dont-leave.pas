@@ -1,0 +1,16 @@
+PROGRAM DONT_LEAVE;
+
+VAR
+    X, Y: INTEGER;
+
+FUNCTION GET: INTEGER;
+BEGIN
+    X := X + 1;
+    GET := X
+END;
+
+BEGIN
+    X := 3;
+    WRITELN(GET * 0);
+    WRITELN(X)
+END.

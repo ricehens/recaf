@@ -1,0 +1,9 @@
+PROGRAM BABY_DIVISION;
+
+VAR
+    A, B;
+BEGIN
+    A := 13;
+    B := 4;
+    WRITELN(A DIV B)
+END.

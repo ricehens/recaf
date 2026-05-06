@@ -1,0 +1,22 @@
+PROGRAM COPIES;
+
+VAR
+    GLOB, X4;
+
+PROCEDURE COPYTOGLOB(X1);
+VAR
+    X2, X3, X5, X6;
+BEGIN
+    X2 := X1;
+    X3 := X2;
+    X4 := X3;
+    X5 := X4;
+    X6 := x5;
+    GLOB := X6
+END;
+
+BEGIN
+    COPYTOGLOB(3);
+    WRITELN(GLOB);
+    WRITELN(X4)
+END.

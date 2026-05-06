@@ -1,0 +1,15 @@
+PROGRAM RENAME_PARAM;
+
+PROCEDURE GIVE(X);
+BEGIN
+    WRITELN(X);
+    X := 3;
+    WRITELN(X)
+END;
+
+VAR X;
+BEGIN
+    X := 5;
+    GIVE(X);
+    WRITELN(X)
+END.

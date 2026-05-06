@@ -1,0 +1,85 @@
+lexer grammar RecafLexer;
+
+// Literals
+BOOL_LITERAL: 'true' | 'false';
+CHAR_LITERAL: '\'' CHAR_CHAR '\'';
+STRING_LITERAL: '"' (STRING_CHAR)* '"';
+LONG_LITERAL: INT_LITERAL 'L';
+INT_LITERAL: DEC_LITERAL | HEX_LITERAL;
+fragment DEC_LITERAL: [0-9]+;
+fragment HEX_LITERAL: '0x' [0-9a-fA-F]+;
+fragment LEGAL_CHAR: [\u0020-\u0021\u0023-\u0026\u0028-\u005B\u005D-\u007E];
+fragment LEGAL_CHAR_ESCAPE: '\\' ["'\\tnrf];
+fragment STRING_CHAR: LEGAL_CHAR | LEGAL_CHAR_ESCAPE | '\'';
+fragment CHAR_CHAR: LEGAL_CHAR | LEGAL_CHAR_ESCAPE | '"';
+
+// Keywords
+INT: 'int';
+LONG: 'long';
+BOOL: 'bool';
+IF: 'if';
+BREAK: 'break';
+IMPORT: 'import';
+CONTINUE: 'continue';
+ELSE: 'else';
+FOR: 'for';
+WHILE: 'while';
+RETURN: 'return';
+VOID: 'void';
+CONST: 'const';
+VAR: 'var';
+FUNC: 'func';
+TYPE: 'type';
+NEW: 'new';
+USE: 'use';
+MODULE: 'module';
+
+// Identifiers
+ID: ALPHA (ALPHA_NUM)*;
+fragment ALPHA: [a-zA-Z_];
+fragment ALPHA_NUM: ALPHA | [0-9];
+
+// Symbols
+LPAREN: '(';
+RPAREN: ')';
+LBRACK: '[';
+RBRACK: ']';
+LBRACE: '{';
+RBRACE: '}';
+SEMICOLON: ';';
+COLON: ':';
+COMMA: ',';
+DOT: '.';
+QUESTION: '?';
+
+// Operations
+PLUS: '+';
+MINUS: '-';
+TIMES: '*';
+DIVIDES: '/';
+MOD: '%';
+EQUALS: '=';
+LEQ: '<=';
+GEQ: '>=';
+EQUALS_EQUALS: '==';
+NEQ: '!=';
+LT: '<';
+GT: '>';
+AND: '&&';
+OR: '||';
+NOT: '!';
+PLUS_PLUS: '++';
+MINUS_MINUS: '--';
+PLUS_EQUALS: '+=';
+MINUS_EQUALS: '-=';
+TIMES_EQUALS: '*=';
+DIVIDES_EQUALS: '/=';
+MOD_EQUALS: '%=';
+
+// Skip
+LINE_COMMENT: '//' ~[\r\n]* -> skip;
+BLOCK_COMMENT: '/*' .*? '*/' -> skip;
+WHITESPACE: [ \t\r\n\f]+ -> skip;
+
+// Error
+ERROR: .;

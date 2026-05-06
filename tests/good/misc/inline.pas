@@ -1,0 +1,13 @@
+PROGRAM INLINE;
+
+VAR Z;
+
+FUNCTION GET(X);
+BEGIN
+    Z := Z + 1;
+    GET := X + Z;
+END;
+
+BEGIN
+    WRITELN(GET(3), ' ', GET(5))
+END.

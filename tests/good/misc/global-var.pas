@@ -1,0 +1,13 @@
+PROGRAM GLOBAL_VAR;
+
+VAR N;
+
+PROCEDURE PRINTN;
+BEGIN
+    WRITELN('N=', N);
+END;
+
+BEGIN
+    N := 3 + 5;
+    PRINTN;
+END.

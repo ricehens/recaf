@@ -1,0 +1,20 @@
+PROGRAM DIVPRINTDIV;
+
+FUNCTION GET(X: INTEGER): INTEGER;
+BEGIN
+    GET := X
+END;
+
+VAR
+    X, Y, Z: INTEGER;
+BEGIN
+    X := GET(130);
+    Y := GET(4);
+    Z := X DIV Y;
+
+    WRITELN(10, 20, 30, 40, 50, 60, 70, 80, 90, 100,
+        110, 120, 130, 140, 150, 160, 170, 180, 190, Z);
+
+    Z := Z DIV Y;
+    WRITELN(Z)
+END.
