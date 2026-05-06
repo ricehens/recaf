@@ -28,13 +28,23 @@ public class ASTBuilder {
         return new ASTProgram(ctx,
                 visitIdentifier(cst.program_decl().ID()),
                 Stream.concat(
-                        Stream.concat(registerInternalMethods(ctx),
+                        Stream.concat(registerInternals(ctx),
                                 cst.declaration().stream().flatMap(this::visit)),
                         Stream.of(visit(cst.main_block()))).toList());
     }
 
-    private Stream<ASTMethodDecl> registerInternalMethods(ASTContext ctx) {
+    private Stream<ASTDeclaration> registerInternals(ASTContext ctx) {
+        ASTPrimitiveType intType = new ASTPrimitiveType(ctx, Type.INT);
+        ASTPrimitiveType longType = new ASTPrimitiveType(ctx, Type.LONG);
+        ASTPrimitiveType boolType = new ASTPrimitiveType(ctx, Type.BOOL);
+        ASTPrimitiveType strType = new ASTPrimitiveType(ctx, Type.STRING);
+        ASTPrimitiveType unkType = new ASTPrimitiveType(ctx, Type.UNKNOWN);
         return Stream.of(
+                new ASTTypeDecl(ctx, new ASTIdentifier(ctx, INTEGER), intType),
+                new ASTTypeDecl(ctx, new ASTIdentifier(ctx, INT64), longType),
+                new ASTTypeDecl(ctx, new ASTIdentifier(ctx, BOOLEAN), boolType),
+                new ASTTypeDecl(ctx, new ASTIdentifier(ctx, STRING), strType),
+                new ASTTypeDecl(ctx, new ASTIdentifier(ctx, ERROR), unkType),
                 new ASTMethodDecl(ctx,
                         Optional.empty(), new ASTIdentifier(ctx, WRITE), Optional.empty(),
                         List.of(), Optional.empty(), false, false, true),
@@ -57,10 +67,10 @@ public class ASTBuilder {
                         Optional.empty(), new ASTIdentifier(ctx, DISPOSE), Optional.empty(),
                         List.of(), Optional.empty(), false, false, true),
                 new ASTMethodDecl(ctx,
-                        Optional.empty(), new ASTIdentifier(ctx, INTEGER), Optional.empty(),
+                        Optional.of(intType), new ASTIdentifier(ctx, INTEGER), Optional.empty(),
                         List.of(), Optional.empty(), false, false, true),
                 new ASTMethodDecl(ctx,
-                        Optional.empty(), new ASTIdentifier(ctx, INT64), Optional.empty(),
+                        Optional.of(longType), new ASTIdentifier(ctx, INT64), Optional.empty(),
                         List.of(), Optional.empty(), false, false, true)
         );
     }

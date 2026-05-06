@@ -42,7 +42,6 @@ public class SemanticChecker {
     }
 
     public ASTProgram check(ASTProgram ast) {
-        registerInternalTypes(ast.ctx());
         ASTIdentifier id = check(ast.id());
         globalMisc.add(declareId(id));
         return new ASTProgram(ast.ctx(), id,
@@ -164,7 +163,9 @@ public class SemanticChecker {
         );
 
         String key = key(id);
-        if (existsIdentifier(key)) {
+        if (ast.external())
+            externalCalls.put(key, id.text());
+        if (!ast.internal() && existsIdentifier(key)) {
             ASTMethodDecl forward = methods.get(key);
             if (forward == null || !forward.forward())
                 id.ctx().error("identifier " + key + " may not be redeclared");
@@ -235,13 +236,6 @@ public class SemanticChecker {
             return resolvedTypes.get(type);
         if (type instanceof ASTBaseType bt) return resolveType(getType(bt.id()));
         return type;
-    }
-
-    private void registerInternalTypes(ASTContext ctx) {
-        globalTypes.put(INTEGER, new ASTPrimitiveType(ctx, Type.INT));
-        globalTypes.put(INT64, new ASTPrimitiveType(ctx, Type.LONG));
-        globalTypes.put(BOOLEAN, new ASTPrimitiveType(ctx, Type.BOOL));
-        globalTypes.put(STRING, new ASTPrimitiveType(ctx, Type.STRING));
     }
 
     private void registerType(ASTIdentifier id, ASTType type) {

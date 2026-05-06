@@ -26,9 +26,10 @@ public class ASTUtils {
     static final String INTEGER = "integer";
     static final String INT64 = "int64";
     static final String BOOLEAN = "boolean";
-    static final String STRING = "";
+    static final String STRING = "@string";
+    static final String ERROR = "@error";
     static final Set<String> RESERVED_TYPES = Set.of(
-            INTEGER, INT64, BOOLEAN, STRING
+            INTEGER, INT64, BOOLEAN, STRING, ERROR
     );
 
     /**
