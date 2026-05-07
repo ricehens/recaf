@@ -31,6 +31,8 @@ public class SemanticChecker {
     private final Map<ASTType, ASTType> resolvedTypes;
     private final Map<ASTExpression, ASTType> exprTypes;
 
+    // note: enums values are reduced to integers but their types still exist
+    // during linearization, just treat any ASTEnumType as integer
     public SemanticChecker() {
         externalCalls = new HashMap<>();
         methods = new HashMap<>();
@@ -336,11 +338,12 @@ public class SemanticChecker {
         if (globalConstants.containsKey(key))
             return check(new ASTLiteral(loc.ctx(), globalConstants.get(key).literal()));
 
-        loc.ctx().error("cannot find location " + loc);
+        loc.ctx().error("cannot find location " + key);
         return loc;
     }
 
-    private ASTLiteral reduceEnum(ASTLocation loc, ASTEnumType et) {
+    // checked + placed in exprtypes iff reduced, i.e. iff return type is not ASTLocation
+    private ASTExpression reduceEnum(ASTLocation loc, ASTEnumType et) {
         for (int i = 0; i < et.members().size(); i++) {
             if (key(loc.id()).equals(key(et.members().get(i)))) {
                 ASTLiteral ret = new ASTLiteral(loc.ctx(), new IntLiteral(i));
@@ -348,7 +351,7 @@ public class SemanticChecker {
                 return ret;
             }
         }
-        throw new AssertionError("This should never happen.");
+        return loc;
     }
 
     // in case it is a method call
