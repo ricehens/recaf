@@ -105,6 +105,10 @@ public class SemanticChecker {
     private ASTArrayRange check(ASTArrayRange ast) {
         Literal lower = evalConstant(ast.lower());
         Literal upper = evalConstant(ast.upper());
+        if (lower == null)
+            ast.ctx().error("array range lower bound must be compile-time evaluable");
+        if (upper == null)
+            ast.ctx().error("array range upper bound must be compile-time evaluable");
         if (lower instanceof IntLiteral(int l) && upper instanceof IntLiteral(int r)) {
             if (l > r) ast.ctx().error("array range lower bound cannot exceed upper bound");
         } else ast.ctx().error("array indices must be integers");
@@ -152,9 +156,12 @@ public class SemanticChecker {
 
     private ASTConstDecl check(ASTConstDecl ast) {
         ASTIdentifier id = check(ast.id());
-        ASTLiteral lit = new ASTLiteral(ast.expr().ctx(), evalConstant(ast.expr()));
-        registerConst(id, lit);
-        return new ASTConstDecl(ast.ctx(), id, lit);
+        Literal lit = evalConstant(ast.expr());
+        if (lit == null)
+            ast.ctx().error("constant must be compile-time evaluable");
+        ASTLiteral astLit = new ASTLiteral(ast.expr().ctx(), lit);
+        registerConst(id, astLit);
+        return new ASTConstDecl(ast.ctx(), id, astLit);
     }
 
     private ASTMethodDecl check(ASTMethodDecl ast) {
@@ -224,6 +231,10 @@ public class SemanticChecker {
         return r1 == r2 || r1 == unk || r2 == unk;
     }
 
+    private boolean equalTypesStrict(ASTType t1, ASTType t2) {
+        return resolveType(t1) == resolveType(t2);
+    }
+
     private boolean isNumeric(ASTType type) {
         return equalTypes(type, primitiveType(Type.INT)) || equalTypes(type, primitiveType(Type.LONG));
     }
@@ -250,8 +261,8 @@ public class SemanticChecker {
         ASTExpression right = dispatch(ast.expr());
 
         // intrinsic cast
-        if (equalTypes(exprType(left), primitiveType(Type.LONG))
-                && equalTypes(exprType(right), primitiveType(Type.INT)))
+        if (equalTypesStrict(exprType(left), primitiveType(Type.LONG))
+                && equalTypesStrict(exprType(right), primitiveType(Type.INT)))
             return new ASTAssignment(ast.ctx(), left, castLong(right));
 
         if (!equalTypes(exprType(left), exprType(right))) {
@@ -288,9 +299,6 @@ public class SemanticChecker {
             ast.ctx().error("cannot find location " + key(id));
             return ast;
         }
-
-        if (equalTypes(type, primitiveType(Type.UNKNOWN)))
-            return ast;
 
         List<ASTAccessor> accesses = new ArrayList<>();
         for (ASTAccessor access : ast.accesses()) {
@@ -358,6 +366,7 @@ public class SemanticChecker {
 
         ASTLocation ret = new ASTLocation(ast.ctx(), id, accesses);
         exprTypes.put(ret, type);
+
         return ret;
     }
 
@@ -406,7 +415,7 @@ public class SemanticChecker {
             case WRITE, WRITELN -> {
                 for (ASTExpression arg : ast.args())
                     // descend into expression twice but whatever
-                    if (!(exprType(dispatch(arg)) instanceof ASTBaseType))
+                    if (!(exprType(dispatch(arg)) instanceof ASTPrimitiveType))
                         arg.ctx().error(key(ast.id()) + " expects arguments of type integer/int64/boolean/string");
             }
             case NEW, DISPOSE -> {
@@ -451,12 +460,12 @@ public class SemanticChecker {
         ASTType startType = exprType(start);
         ASTType endType = exprType(end);
 
-        if (equalTypes(idType, primitiveType(Type.LONG))) {
-            if (equalTypes(startType, primitiveType(Type.INT))) {
+        if (equalTypesStrict(idType, primitiveType(Type.LONG))) {
+            if (equalTypesStrict(startType, primitiveType(Type.INT))) {
                 start = castLong(start);
                 startType = exprType(start);
             }
-            if (equalTypes(endType, primitiveType(Type.INT))) {
+            if (equalTypesStrict(endType, primitiveType(Type.INT))) {
                 end = castLong(end);
                 endType = exprType(end);
             }
@@ -499,8 +508,95 @@ public class SemanticChecker {
     }
 
     private ASTExpression dispatch(ASTExpression expr) {
-        throw new RuntimeException("not implemented");
-        // TODO
+        return switch (expr) {
+            case ASTLocation loc -> checkLocExpr(loc);
+            case ASTMethodCall mc -> check(mc);
+            case ASTLiteral lit -> check(lit);
+            case ASTUnaryExpression un -> check(un);
+            case ASTBinaryExpression bin -> check(bin);
+            default -> throw new AssertionError("This should never happen.");
+        };
+    }
+
+    private ASTLiteral check(ASTLiteral ast) {
+        exprTypes.put(ast, primitiveType(ast.literal().type()));
+        return ast;
+    }
+
+    private ASTUnaryExpression check(ASTUnaryExpression ast) {
+        ASTExpression expr = dispatch(ast.expr());
+        ASTType type = exprType(expr);
+
+        switch (ast.op()) {
+            case NOT -> {
+                if (!equalTypes(type, primitiveType(Type.BOOL)))
+                    ast.ctx().error("unary operator `not` expects type boolean");
+            }
+            case MINUS -> {
+                if (!isNumeric(type))
+                    ast.ctx().error("unary minus expects type integer or int64");
+            }
+        }
+
+        ASTUnaryExpression ret = new ASTUnaryExpression(ast.ctx(), ast.op(), expr);
+        exprTypes.put(ret, type);
+        return ret;
+    }
+
+    private ASTBinaryExpression check(ASTBinaryExpression ast) {
+        ASTExpression left = dispatch(ast.left());
+        ASTExpression right = dispatch(ast.right());
+        ASTType leftType = exprType(left);
+        ASTType rightType = exprType(right);
+
+        if (equalTypesStrict(leftType, primitiveType(Type.LONG))
+                && equalTypesStrict(rightType, primitiveType(Type.INT))) {
+            right = castLong(right);
+            rightType = exprType(right);
+        }
+
+        if (equalTypesStrict(leftType, primitiveType(Type.INT))
+                && equalTypesStrict(rightType, primitiveType(Type.LONG))) {
+            left = castLong(left);
+            leftType = exprType(left);
+        }
+
+        if (!equalTypes(leftType, rightType)) {
+            ast.ctx().error("left-right type mismatch on binary operator");
+            return ast;
+        }
+
+        switch (ast.op().getType()) {
+            case ARITH_OP -> {
+                if (!isNumeric(leftType)) {
+                    ast.ctx().error("arithmetic binary operator expected type integer or int64");
+                    return ast;
+                }
+            }
+            case REL_OP -> {
+                if (!isNumeric(leftType)) {
+                    ast.ctx().error("comparison binary operator expected type integer or int64");
+                    return ast;
+                }
+            }
+            case COND_OP -> {
+                if (!equalTypes(leftType, primitiveType(Type.BOOL))) {
+                    ast.ctx().error("logical binary operator expected type boolean");
+                    return ast;
+                }
+            }
+            case EQ_OP -> {
+                if (leftType instanceof ASTArrayType)
+                    ast.ctx().error("cannot compare equality between arrays");
+                if (leftType instanceof ASTRecordType)
+                    ast.ctx().error("cannot compare equality between records");
+            }
+        }
+
+        ASTBinaryExpression ret = new ASTBinaryExpression(ast.ctx(), ast.op(), left, right);
+        exprTypes.put(ret, ast.op().getType() == BinaryOperator.BinOpType.ARITH_OP
+                ? leftType : primitiveType(Type.BOOL));
+        return ret;
     }
 
     private ASTType primitiveType(Type type) {

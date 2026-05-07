@@ -174,13 +174,13 @@ public class ASTBuilder {
         return new ASTMethodDecl(ctx,
                 Optional.of(cst.type_ref() == null ? defaultType(ctx) : visit(cst.type_ref())),
                 visitIdentifier(cst.ID()),
-                cst.formal_params() != null ? cst.formal_params().ELLIPSIS() == null ? Optional.empty()
-                                              : cst.formal_params().param_decls() == null ? Optional.of(List.of())
-                                                : Optional.of(visit(cst.formal_params().param_decls()).toList())
-                        : Optional.of(List.of()),
-                cst.routine_block() != null ? cst.routine_block().local_declaration().stream()
-                                              .flatMap(this::visit).toList()
-                        : List.of(),
+                cst.formal_params() == null ? Optional.of(List.of())
+                        : cst.formal_params().ELLIPSIS() != null ? Optional.empty()
+                          : cst.formal_params().param_decls() == null ? Optional.of(List.of())
+                            : Optional.of(visit(cst.formal_params().param_decls()).toList()),
+                cst.routine_block() == null ? List.of()
+                        : cst.routine_block().local_declaration().stream()
+                          .flatMap(this::visit).toList(),
                 cst.routine_block() != null ? Optional.of(visit(cst.routine_block().block())) : Optional.empty(),
                 cst.FORWARD() != null, cst.EXTERNAL() != null, false
         );
@@ -190,13 +190,13 @@ public class ASTBuilder {
         return new ASTMethodDecl(ctx(cst),
                 Optional.empty(),
                 visitIdentifier(cst.ID()),
-                cst.formal_params() != null ? cst.formal_params().ELLIPSIS() == null ? Optional.empty()
-                                              : cst.formal_params().param_decls() == null ? Optional.of(List.of())
-                                                : Optional.of(visit(cst.formal_params().param_decls()).toList())
-                        : Optional.of(List.of()),
-                cst.routine_block() != null ? cst.routine_block().local_declaration().stream()
-                                              .flatMap(this::visit).toList()
-                        : List.of(),
+                cst.formal_params() == null ? Optional.of(List.of())
+                        : cst.formal_params().ELLIPSIS() != null ? Optional.empty()
+                          : cst.formal_params().param_decls() == null ? Optional.of(List.of())
+                            : Optional.of(visit(cst.formal_params().param_decls()).toList()),
+                cst.routine_block() == null ? List.of()
+                        : cst.routine_block().local_declaration().stream()
+                          .flatMap(this::visit).toList(),
                 cst.routine_block() != null ? Optional.of(visit(cst.routine_block().block())) : Optional.empty(),
                 cst.FORWARD() != null, cst.EXTERNAL() != null, false
         );

@@ -9,8 +9,21 @@ program StrassenMatMul;
 procedure scanf(...); external;
 procedure printf(...); external;
 
+const
+    A = 0;
+    B = 1;
+    C = 2;
+    T1 = 3;
+    T2 = 4;
+    M1 = 5;
+    M2 = 6;
+    M3 = 7;
+    M4 = 8;
+    M5 = 9;
+    M6 = 10;
+    M7 = 11;
 type
-    IDX = (A, B, C, T1, T2, M1, M2, M3, M4, M5, M6, M7);
+    IDX = integer;
 var
     M: array[A..M7, 0..2047, 0..1023];
     N, i, j;
