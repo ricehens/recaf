@@ -87,11 +87,9 @@ public class CFGVarDeclInstruction implements CFGInstruction {
 
     @Override
     public String toString() {
-        String typeStr = arrayLen < 0
-                ? type.toCFGString()
-                : type == Type.RECORD
-                ? String.format("[%d x i8]", arrayLen)
-                : String.format("[%d x %s]", arrayLen, type.toCFGString());
+        String typeStr = arrayLen < 0 ? type.toCFGString()
+                : type == Type.RECORD ? String.format("[%d x i8]", arrayLen)
+                  : String.format("[%d x %s]", arrayLen, type.toCFGString());
 
         return inGlobalScope ? String.format(
                 // "@%s = common global %s, align %d",
