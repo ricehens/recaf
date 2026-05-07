@@ -86,7 +86,7 @@ public class ASTBuilder {
             return Stream.of(visit(cst.function_decl()));
         if (cst.procedure_decl() != null)
             return Stream.of(visit(cst.procedure_decl()));
-        throw new RuntimeException("This should never happen.");
+        throw new AssertionError("This should never happen.");
     }
 
     private Stream<ASTTypeDecl> visit(RecafParser.Type_sectionContext cst) {
@@ -111,7 +111,7 @@ public class ASTBuilder {
             return visit(cst.enum_type());
         if (cst.pointer_type() != null)
             return visit(cst.pointer_type());
-        throw new RuntimeException("This should never happen.");
+        throw new AssertionError("This should never happen.");
     }
 
     private ASTType defaultType(ASTContext ctx) {
@@ -213,7 +213,7 @@ public class ASTBuilder {
             return visit(cst.const_section()).map(x -> x);
         if (cst.var_section() != null)
             return visit(cst.var_section()).map(x -> x);
-        throw new RuntimeException("This should never happen");
+        throw new AssertionError("This should never happen");
     }
 
     private ASTMethodDecl visit(RecafParser.Main_blockContext cst) {
@@ -250,7 +250,7 @@ public class ASTBuilder {
             return visit(cst.repeat_loop());
         if (cst.block() != null)
             return visit(cst.block());
-        throw new RuntimeException("This should never happen.");
+        throw new AssertionError("This should never happen.");
     }
 
     private ASTStatement visit(RecafParser.Assign_statementContext cst) {
@@ -262,31 +262,31 @@ public class ASTBuilder {
                 cst.location_access().stream().map(this::visit).toList());
     }
 
-    private ASTLocationAccess visit(RecafParser.Location_accessContext cst) {
+    private ASTAccessor visit(RecafParser.Location_accessContext cst) {
         if (cst.indexer() != null)
             return visit(cst.indexer());
         if (cst.field_selector() != null)
             return visit(cst.field_selector());
         if (cst.deref_selector() != null)
             return visit(cst.deref_selector());
-        throw new RuntimeException("This should never happen.");
+        throw new AssertionError("This should never happen.");
     }
 
-    private ASTLocationIndexAccess visit(RecafParser.IndexerContext cst) {
-        return new ASTLocationIndexAccess(ctx(cst),
+    private ASTIndexAccess visit(RecafParser.IndexerContext cst) {
+        return new ASTIndexAccess(ctx(cst),
                 cst.expr().stream().map(this::visit).toList());
     }
 
-    private ASTLocationFieldAccess visit(RecafParser.Field_selectorContext cst) {
-        return new ASTLocationFieldAccess(ctx(cst), visitIdentifier(cst.ID()));
+    private ASTFieldAccess visit(RecafParser.Field_selectorContext cst) {
+        return new ASTFieldAccess(ctx(cst), visitIdentifier(cst.ID()));
     }
 
-    private ASTLocationDerefAccess visit(RecafParser.Deref_selectorContext cst) {
-        return new ASTLocationDerefAccess(ctx(cst));
+    private ASTDerefAccess visit(RecafParser.Deref_selectorContext cst) {
+        return new ASTDerefAccess(ctx(cst));
     }
 
     private ASTMethodCall visit(RecafParser.Method_call_statementContext cst) {
-        return visit(cst.method_call());
+        return new ASTMethodCall(ctx(cst), visitIdentifier(cst.ID()), visit(cst.args()).toList());
     }
 
     private ASTMethodCall visit(RecafParser.Method_callContext cst) {
@@ -304,7 +304,7 @@ public class ASTBuilder {
             return new ASTLiteral(ctx,
                     new StringLiteral(parseString(cst.STRING_LITERAL().getText(), ctx::error)));
         }
-        throw new RuntimeException("This should never happen.");
+        throw new AssertionError("This should never happen.");
     }
 
     private ASTIfElse visit(RecafParser.If_elseContext cst) {
@@ -332,8 +332,8 @@ public class ASTBuilder {
 
     private ASTRepeatLoop visit(RecafParser.Repeat_loopContext cst) {
         return new ASTRepeatLoop(ctx(cst),
-                new ASTBlock(ctx(cst.statement_list()), visit(cst.statement_list()).toList()),
-                visit(cst.expr()));
+                new ASTBlock(ctx(cst.statement_list()), visit(cst.statement_list()).toList()), visit(cst.expr())
+        );
     }
 
     private ASTExpression visit(RecafParser.ExprContext cst) {
@@ -364,7 +364,7 @@ public class ASTBuilder {
         if (cst.LPAREN() != null)
             return visit(cst.expr(0));
 
-        throw new RuntimeException("This should never happen.");
+        throw new AssertionError("This should never happen.");
     }
 
     private ASTLiteral visit(RecafParser.LiteralContext cst) {
@@ -376,7 +376,7 @@ public class ASTBuilder {
             return new ASTLiteral(ctx,
                     parseIntegerLiteral(cst.INT_LITERAL().getText(), ctx::error));
         }
-        throw new RuntimeException("This should never happen.");
+        throw new AssertionError("This should never happen.");
     }
 
     private ASTExpression extractUnaryExpression(RecafParser.ExprContext cst) {
@@ -445,14 +445,14 @@ public class ASTBuilder {
                     char d = text.charAt(i);
                     if (d == '\'') {
                         if (i + 1 < text.length() && text.charAt(i + 1) == '\'') {
-                            appendEscaped(sb, '\'');
+                            sb.append('\'');
                             i += 2;
                         } else {
                             i++;
                             break;
                         }
                     } else {
-                        appendEscaped(sb, d);
+                        sb.append(d);
                         i++;
                     }
                 }
@@ -470,29 +470,13 @@ public class ASTBuilder {
                 int code = Integer.parseInt(text.substring(start, i));
                 if (code < 0 || code > 255)
                     error.accept("string escape code out of range: #" + code);
-                appendEscaped(sb, (char) (code & 0xFF));
+                sb.append((char) (code & 0xFF));
                 continue;
             }
             error.accept("invalid string literal segment");
             i++;
         }
         return sb.toString();
-    }
-
-    private static void appendEscaped(StringBuilder sb, char c) {
-        switch (c) {
-            case '\\' -> sb.append("\\\\");
-            case '"' -> sb.append("\\\"");
-            case '\n' -> sb.append("\\n");
-            case '\r' -> sb.append("\\r");
-            case '\t' -> sb.append("\\t");
-            case '\0' -> sb.append("\\0");
-            default -> {
-                if (c < 32 || c == 127)
-                    sb.append(String.format("\\x%02x", (int) c));
-                else sb.append(c);
-            }
-        }
     }
 
     private BinaryOperator extractBinaryOperator(RecafParser.ExprContext cst) {

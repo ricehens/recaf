@@ -5,12 +5,12 @@ import recaf.ast.ASTUtils;
 public record ASTRepeatLoop(
         ASTContext ctx,
         ASTStatement body,
-        ASTExpression untilCond
+        ASTExpression cond
 ) implements ASTStatement {
 
     @Override
     public String toString() {
-        return ASTUtils.generateToString("(RepeatLoop)", body, untilCond);
+        return ASTUtils.generateToString("(RepeatLoop)", body, cond);
     }
 
 }

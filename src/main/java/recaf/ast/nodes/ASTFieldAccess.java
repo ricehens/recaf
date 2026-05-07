@@ -2,7 +2,7 @@ package recaf.ast.nodes;
 
 import recaf.ast.ASTUtils;
 
-public record ASTLocationFieldAccess(ASTContext ctx, ASTIdentifier field) implements ASTLocationAccess {
+public record ASTFieldAccess(ASTContext ctx, ASTIdentifier field) implements ASTAccessor {
 
     @Override
     public String toString() {

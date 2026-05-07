@@ -137,7 +137,7 @@ public class Compiler {
         try {
             List<String> cmd = new ArrayList<>(List.of(
                     "gcc", "-O0", "-no-pie", "-s", temp.getPath(),
-                    "-o", outfile == null ? "a.out" : outfile
+                    "-o", outfile == null ? infile.substring(0, infile.length() - 4) : outfile
             ));
             for (String lib : libraries) {
                 File file = new File(lib);

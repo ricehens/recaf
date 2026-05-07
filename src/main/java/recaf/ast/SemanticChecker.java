@@ -25,6 +25,8 @@ public class SemanticChecker {
     private Map<String, ASTType> localVariables;
     private Map<String, ASTLiteral> localConstants;
 
+    private int loopDepth;
+
     private final Map<ASTType, ASTType> resolvedTypes;
     private final Map<ASTExpression, ASTType> exprTypes;
 
@@ -39,6 +41,7 @@ public class SemanticChecker {
         resolvedTypes = new IdentityHashMap<>();
         exprTypes = new IdentityHashMap<>();
         local = false;
+        loopDepth = 0;
     }
 
     public ASTProgram check(ASTProgram ast) {
@@ -56,13 +59,13 @@ public class SemanticChecker {
         return switch (ast) {
             case ASTTypeDecl td -> check(td);
             case ASTVarDecl vd -> {
-                ASTDeclaration ret = check(vd);
-                registerVar(vd.id(), vd.type());
+                ASTVarDecl ret = check(vd);
+                registerVar(ret.id(), ret.type());
                 yield ret;
             }
             case ASTConstDecl cd -> check(cd);
             case ASTMethodDecl md -> check(md);
-            default -> throw new RuntimeException("This should never happen.");
+            default -> throw new AssertionError("This should never happen.");
         };
     }
 
@@ -81,7 +84,7 @@ public class SemanticChecker {
             case ASTPointerType pt -> check(pt);
             case ASTRecordType rt -> check(rt);
             case ASTPrimitiveType pr -> check(pr);
-            default -> throw new RuntimeException("This should never happen.");
+            default -> throw new AssertionError("This should never happen.");
         };
     }
 
@@ -115,7 +118,6 @@ public class SemanticChecker {
         ASTEnumType ret = new ASTEnumType(ast.ctx(), newIds);
         for (int i = 0; i < ast.members().size(); i++) {
             ASTIdentifier id = check(ast.members().get(i));
-            // registerConst(id, new ASTLiteral(id.ctx(), new IntLiteral(i)));
             registerVar(id, ret);
             newIds.add(id);
         }
@@ -196,15 +198,19 @@ public class SemanticChecker {
         localConstants = new HashMap<>();
 
         returnType.ifPresent(type -> registerVar(id, type));
-        if (params.isPresent())
-            for (ASTVarDecl vd : params.get())
-                registerVar(vd.id(), vd.type());
+        if (params.isPresent()) {
+            for (ASTVarDecl vd : params.get()) {
+                ASTVarDecl vd2 = check(vd);
+                registerVar(vd2.id(), vd2.type());
+            }
+        }
 
         List<ASTDeclaration> decls = ast.decls().stream().map(this::dispatch).toList();
         flushPromises();
         Optional<ASTBlock> block = ast.block().map(this::check);
 
         local = false;
+        if (loopDepth != 0) throw new AssertionError("This should never happen.");
 
         return new ASTMethodDecl(ast.ctx(),
                 returnType, id, params, decls, block,
@@ -212,7 +218,14 @@ public class SemanticChecker {
     }
 
     private boolean equalTypes(ASTType t1, ASTType t2) {
-        return resolveType(t1) == resolveType(t2);
+        ASTType r1 = resolveType(t1);
+        ASTType r2 = resolveType(t2);
+        ASTType unk = primitiveType(Type.UNKNOWN);
+        return r1 == r2 || r1 == unk || r2 == unk;
+    }
+
+    private boolean isNumeric(ASTType type) {
+        return equalTypes(type, primitiveType(Type.INT)) || equalTypes(type, primitiveType(Type.LONG));
     }
 
     private ASTBlock check(ASTBlock ast) {
@@ -221,9 +234,272 @@ public class SemanticChecker {
 
     private ASTStatement dispatch(ASTStatement ast) {
         return switch (ast) {
+            case ASTAssignment as -> check(as);
+            case ASTMethodCall mc -> check(mc);
+            case ASTIfElse ie -> check(ie);
+            case ASTForLoop fl -> check(fl);
+            case ASTWhileLoop wl -> check(wl);
+            case ASTRepeatLoop rl -> check(rl);
             case ASTBlock blk -> check(blk);
-            default -> throw new RuntimeException("This should never happen.");
+            default -> throw new AssertionError("This should never happen.");
         };
+    }
+
+    private ASTAssignment check(ASTAssignment ast) {
+        ASTLocation left = check(ast.location());
+        ASTExpression right = dispatch(ast.expr());
+
+        // intrinsic cast
+        if (equalTypes(exprType(left), primitiveType(Type.LONG))
+                && equalTypes(exprType(right), primitiveType(Type.INT)))
+            return new ASTAssignment(ast.ctx(), left, castLong(right));
+
+        if (!equalTypes(exprType(left), exprType(right))) {
+            ast.ctx().error("type mismatch for assignment");
+            return ast;
+        }
+
+        return new ASTAssignment(ast.ctx(), left, right);
+    }
+
+    private ASTMethodCall castLong(ASTExpression expr) {
+        return check(new ASTMethodCall(expr.ctx(), new ASTIdentifier(expr.ctx(), INT64), List.of(expr)));
+    }
+
+    // in case it is a method call
+    private ASTExpression checkLocExpr(ASTLocation ast) {
+        ASTIdentifier id = check(ast.id());
+        ASTType type = getVar(id);
+        if (type == null && ast.accesses().isEmpty()) {
+            ASTMethodDecl md = methods.get(key(id));
+            if (md != null)
+                return check(new ASTMethodCall(
+                        ast.ctx(), id, List.of()
+                ));
+        }
+        return check(ast);
+    }
+
+    private ASTLocation check(ASTLocation ast) {
+        ASTIdentifier id = check(ast.id());
+        ASTType type = getVar(id);
+
+        if (type == null) {
+            ast.ctx().error("cannot find location " + key(id));
+            return ast;
+        }
+
+        if (equalTypes(type, primitiveType(Type.UNKNOWN)))
+            return ast;
+
+        List<ASTAccessor> accesses = new ArrayList<>();
+        for (ASTAccessor access : ast.accesses()) {
+            switch (access) {
+                case ASTIndexAccess index -> {
+                    if (!(type instanceof ASTArrayType arrayType)) {
+                        index.ctx().error("cannot index into non-array");
+                        return ast;
+                    }
+                    if (arrayType.ranges().size() != index.indices().size()) {
+                        index.ctx().error("expected " + arrayType.ranges().size()
+                                + " indices, got " + index.indices().size());
+                        return ast;
+                    }
+                    List<ASTExpression> indices = new ArrayList<>();
+                    for (ASTExpression expr : index.indices()) {
+                        ASTExpression e2 = dispatch(expr);
+                        if (!equalTypes(primitiveType(Type.INT), exprType(e2))) {
+                            expr.ctx().error("array indices must be of type integer");
+                            return ast;
+                        }
+                        indices.add(e2);
+                    }
+                    type = resolveType(arrayType.type());
+                    accesses.add(new ASTIndexAccess(index.ctx(), indices));
+                }
+
+                case ASTFieldAccess field -> {
+                    if (!(type instanceof ASTRecordType recordType)) {
+                        field.ctx().error("cannot read field of non-record");
+                        return ast;
+                    }
+                    ASTIdentifier fieldId = check(field.field());
+
+                    ASTVarDecl foundField = null;
+                    for (ASTVarDecl vd : recordType.fields()) {
+                        if (vd.id().text().equals(fieldId.text())) {
+                            foundField = vd;
+                            break;
+                        }
+                    }
+
+                    if (foundField == null) {
+                        field.ctx().error("cannot find field " + field.field().text());
+                        return ast;
+                    }
+
+                    type = resolveType(foundField.type());
+                    accesses.add(new ASTFieldAccess(field.ctx(), fieldId));
+                }
+
+                case ASTDerefAccess deref -> {
+                    if (!(type instanceof ASTPointerType ptrType)) {
+                        deref.ctx().error("cannot dereference non-pointer");
+                        return ast;
+                    }
+
+                    type = resolveType(ptrType.type());
+                    accesses.add(new ASTDerefAccess(deref.ctx()));
+                }
+
+                default -> throw new AssertionError("This should never happen.");
+            }
+        }
+
+        ASTLocation ret = new ASTLocation(ast.ctx(), id, accesses);
+        exprTypes.put(ret, type);
+        return ret;
+    }
+
+    private ASTMethodCall check(ASTMethodCall ast) {
+        ASTIdentifier id = check(ast.id());
+        ASTMethodDecl md = methods.get(key(id));
+        if (md == null) {
+            ast.ctx().error("cannot find routine " + key(id));
+            return ast;
+        }
+
+        if (md.internal()) checkNativeCall(ast);
+
+        if (md.params().isEmpty()) {
+            ASTMethodCall ret = new ASTMethodCall(ast.ctx(), id,
+                    ast.args().stream().map(this::dispatch).toList());
+            if (md.returnType().isPresent())
+                exprTypes.put(ret, md.returnType().get());
+            return ret;
+        }
+
+        if (md.params().get().size() != ast.args().size()) {
+            ast.ctx().error("expected " + md.params().get().size()
+                    + " arguments, got " + ast.args().size());
+            return ast;
+        }
+
+        List<ASTExpression> args = new ArrayList<>();
+        for (int i = 0; i < ast.args().size(); i++) {
+            ASTExpression e = dispatch(ast.args().get(i));
+            if (!equalTypes(exprType(e), md.params().get().get(i).type())) {
+                ast.ctx().error("type mismatch for " + i + "th argument");
+                return ast;
+            }
+            args.add(e);
+        }
+
+        ASTMethodCall ret = new ASTMethodCall(ast.ctx(), id, args);
+        if (md.returnType().isPresent())
+            exprTypes.put(ret, md.returnType().get());
+        return ret;
+    }
+
+    private void checkNativeCall(ASTMethodCall ast) {
+        switch (key(ast.id())) {
+            case WRITE, WRITELN -> {
+                for (ASTExpression arg : ast.args())
+                    // descend into expression twice but whatever
+                    if (!(exprType(dispatch(arg)) instanceof ASTBaseType))
+                        arg.ctx().error(key(ast.id()) + " expects arguments of type integer/int64/boolean/string");
+            }
+            case NEW, DISPOSE -> {
+                if (ast.args().size() != 1)
+                    ast.ctx().error(key(ast.id()) + " expects exactly one argument");
+                else if (!(exprType(dispatch(ast.args().getFirst())) instanceof ASTPointerType))
+                    ast.args().getFirst().ctx().error(key(ast.id()) + " expects argument of pointer type");
+            }
+            case INTEGER, INT64 -> {
+                if (ast.args().size() != 1)
+                    ast.ctx().error(key(ast.id()) + " expects exactly one argument");
+                else {
+                    if (!isNumeric(exprType(dispatch(ast.args().getFirst()))))
+                        ast.ctx().error(key(ast.id()) + " expects argument of type integer or int64");
+                }
+            }
+            case BREAK, CONTINUE -> {
+                if (loopDepth <= 0) ast.ctx().error("unexpected " + key(ast.id()) + " outside of loop");
+            }
+        }
+    }
+
+    private ASTIfElse check(ASTIfElse ast) {
+        ASTExpression cond = dispatch(ast.cond());
+        if (!equalTypes(exprType(cond), primitiveType(Type.BOOL)))
+            cond.ctx().error("if condition expects type boolean");
+
+        ASTStatement thenBlock = dispatch(ast.thenBlock());
+        Optional<ASTStatement> elseBlock = ast.elseBlock().map(this::dispatch);
+        return new ASTIfElse(ast.ctx(), cond, thenBlock, elseBlock);
+    }
+
+    private ASTForLoop check(ASTForLoop ast) {
+        ASTIdentifier id = ast.dummy();
+        ASTType idType = getVar(id);
+        if (!isNumeric(idType))
+            id.ctx().error("for loop expects dummy variable of type int or long");
+
+        ASTExpression start = dispatch(ast.start());
+        ASTExpression end = dispatch(ast.end());
+
+        ASTType startType = exprType(start);
+        ASTType endType = exprType(end);
+
+        if (equalTypes(idType, primitiveType(Type.LONG))) {
+            if (equalTypes(startType, primitiveType(Type.INT))) {
+                start = castLong(start);
+                startType = exprType(start);
+            }
+            if (equalTypes(endType, primitiveType(Type.INT))) {
+                end = castLong(end);
+                endType = exprType(end);
+            }
+        }
+
+        if (!equalTypes(idType, startType))
+            id.ctx().error("type mismatch for assignment to for loop lower bound");
+        if (!equalTypes(idType, endType))
+            id.ctx().error("type mismatch for assignment to for loop upper bound");
+
+        loopDepth++;
+        ASTStatement body = dispatch(ast.body());
+        loopDepth--;
+
+        return new ASTForLoop(ast.ctx(), id, start, end, ast.descending(), body);
+    }
+
+    private ASTWhileLoop check(ASTWhileLoop ast) {
+        ASTExpression cond = dispatch(ast.cond());
+        if (!equalTypes(exprType(cond), primitiveType(Type.BOOL)))
+            cond.ctx().error("while condition expects type boolean");
+
+        loopDepth++;
+        ASTStatement body = dispatch(ast.body());
+        loopDepth--;
+
+        return new ASTWhileLoop(ast.ctx(), cond, body);
+    }
+
+    private ASTRepeatLoop check(ASTRepeatLoop ast) {
+        loopDepth++;
+        ASTStatement body = dispatch(ast.body());
+        loopDepth--;
+
+        ASTExpression cond = dispatch(ast.cond());
+        if (!equalTypes(exprType(cond), primitiveType(Type.BOOL)))
+            cond.ctx().error("until condition expects type boolean");
+
+        return new ASTRepeatLoop(ast.ctx(), body, cond);
+    }
+
+    private ASTExpression dispatch(ASTExpression expr) {
+        throw new RuntimeException("not implemented");
         // TODO
     }
 
@@ -233,10 +509,12 @@ public class SemanticChecker {
             case LONG -> globalTypes.get(INT64);
             case BOOL -> globalTypes.get(BOOLEAN);
             case STRING -> globalTypes.get(STRING);
-            default -> throw new RuntimeException("This should never happen.");
+            case UNKNOWN -> globalTypes.get(ERROR);
+            default -> throw new AssertionError("This should never happen.");
         };
     }
 
+    // get a type that doesn't contain ASTBaseType
     private ASTType resolveType(ASTType type) {
         if (resolvedTypes.containsKey(type))
             return resolvedTypes.get(type);
@@ -303,6 +581,10 @@ public class SemanticChecker {
         if (!local && LIBC_RESERVED.contains(key))
             id.ctx().error("global identifier " + key + " reserved for external routines");
         return key;
+    }
+
+    private ASTType exprType(ASTExpression expr) {
+        return exprTypes.getOrDefault(expr, primitiveType(Type.UNKNOWN));
     }
 
     private boolean existsIdentifier(String text) {

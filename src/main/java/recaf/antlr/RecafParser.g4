@@ -55,8 +55,8 @@ statement: assign_statement
 
 assign_statement: location ASSIGN expr;
 
-method_call_statement: method_call;
-method_call: ID (LPAREN args? RPAREN)?;
+method_call_statement: ID (LPAREN args? RPAREN)?;
+method_call: ID LPAREN args? RPAREN;
 args: arg (COMMA arg)*;
 arg: expr | STRING_LITERAL;
 
