@@ -320,8 +320,9 @@ public class ASTBuilder {
     }
 
     private ASTForLoop visit(RecafParser.For_loopContext cst) {
-        return new ASTForLoop(ctx(cst),
-                visitIdentifier(cst.ID()),
+        ASTContext ctx = ctx(cst);
+        return new ASTForLoop(ctx,
+                new ASTLocation(ctx, visitIdentifier(cst.ID()), List.of()),
                 visit(cst.expr(0)),
                 visit(cst.expr(1)),
                 cst.DOWNTO() != null,

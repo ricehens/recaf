@@ -20,8 +20,7 @@ public class ASTGenerator {
     public ASTProgram generate(RecafParser.ProgramContext cst) {
         ASTProgram ast = convert(cst);
         if (errorHandler.hasErrors()) return null;
-        if (errorHandler.hasErrors()) return null;
-        semanticCheck(ast);
+        ast = semanticCheck(ast);
         if (errorHandler.hasErrors()) return null;
         return ast;
     }
@@ -30,8 +29,8 @@ public class ASTGenerator {
         return new ASTBuilder(infile, errorHandler, optLevel).visit(cst);
     }
 
-    private void semanticCheck(ASTProgram ast) {
-        new SemanticChecker().check(ast);
+    private ASTProgram semanticCheck(ASTProgram ast) {
+        return new SemanticChecker().check(ast);
     }
 
 }

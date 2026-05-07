@@ -4,7 +4,7 @@ import recaf.ast.ASTUtils;
 
 public record ASTForLoop(
         ASTContext ctx,
-        ASTIdentifier dummy,
+        ASTLocation dummy,
         ASTExpression start,
         ASTExpression end,
         boolean descending,
@@ -13,8 +13,8 @@ public record ASTForLoop(
 
     @Override
     public String toString() {
-        return ASTUtils.generateToString("(ForLoop) " + dummy.text(),
-                start, descending ? "(Direction) downto" : "(Direction) to", end, body);
+        return ASTUtils.generateToString("(ForLoop)",
+                dummy, start, descending ? "(Direction) downto" : "(Direction) to", end, body);
     }
 
 }

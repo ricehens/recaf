@@ -181,7 +181,8 @@ public class SemanticChecker {
     }
 
     private ASTMethodDecl check(ASTMethodDecl ast) {
-        ASTIdentifier id = check(ast.id());
+        ASTIdentifier id = new ASTIdentifier(ast.ctx(),
+                ast.external() ? ast.id().text() : key(ast.id()));
         Optional<ASTType> returnType = ast.returnType().map(this::dispatch);
         Optional<List<ASTVarDecl>> params = ast.params().map(
                 x -> x.stream().map(this::check).toList()
@@ -287,7 +288,10 @@ public class SemanticChecker {
     }
 
     private ASTAssignment check(ASTAssignment ast) {
-        ASTLocation left = check(ast.location());
+        if (!(check(ast.location()) instanceof ASTLocation left)) {
+            ast.ctx().error("cannot assign to rvalue");
+            return ast;
+        }
         ASTExpression right = dispatch(ast.expr());
 
         // intrinsic cast
@@ -309,6 +313,44 @@ public class SemanticChecker {
         return check(new ASTMethodCall(expr.ctx(), new ASTIdentifier(expr.ctx(), INT64), List.of(expr)));
     }
 
+    // checked + placed in exprtypes iff reduced, i.e. iff return type is not ASTLocation
+    private ASTExpression reduce(ASTLocation loc) {
+        String key = key(loc.id());
+        if (local) {
+            if (localVariables.containsKey(key)) {
+                if (localVariables.get(key) instanceof ASTEnumType et)
+                    return reduceEnum(loc, et);
+                return loc;
+            }
+
+            if (localConstants.containsKey(key))
+                return check(new ASTLiteral(loc.ctx(), localConstants.get(key).literal()));
+        }
+
+        if (globalVariables.containsKey(key)) {
+            if (globalVariables.get(key) instanceof ASTEnumType et)
+                return reduceEnum(loc, et);
+            return loc;
+        }
+
+        if (globalConstants.containsKey(key))
+            return check(new ASTLiteral(loc.ctx(), globalConstants.get(key).literal()));
+
+        loc.ctx().error("cannot find location " + loc);
+        return loc;
+    }
+
+    private ASTLiteral reduceEnum(ASTLocation loc, ASTEnumType et) {
+        for (int i = 0; i < et.members().size(); i++) {
+            if (key(loc.id()).equals(key(et.members().get(i)))) {
+                ASTLiteral ret = new ASTLiteral(loc.ctx(), new IntLiteral(i));
+                exprTypes.put(ret, et);
+                return ret;
+            }
+        }
+        throw new AssertionError("This should never happen.");
+    }
+
     // in case it is a method call
     private ASTExpression checkLocationExpression(ASTLocation ast) {
         ASTIdentifier id = check(ast.id());
@@ -326,7 +368,15 @@ public class SemanticChecker {
         return check(ast);
     }
 
-    private ASTLocation check(ASTLocation ast) {
+    private ASTExpression check(ASTLocation ast) {
+        ASTExpression red = reduce(ast);
+        if (!(red instanceof ASTLocation)) {
+            if (!ast.accesses().isEmpty())
+                ast.ctx().error("cannot access member of rvalue");
+            // already placed into exprtypes
+            return red;
+        }
+
         ASTIdentifier id = check(ast.id());
         ASTType type = getVar(id);
 
@@ -493,10 +543,18 @@ public class SemanticChecker {
     }
 
     private ASTForLoop check(ASTForLoop ast) {
-        ASTIdentifier id = ast.dummy();
-        ASTType idType = getVar(id);
-        if (!isNumeric(idType))
-            id.ctx().error("for loop expects dummy variable of type int or long");
+        if (!(check(ast.dummy()) instanceof ASTLocation dummy)) {
+            ast.dummy().ctx().error("rvalue cannot be for loop dummy");
+            return ast;
+        }
+
+        if (!dummy.accesses().isEmpty()) {
+            ast.dummy().ctx().error("for loop dummy variable must be simple");
+        }
+
+        ASTType dummyType = exprType(dummy);
+        if (!isNumeric(dummyType))
+            dummy.ctx().error("for loop dummy variable must have type int or long");
 
         ASTExpression start = dispatch(ast.start());
         ASTExpression end = dispatch(ast.end());
@@ -504,7 +562,7 @@ public class SemanticChecker {
         ASTType startType = exprType(start);
         ASTType endType = exprType(end);
 
-        if (equalTypesStrict(idType, primitiveType(Type.LONG))) {
+        if (equalTypesStrict(dummyType, primitiveType(Type.LONG))) {
             if (equalTypesStrict(startType, primitiveType(Type.INT))) {
                 start = castLong(start);
                 startType = exprType(start);
@@ -515,16 +573,16 @@ public class SemanticChecker {
             }
         }
 
-        if (!equalTypes(idType, startType))
-            id.ctx().error("type mismatch for assignment to for loop lower bound");
-        if (!equalTypes(idType, endType))
-            id.ctx().error("type mismatch for assignment to for loop upper bound");
+        if (!equalTypes(dummyType, startType))
+            start.ctx().error("type mismatch for assignment to for loop lower bound");
+        if (!equalTypes(dummyType, endType))
+            end.ctx().error("type mismatch for assignment to for loop upper bound");
 
         loopDepth++;
         ASTStatement body = dispatch(ast.body());
         loopDepth--;
 
-        return new ASTForLoop(ast.ctx(), id, start, end, ast.descending(), body);
+        return new ASTForLoop(ast.ctx(), dummy, start, end, ast.descending(), body);
     }
 
     private ASTWhileLoop check(ASTWhileLoop ast) {
