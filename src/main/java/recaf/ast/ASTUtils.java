@@ -28,9 +28,6 @@ public class ASTUtils {
     static final String BOOLEAN = "boolean";
     static final String STRING = "@string";
     static final String ERROR = "@error";
-    static final Set<String> RESERVED_TYPES = Set.of(
-            INTEGER, INT64, BOOLEAN, STRING, ERROR
-    );
 
     /**
      * Generates first toString for an AST node by concatenating first given string with

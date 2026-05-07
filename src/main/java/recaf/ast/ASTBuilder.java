@@ -40,6 +40,9 @@ public class ASTBuilder {
         ASTPrimitiveType strType = new ASTPrimitiveType(ctx, Type.STRING);
         ASTPrimitiveType unkType = new ASTPrimitiveType(ctx, Type.UNKNOWN);
         return Stream.of(
+                new ASTMethodDecl(ctx,
+                        Optional.empty(), new ASTIdentifier(ctx, MAIN), Optional.of(List.of()),
+                        List.of(), Optional.empty(), true, false, false),
                 new ASTTypeDecl(ctx, new ASTIdentifier(ctx, INTEGER), intType),
                 new ASTTypeDecl(ctx, new ASTIdentifier(ctx, INT64), longType),
                 new ASTTypeDecl(ctx, new ASTIdentifier(ctx, BOOLEAN), boolType),
@@ -232,7 +235,7 @@ public class ASTBuilder {
     }
 
     private Stream<ASTStatement> visit(RecafParser.Statement_listContext cst) {
-        return cst.statement().stream().map(this::visit);
+        return cst == null ? Stream.empty() : cst.statement().stream().map(this::visit);
     }
 
     private ASTStatement visit(RecafParser.StatementContext cst) {

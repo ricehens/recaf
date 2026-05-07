@@ -2,15 +2,16 @@ program pointer_params_return;
 type
   PCell = ^Cell;
   Cell = record
-    value: integer;
+    value: Integer;
   end;
-
+  PInteger = ^Integer;
+  PPInteger = ^PInteger;
 var
-  cells: array[0..1] of PCell;
-  pp: ^^integer;
-  chosen: ^integer;
+  cells: Array[0..1] of PCell;
+  pp: PPInteger;
+  chosen: PInteger;
 
-function pick(a, b: ^integer; useA: boolean): ^integer;
+function pick(a, b: PInteger; useA: Boolean): PInteger;
 begin
   if useA then
     pick := a
@@ -28,7 +29,7 @@ begin
   chosen^ := cells[0]^.value + cells[1]^.value;
 
   New(pp);
-  pp^ := pick(chosen, chosen, true);
+  pp^ := pick(chosen, chosen, True);
   writeln(pp^^);
 
   Dispose(pp);
