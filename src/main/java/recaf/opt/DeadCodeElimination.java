@@ -89,7 +89,6 @@ for (CFGBasicBlock block : method.getBlocks()) {
                         || instruction instanceof CFGMethodCallInstruction
                         || instruction instanceof CFGReturnInstruction
                         || instruction instanceof CFGExceptionInstruction
-                        || (instruction instanceof CFGVarDeclInstruction && ctx.getSymbolTable().getVar(instruction.address()).isArray())
         ).forEach(workList::offer);
 
         data.getDominatorTree().getImmediateDominatedNodes(node).forEach(this::fillWorkList);

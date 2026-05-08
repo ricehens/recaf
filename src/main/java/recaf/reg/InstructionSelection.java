@@ -584,11 +584,6 @@ public class InstructionSelection implements CFGVisitor {
     }
 
     @Override
-    public void visit(CFGVarDeclInstruction cfg) {
-        // no work to be done; stack pointer moved one-time
-    }
-
-    @Override
     public void visit(CFGPhiInstruction cfg) {
         throw new RuntimeException("Phi instruction not eliminated before assembly generation.");
     }

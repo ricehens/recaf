@@ -60,7 +60,7 @@ public class Linearizer {
         // TODO set ctx program
     }
 
-    private CFGVarDeclInstruction linearize(ASTVarDecl vd) {
+    private void linearize(ASTVarDecl vd) {
         (local ? localVars : globalVars).put(vd.id().text(), vd);
         CFGVariable variable = switch (vd.type()) {
             case ASTArrayType _, ASTRecordType _ ->
@@ -73,7 +73,6 @@ public class Linearizer {
                 new CFGVariable(symbolTable, vd.id().text(), pr.type());
             default -> throw new AssertionError("This should never happen.");
         };
-        return null;
         // TODO
         /*
         symbols.put(vd, vd)

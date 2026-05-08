@@ -170,19 +170,6 @@ public class LoopUnrolling extends SSATransformation {
         }
 
         // insert instructions
-        for (CFGBasicBlock block : loop.blocks) {
-            // canonicalize var decl's
-            Queue<CFGInstruction> shortlist = new LinkedList<>(block.getInstructions().stream().toList());
-            while (!shortlist.isEmpty()) {
-                CFGInstruction instruction = shortlist.poll();
-                if (instruction instanceof CFGVarDeclInstruction && ctx.getSymbolTable().getVar(instruction.address()).isArray()) {
-                    // newBlocks.get(0).get(loop.header).getInstructions().offerFirst(instruction);
-                    method.getBlocks().peekFirst().getInstructions().offerFirst(instruction);
-                    block.getInstructions().remove(instruction);
-                }
-            }
-        }
-
         for (int i = 0; i < numCopies; i++) {
             for (CFGBasicBlock oldBlock : loop.blocks) {
                 CFGBasicBlock newBlock = newBlocks.get(i).get(oldBlock);

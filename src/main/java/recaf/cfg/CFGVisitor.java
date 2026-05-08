@@ -37,8 +37,6 @@ public interface CFGVisitor {
 
     void visit(CFGUnaryInstruction cfg);
 
-    void visit(CFGVarDeclInstruction cfg);
-
     void visit(CFGPhiInstruction cfg);
 
 }

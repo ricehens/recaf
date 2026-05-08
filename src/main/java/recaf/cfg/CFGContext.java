@@ -2,6 +2,7 @@ package recaf.cfg;
 
 import recaf.general.Type;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -25,7 +26,7 @@ public class CFGContext {
     public CFGContext(CFGProgram program, CFGSymbolTable symbolTable) {
         this.program = program;
         this.symbolTable = symbolTable;
-        globalVars = List.of();
+        globalVars = new ArrayList<>();
     }
 
     /**
@@ -47,12 +48,12 @@ public class CFGContext {
     }
 
     /**
-     * Provides the list of global variables to the context.
+     * Registers a global variable to the context.
      *
-     * @param globalVars the global variables
+     * @param globalVar the global variable
      */
-    public void setGlobalVars(List<CFGAddress> globalVars) {
-        this.globalVars = globalVars;
+    public void addGlobalVar(CFGAddress globalVar) {
+        globalVars.add(globalVar);
     }
 
     /**
