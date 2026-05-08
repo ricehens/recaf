@@ -10,7 +10,6 @@ public class CFGReturnInstruction implements CFGLastInstruction {
     private final int id;
     private final CFGContext ctx;
     private final CFGAddress returnAddress;
-    private final String methodName;
 
     /**
      * Creates first non-void return instruction
@@ -19,11 +18,10 @@ public class CFGReturnInstruction implements CFGLastInstruction {
      * @param returnAddress the return address
      *                of which only first copy is stored.
      */
-    public CFGReturnInstruction(CFGContext ctx, CFGAddress returnAddress, String methodName) {
+    public CFGReturnInstruction(CFGContext ctx, CFGAddress returnAddress) {
         this.id = ctx.getInstructionCounter();
         this.ctx = ctx;
         this.returnAddress = returnAddress != null ? CFGAddress.clone(returnAddress) : null;
-        this.methodName = methodName;
     }
 
     /**
@@ -31,8 +29,8 @@ public class CFGReturnInstruction implements CFGLastInstruction {
      *
      * @param ctx the CFG context
      */
-    public CFGReturnInstruction(CFGContext ctx, String methodName) {
-        this(ctx, null, methodName);
+    public CFGReturnInstruction(CFGContext ctx) {
+        this(ctx, null);
     }
 
     public CFGContext ctx() {
@@ -41,10 +39,6 @@ public class CFGReturnInstruction implements CFGLastInstruction {
 
     public CFGAddress returnAddress() {
         return returnAddress;
-    }
-
-    public String methodName() {
-        return methodName;
     }
 
     @Override
@@ -69,7 +63,7 @@ public class CFGReturnInstruction implements CFGLastInstruction {
 
     @Override
     public CFGLastInstruction copy() {
-        return new CFGReturnInstruction(ctx, returnAddress, methodName);
+        return new CFGReturnInstruction(ctx, returnAddress);
     }
 
     @Override

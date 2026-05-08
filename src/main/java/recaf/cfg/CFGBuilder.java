@@ -73,7 +73,7 @@ public class CFGBuilder {
                 else {
                     if (method.getType() != Type.VOID)
                         block.setLastInstruction(new CFGExceptionInstruction(ctx, getFalloffString(method.getName())));
-                    else block.setLastInstruction(new CFGReturnInstruction(ctx, method.getName()));
+                    else block.setLastInstruction(new CFGReturnInstruction(ctx));
                 }
             }
         }

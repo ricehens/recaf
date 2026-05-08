@@ -26,7 +26,7 @@ public class Linearizer {
     private boolean local;
     private Map<String, ASTType> localTypes;
     private Map<String, ASTVarDecl> localVars;
-    private String currentMethod;
+    private String currentMethod; // TODO return 0 at end of main
 
     public Linearizer(SemanticChecker sc) {
         symbolTable = new CFGSymbolTable();
@@ -107,6 +107,16 @@ public class Linearizer {
         cfg = new CFGBuilder(ctx);
         cfg.newBlock();
         linearize(ast.block().get());
+
+        if (ast.returnType().isPresent()) {
+            cfg.offer(new CFGReturnInstruction(ctx, symbols.get(localVars.get(ast.id().text())).getAddress()));
+            cfg.newBlock();
+        } else if (currentMethod.equals("main")) {
+            CFGAddress exitCode = ctx.newAddress(Type.INT);
+            cfg.offer(new CFGLiteralInstruction(ctx, exitCode, 0));
+            cfg.offer(new CFGReturnInstruction(ctx, exitCode));
+            cfg.newBlock();
+        }
 
         local = false;
         return Optional.of(new CFGMethod(ctx,

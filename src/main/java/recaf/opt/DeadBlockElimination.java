@@ -214,7 +214,7 @@ public class DeadBlockElimination extends MethodTransformation {
                     } else if (last instanceof CFGReturnInstruction) {
                         CFGReturnInstruction translation = (CFGReturnInstruction) last.copy();
                         if (phiTranslation.containsKey(translation.returnAddress()))
-                            translation = new CFGReturnInstruction(ctx, phiTranslation.get(translation.returnAddress()), method.getName());
+                            translation = new CFGReturnInstruction(ctx, phiTranslation.get(translation.returnAddress()));
                         if (!(i.getLastInstruction() instanceof CFGReturnInstruction rorig)
                                 || rorig.returnAddress() != null
                                 && !rorig.returnAddress().equals(translation.returnAddress())) {

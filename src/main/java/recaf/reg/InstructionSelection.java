@@ -555,8 +555,6 @@ public class InstructionSelection implements CFGVisitor {
                     asm.emit(ASMOperator.MOVB, retLoc, ASMRegister.AL);
                     break;
             }
-        } else if (cfg.methodName().equals("main")) {
-            asm.emit(ASMOperator.XORQ, ASMRegister.RAX, ASMRegister.RAX);
         }
 
         // in register allocation, this will be replaced with an appropriate addq instruction to move the stack pointer

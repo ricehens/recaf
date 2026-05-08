@@ -640,8 +640,6 @@ public class CFGtoASM implements CFGVisitor {
                     asm.emit(ASMOperator.MOVZBL, retLoc, ASMRegister.EAX);
                     break;
             }
-        } else if (cfg.methodName().equals("main")) {
-            asm.emit(ASMOperator.MOVQ, new ASMLiteral(0), ASMRegister.RAX);
         }
 
         asm.emit(ASMOperator.LEAVE);

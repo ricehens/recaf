@@ -7,7 +7,7 @@ import recaf.general.Type;
  */
 public class CFGVariable {
 
-    private final String name;
+    private final String name; // only matters for global variables
     private final Type type;
     private final int arrayLen;
     private final CFGAddress address;

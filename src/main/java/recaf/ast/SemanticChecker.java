@@ -233,7 +233,8 @@ public class SemanticChecker {
                 returnType.get().ctx().error("functions may not return arrays");
             if (returnType.get() instanceof ASTRecordType)
                 returnType.get().ctx().error("functions may not return records");
-            registerVar(id, returnType.get());
+            ASTVarDecl rv = check(new ASTVarDecl(ast.ctx(), returnType.get(), id));
+            registerVar(rv.id(), rv.type());
         }
 
         if (params.isPresent()) {
