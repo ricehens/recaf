@@ -108,7 +108,7 @@ public class CodeGenerator {
                 case 1 -> 3;
                 case 2 -> 5;
                 case 3 -> 10;
-                default -> throw new RuntimeException("Unrecognized option level: " + optLevel);
+                default -> throw new AssertionError("Unrecognized option level: " + optLevel);
             };
 
             for (int i = 0; i < 2 * iterations; i++) {

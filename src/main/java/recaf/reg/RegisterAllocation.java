@@ -411,7 +411,7 @@ public class RegisterAllocation {
                 return pr.getType();
             else if (reg instanceof ASMVirtualRegister vr)
                 return ctx.getCfgCtx().getType(vr.address());
-            else throw new RuntimeException("This should never happen.");
+            else throw new AssertionError("This should never happen.");
         }
 
         private boolean isCopy(ASMInstruction inst) {
@@ -594,7 +594,7 @@ public class RegisterAllocation {
             }
 
             if (liveAtDef == null || liveAtUse == null)
-                throw new RuntimeException("This should never happen.");
+                throw new AssertionError("This should never happen.");
 
 // System.out.printf("liveAtDef[%s] = %s%nliveAtUse[%s] = %s%n", vr, liveAtDef, vr, liveAtUse);
             liveAtDef.remove(vr);

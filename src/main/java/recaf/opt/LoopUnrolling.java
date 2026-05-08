@@ -279,7 +279,7 @@ public class LoopUnrolling extends SSATransformation {
         } else if (finalBranch.elseAddr().equals(finalHead.address())) {
             finalBack.setLastInstruction(new CFGBranchInstruction(ctx, finalBranch.boolAddr(),
                     epilogueEntry.address(), repeatHead.address()));
-        } else throw new RuntimeException("This should never happen.");
+        } else throw new AssertionError("This should never happen.");
 
         for (CFGPhiInstruction phi : repeatHead.getPhiInstructions()) {
             if (phi.address().equals(newAddresses.get(0).get(loop.updatePair.iv))) {

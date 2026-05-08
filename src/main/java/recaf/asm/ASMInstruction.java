@@ -38,11 +38,11 @@ public class ASMInstruction implements ASMStatement {
         // Check instruction params
         if (((src == null) ^ (op.src == null))
                 || ((dest == null) ^ (op.dest == null))) {
-            throw new RuntimeException("Operator" + op + " argument number mismatch: " + src + ", " + dest);
+            throw new AssertionError("Operator" + op + " argument number mismatch: " + src + ", " + dest);
         }
         if (((src instanceof ASMRegister) && ((ASMRegister) src).type != op.src)
                 || ((dest instanceof ASMRegister) && ((ASMRegister) dest).type != op.dest)) {
-            throw new RuntimeException("Operator " + op + " type mismatch: " + src + ", " + dest);
+            throw new AssertionError("Operator " + op + " type mismatch: " + src + ", " + dest);
 
         }
     }

@@ -139,7 +139,7 @@ public class CFGBasicBlock implements CFG, DominatorTree.Node<CFGBasicBlock> {
         return next == null ? List.of() : List.of(next);
 
  */
-        throw new RuntimeException("Requesting successors of block " + address + " with no last instruction\n" + method);
+        throw new AssertionError("Requesting successors of block " + address + " with no last instruction\n" + method);
     }
 
     @Override

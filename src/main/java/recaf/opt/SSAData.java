@@ -211,7 +211,7 @@ public class SSAData {
     /**
      * An exception thrown when the SSA invariant is violated.
      */
-    public static class SSAValidationException extends RuntimeException {
+    public static class SSAValidationException extends AssertionError {
         public SSAValidationException(String message) {
             super(message);
         }

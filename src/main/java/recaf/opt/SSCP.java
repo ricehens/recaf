@@ -281,7 +281,7 @@ public class SSCP extends SSATransformation {
                 case GT -> new BoolLiteral(l > r);
                 case LEQ -> new BoolLiteral(l <= r);
                 case GEQ -> new BoolLiteral(l >= r);
-                default -> throw new RuntimeException("This should never happen.");
+                default -> throw new AssertionError("This should never happen.");
             };
         } else if (left instanceof LongLiteral) {
             long l = ((LongLiteral) left).value();
@@ -298,7 +298,7 @@ public class SSCP extends SSATransformation {
                 case GT -> new BoolLiteral(l > r);
                 case LEQ -> new BoolLiteral(l <= r);
                 case GEQ -> new BoolLiteral(l >= r);
-                default -> throw new RuntimeException("This should never happen.");
+                default -> throw new AssertionError("This should never happen.");
             };
         } else if (left instanceof BoolLiteral) {
             boolean l = ((BoolLiteral) left).value();
@@ -308,10 +308,10 @@ public class SSCP extends SSATransformation {
                 case NEQ -> new BoolLiteral(l != r);
                 case AND -> new BoolLiteral(l && r);
                 case OR -> new BoolLiteral(l || r);
-                default -> throw new RuntimeException("This should never happen.");
+                default -> throw new AssertionError("This should never happen.");
             };
         }
-        throw new RuntimeException("This should never happen.");
+        throw new AssertionError("This should never happen.");
     }
 
     /**
@@ -329,7 +329,7 @@ public class SSCP extends SSATransformation {
         } else if (operand instanceof BoolLiteral) {
             return new BoolLiteral(!((BoolLiteral) operand).value());
         }
-        throw new RuntimeException("This should never happen.");
+        throw new AssertionError("This should never happen.");
     }
 
     /**

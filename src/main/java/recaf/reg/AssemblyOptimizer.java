@@ -176,7 +176,7 @@ public class AssemblyOptimizer {
                                     case 3 -> new ASMStackAddressArray(0, pr.toType(Type.LONG), pr.toType(Type.LONG), 2);
                                     case 5 -> new ASMStackAddressArray(0, pr.toType(Type.LONG), pr.toType(Type.LONG), 4);
                                     case 9 -> new ASMStackAddressArray(0, pr.toType(Type.LONG), pr.toType(Type.LONG), 8);
-                                    default -> throw new RuntimeException("This should never happen.");
+                                    default -> throw new AssertionError("This should never happen.");
                                 },
                         inst.dest(),
                         inst.specificCtx()
@@ -192,7 +192,7 @@ public class AssemblyOptimizer {
                                     case 1 -> new ASMStackAddressArray(0, pr.toType(Type.LONG), pr.toType(Type.LONG), 1);
                                     case 2 -> new ASMStackAddressArray(0, null, pr.toType(Type.LONG), 4);
                                     case 3 -> new ASMStackAddressArray(0, null, pr.toType(Type.LONG), 8);
-                                    default -> throw new RuntimeException("This should never happen.");
+                                    default -> throw new AssertionError("This should never happen.");
                                 },
                                 inst.dest(),
                                 inst.specificCtx()

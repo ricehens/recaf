@@ -111,7 +111,7 @@ public class OptUtils {
     public static Literal negate(Literal lit) {
         if (lit instanceof IntLiteral ilit) return new IntLiteral(-ilit.value());
         if (lit instanceof LongLiteral llit) return new LongLiteral(-llit.value());
-        throw new RuntimeException("This should never happen.");
+        throw new AssertionError("This should never happen.");
     }
 
     /**
@@ -153,7 +153,7 @@ public class OptUtils {
                 case GT -> new BoolLiteral(i1.value() > i2.value());
                 case LEQ -> new BoolLiteral(i1.value() <= i2.value());
                 case GEQ -> new BoolLiteral(i1.value() >= i2.value());
-                default -> throw new RuntimeException("This should never happen");
+                default -> throw new AssertionError("This should never happen");
             };
         } else if (o1 instanceof LongLiteral l1 && o2 instanceof LongLiteral l2) {
             return switch (op) {
@@ -168,7 +168,7 @@ public class OptUtils {
                 case GT -> new BoolLiteral(l1.value() > l2.value());
                 case LEQ -> new BoolLiteral(l1.value() <= l2.value());
                 case GEQ -> new BoolLiteral(l1.value() >= l2.value());
-                default -> throw new RuntimeException("This should never happen");
+                default -> throw new AssertionError("This should never happen");
             };
         } else if (o1 instanceof BoolLiteral b1 && o2 instanceof BoolLiteral b2) {
             return switch (op) {
@@ -176,10 +176,10 @@ public class OptUtils {
                 case NEQ -> new BoolLiteral(b1.value() != b2.value());
                 case AND -> new BoolLiteral(b1.value() && b2.value());
                 case OR -> new BoolLiteral(b1.value() || b2.value());
-                default -> throw new RuntimeException("This should never happen");
+                default -> throw new AssertionError("This should never happen");
             };
         }
-        throw new RuntimeException("This should never happen");
+        throw new AssertionError("This should never happen");
     }
 
 

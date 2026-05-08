@@ -210,7 +210,7 @@ public class GVNPRE extends SSATransformation {
                 Expression e = makeBinExpr(switch(cast.type()) {
                     case INT -> Op.INT;
                     case LONG -> Op.LONG;
-                    default -> throw new RuntimeException("This should never happen.");
+                    default -> throw new AssertionError("This should never happen.");
                 }, v1, NULL);
                 Value v = vt.lookupOrAdd(e);
                 vt.add(t, v);
@@ -444,7 +444,7 @@ System.out.println(vt);
                                 vt.add(t, v);
                                 availOut.get(bp).put(v, t);
                                 availTemps.put(bp, t);
-                            } else throw new RuntimeException("This should never happen.");
+                            } else throw new AssertionError("This should never happen.");
                         }
 
                         CFGPhiInstruction phi = new CFGPhiInstruction(ctx, new CFGAddress());
@@ -657,7 +657,7 @@ System.out.println(vt);
                 case GE -> Type.BOOL;
                 default -> bin.left().type;
             };
-        } else throw new RuntimeException("This should never happen.");
+        } else throw new AssertionError("This should never happen.");
     }
 
     /** Represents first value */

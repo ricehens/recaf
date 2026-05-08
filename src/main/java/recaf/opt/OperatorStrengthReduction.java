@@ -424,14 +424,14 @@ public class OperatorStrengthReduction extends SSATransformation {
                 return new LongLiteral(i1.value());
             if (o1 instanceof LongLiteral l1)
                 return l1;
-            throw new RuntimeException("This should never happen.");
+            throw new AssertionError("This should never happen.");
         }
 
         return OptUtils.compute(switch (op) {
             case PLUS -> BinaryOperator.PLUS;
             case MINUS -> BinaryOperator.MINUS;
             case TIMES -> BinaryOperator.TIMES;
-            default -> throw new RuntimeException("This should never happen.");
+            default -> throw new AssertionError("This should never happen.");
         }, o1, o2);
     }
 
@@ -557,7 +557,7 @@ public class OperatorStrengthReduction extends SSATransformation {
                     case PLUS -> Op.PLUS;
                     case MINUS -> Op.MINUS;
                     case TIMES -> Op.TIMES;
-                    default -> throw new RuntimeException("This should never happen.");
+                    default -> throw new AssertionError("This should never happen.");
                 }, left, new RegionConstant(bim.right()));
         } else if (instruction instanceof CFGUnaryInstruction unary) {
             CFGAddress operand = unary.operand();

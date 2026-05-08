@@ -64,7 +64,7 @@ public class InstructionSelection implements CFGVisitor {
                     asm.emit(ASMOperator.MOVB, asm.getMemoryLocation(param), new ASMVirtualRegister(param));
                     break;
                 default:
-                    throw new RuntimeException("This should never happen.");
+                    throw new AssertionError("This should never happen.");
             }
         }
         extractLocalArrays(cfg).forEach(asm::registerVariable);
@@ -82,7 +82,7 @@ public class InstructionSelection implements CFGVisitor {
                     asm.emit(ASMOperator.MOVB, ASMRegister.getMethodArg(Type.BOOL, i), new ASMVirtualRegister(param));
                     break;
                 default:
-                    throw new RuntimeException("This should never happen.");
+                    throw new AssertionError("This should never happen.");
             }
         }
 
@@ -134,7 +134,7 @@ public class InstructionSelection implements CFGVisitor {
                 asm.emit(ASMOperator.MOVZBL, arrayLoc, dest);
                 break;
             default:
-                throw new RuntimeException("unsupported record read width: " + cfg.width());
+                throw new AssertionError("unsupported record read width: " + cfg.width());
         }
     }
 
@@ -150,7 +150,7 @@ public class InstructionSelection implements CFGVisitor {
                 case 4 -> asm.emit(ASMOperator.MOVL, valueLoc, ASMRegister.R11D);
                 case 8 -> asm.emit(ASMOperator.MOVQ, valueLoc, ASMRegister.R11);
                 case 1 -> asm.emit(ASMOperator.MOVZBL, valueLoc, ASMRegister.R11D);
-                default -> throw new RuntimeException("unsupported record write width: " + cfg.width());
+                default -> throw new AssertionError("unsupported record write width: " + cfg.width());
             }
             asm.emit(ASMOperator.MOVQ, new ASMVirtualRegister(cfg.recordAddress()), ASMRegister.RCX);
             arrayLoc = new ASMStackAddressArray(0, ASMRegister.RCX, ASMRegister.RAX, cfg.width());
@@ -174,7 +174,7 @@ public class InstructionSelection implements CFGVisitor {
                         arrayLoc);
                 break;
             default:
-                throw new RuntimeException("unsupported record write width: " + cfg.width());
+                throw new AssertionError("unsupported record write width: " + cfg.width());
         }
     }
 
@@ -302,7 +302,7 @@ public class InstructionSelection implements CFGVisitor {
                     case GEQ -> ASMOperator.SETGE;
                     case EQ -> ASMOperator.SETE;
                     case NEQ -> ASMOperator.SETNE;
-                    default -> throw new RuntimeException("This should never happen.");
+                    default -> throw new AssertionError("This should never happen.");
                 };
                 asm.emit(nextOpcode, dest);
             } else {
@@ -311,7 +311,7 @@ public class InstructionSelection implements CFGVisitor {
                     case PLUS -> (type == Type.LONG ? ASMOperator.ADDQ : ASMOperator.ADDL);
                     case MINUS -> (type == Type.LONG ? ASMOperator.SUBQ : ASMOperator.SUBL);
                     case TIMES -> (type == Type.LONG ? ASMOperator.IMULQ : ASMOperator.IMULL);
-                    default -> throw new RuntimeException("This should never happen.");
+                    default -> throw new AssertionError("This should never happen.");
                 };
                 asm.emit(opcode2, rightLoc, dest);
             }
@@ -348,7 +348,7 @@ public class InstructionSelection implements CFGVisitor {
                 case GEQ -> ASMOperator.SETGE;
                 case EQ -> ASMOperator.SETE;
                 case NEQ -> ASMOperator.SETNE;
-                default -> throw new RuntimeException("This should never happen.");
+                default -> throw new AssertionError("This should never happen.");
             };
             asm.emit(nextOpcode, dest);
         } else {
@@ -362,7 +362,7 @@ public class InstructionSelection implements CFGVisitor {
                 case PLUS -> (type == Type.LONG ? ASMOperator.ADDQ : ASMOperator.ADDL);
                 case MINUS -> (type == Type.LONG ? ASMOperator.SUBQ : ASMOperator.SUBL);
                 case TIMES -> (type == Type.LONG ? ASMOperator.IMULQ : ASMOperator.IMULL);
-                default -> throw new RuntimeException("This should never happen.");
+                default -> throw new AssertionError("This should never happen.");
             };
             asm.emit(opcode2, rightLoc, dest);
         }
@@ -407,7 +407,7 @@ public class InstructionSelection implements CFGVisitor {
                 asm.emit(ASMOperator.MOVB, srcLoc, dest);
                 break;
             default:
-                throw new RuntimeException("This should never happen.");
+                throw new AssertionError("This should never happen.");
         }
     }
 
@@ -459,7 +459,7 @@ public class InstructionSelection implements CFGVisitor {
                 asm.emit(ASMOperator.LEAQ, asm.getStringLiteral(((StringLiteral) cfg.literal()).value()), dest);
                 break;
             default:
-                throw new RuntimeException("This should never happen.");
+                throw new AssertionError("This should never happen.");
         }
     }
 
@@ -585,7 +585,7 @@ public class InstructionSelection implements CFGVisitor {
 
     @Override
     public void visit(CFGPhiInstruction cfg) {
-        throw new RuntimeException("Phi instruction not eliminated before assembly generation.");
+        throw new AssertionError("Phi instruction not eliminated before assembly generation.");
     }
 
     private static String getFalloffString(String m) {

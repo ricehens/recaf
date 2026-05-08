@@ -76,7 +76,7 @@ public class CFGtoASM implements CFGVisitor {
                     asm.emit(ASMOperator.MOVB, ASMRegister.AL, asm.getMemoryLocation(cfg.getParams().get(i)));
                     break;
                 default:
-                    throw new RuntimeException("This should never happen.");
+                    throw new AssertionError("This should never happen.");
             }
         }
 
@@ -141,7 +141,7 @@ public class CFGtoASM implements CFGVisitor {
                 asm.emit(ASMOperator.MOVB, ASMRegister.AL, dest);
                 break;
             default:
-                throw new RuntimeException("unsupported record read width: " + cfg.width());
+                throw new AssertionError("unsupported record read width: " + cfg.width());
         }
     }
 
@@ -190,7 +190,7 @@ public class CFGtoASM implements CFGVisitor {
                 }
                 break;
             default:
-                throw new RuntimeException("unsupported record write width: " + cfg.width());
+                throw new AssertionError("unsupported record write width: " + cfg.width());
         }
     }
 
@@ -220,7 +220,7 @@ public class CFGtoASM implements CFGVisitor {
             case INT -> ASMOperator.MOVL;
             case LONG -> ASMOperator.MOVQ;
             case BOOL -> ASMOperator.MOVB;
-            default -> throw new RuntimeException("This should never happen.");
+            default -> throw new AssertionError("This should never happen.");
         };
         asm.emit(opcode1, leftLoc, leftOperand);
 
@@ -230,7 +230,7 @@ public class CFGtoASM implements CFGVisitor {
             // case MOD -> (type == Type.LONG ? ASMRegister.RDX : ASMRegister.EDX);
             case MOD -> rightOperand;
             case LT, GT, LEQ, GEQ, EQ, NEQ -> ASMRegister.AL;
-            default -> throw new RuntimeException("This should never happen.");
+            default -> throw new AssertionError("This should never happen.");
         };
         ASMOperator opcode2 = switch (cfg.operator()) {
             case PLUS -> (type == Type.LONG ? ASMOperator.ADDQ : ASMOperator.ADDL);
@@ -238,7 +238,7 @@ public class CFGtoASM implements CFGVisitor {
             case TIMES -> (type == Type.LONG ? ASMOperator.IMULQ : ASMOperator.IMULL);
             case DIVIDES, MOD -> (type == Type.LONG ? ASMOperator.IDIVQ : ASMOperator.IDIVL);
             case LT, GT, LEQ, GEQ, EQ, NEQ -> (type == Type.LONG ? ASMOperator.CMPQ : type == Type.BOOL ? ASMOperator.CMPB : ASMOperator.CMPL);
-            default -> throw new RuntimeException("This should never happen.");
+            default -> throw new AssertionError("This should never happen.");
         };
         NumUtils pf = new NumUtils(right);
         if (cfg.operator() == BinaryOperator.TIMES && Set.of(2L, 3L, 4L, 5L, 8L, 9L).contains(pf.asLong())) {
@@ -252,7 +252,7 @@ public class CFGtoASM implements CFGVisitor {
                         case 5 -> new ASMStackAddressArray(0, leftLong, leftLong, 4);
                         case 8 -> new ASMStackAddressArray(0, null, leftLong, 8);
                         case 9 -> new ASMStackAddressArray(0, leftLong, leftLong, 8);
-                        default -> throw new RuntimeException("This should never happen.");
+                        default -> throw new AssertionError("This should never happen.");
                     },
                     leftOperand
             );
@@ -357,7 +357,7 @@ public class CFGtoASM implements CFGVisitor {
                 case GEQ -> ASMOperator.SETGE;
                 case EQ -> ASMOperator.SETE;
                 case NEQ -> ASMOperator.SETNE;
-                default -> throw new RuntimeException("This should never happen.");
+                default -> throw new AssertionError("This should never happen.");
             };
             asm.emit(nextOpcode, destLoc);
         }
@@ -367,7 +367,7 @@ public class CFGtoASM implements CFGVisitor {
             case INT -> ASMOperator.MOVL;
             case LONG -> ASMOperator.MOVQ;
             case BOOL -> ASMOperator.MOVB;
-            default -> throw new RuntimeException("This should never happen.");
+            default -> throw new AssertionError("This should never happen.");
         };
         asm.emit(opcode3, destLoc, dest);
     }
@@ -389,7 +389,7 @@ public class CFGtoASM implements CFGVisitor {
             case INT -> ASMOperator.MOVL;
             case LONG, POINTER -> ASMOperator.MOVQ;
             case BOOL -> ASMOperator.MOVB;
-            default -> throw new RuntimeException("This should never happen.");
+            default -> throw new AssertionError("This should never happen.");
         };
         asm.emit(opcode1, leftLoc, leftOperand);
 
@@ -398,7 +398,7 @@ public class CFGtoASM implements CFGVisitor {
             case PLUS, MINUS, TIMES, DIVIDES -> (type == Type.LONG ? ASMRegister.RAX : ASMRegister.EAX);
             case MOD -> (type == Type.LONG ? ASMRegister.RDX : ASMRegister.EDX);
             case LT, GT, LEQ, GEQ, EQ, NEQ -> ASMRegister.AL;
-            default -> throw new RuntimeException("This should never happen.");
+            default -> throw new AssertionError("This should never happen.");
         };
         ASMOperator opcode2 = switch (cfg.operator()) {
             case PLUS -> (type == Type.LONG ? ASMOperator.ADDQ : ASMOperator.ADDL);
@@ -407,7 +407,7 @@ public class CFGtoASM implements CFGVisitor {
             case DIVIDES, MOD -> (type == Type.LONG ? ASMOperator.IDIVQ : ASMOperator.IDIVL);
             case LT, GT, LEQ, GEQ, EQ, NEQ -> (type == Type.LONG || type == Type.POINTER ? ASMOperator.CMPQ
                     : type == Type.BOOL ? ASMOperator.CMPB : ASMOperator.CMPL);
-            default -> throw new RuntimeException("This should never happen.");
+            default -> throw new AssertionError("This should never happen.");
         };
         if (cfg.operator() == BinaryOperator.DIVIDES || cfg.operator() == BinaryOperator.MOD) {
             asm.emit(type == Type.LONG ? ASMOperator.CQTO : ASMOperator.CLTD);
@@ -426,7 +426,7 @@ public class CFGtoASM implements CFGVisitor {
                 case GEQ -> ASMOperator.SETGE;
                 case EQ -> ASMOperator.SETE;
                 case NEQ -> ASMOperator.SETNE;
-                default -> throw new RuntimeException("This should never happen.");
+                default -> throw new AssertionError("This should never happen.");
             };
             asm.emit(nextOpcode, destLoc);
         }
@@ -436,7 +436,7 @@ public class CFGtoASM implements CFGVisitor {
             case INT -> ASMOperator.MOVL;
             case LONG -> ASMOperator.MOVQ;
             case BOOL -> ASMOperator.MOVB;
-            default -> throw new RuntimeException("This should never happen.");
+            default -> throw new AssertionError("This should never happen.");
         };
         asm.emit(opcode3, destLoc, dest);
     }
@@ -493,7 +493,7 @@ public class CFGtoASM implements CFGVisitor {
                 asm.emit(ASMOperator.MOVB, ASMRegister.AL, dest);
                 break;
             default:
-                throw new RuntimeException("This should never happen.");
+                throw new AssertionError("This should never happen.");
         }
     }
 
@@ -548,7 +548,7 @@ public class CFGtoASM implements CFGVisitor {
                 asm.emit(ASMOperator.MOVQ, ASMRegister.RAX, dest);
                 break;
             default:
-                throw new RuntimeException("This should never happen.");
+                throw new AssertionError("This should never happen.");
         }
     }
 
@@ -673,7 +673,7 @@ public class CFGtoASM implements CFGVisitor {
 
     @Override
     public void visit(CFGPhiInstruction cfg) {
-        throw new RuntimeException("Phi instruction not eliminated before assembly generation.");
+        throw new AssertionError("Phi instruction not eliminated before assembly generation.");
     }
 
 }
