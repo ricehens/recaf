@@ -195,6 +195,8 @@ public class SemanticChecker {
             externalCalls.put(key, id.text());
         else if (LIBC_RESERVED.contains(key))
             id.ctx().error("identifier " + key + " is reserved for external routines");
+        if (params.isEmpty() && !ast.external() && !ast.internal())
+            ast.ctx().error("undeclared parameters are only permitted for external routines");
         if (!ast.internal() && existsIdentifier(key)) {
             ASTMethodDecl forward = methods.get(key);
             if (forward == null || !forward.forward())

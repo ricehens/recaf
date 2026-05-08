@@ -26,6 +26,7 @@ public class Linearizer {
     private boolean local;
     private Map<String, ASTType> localTypes;
     private Map<String, ASTVarDecl> localVars;
+    private String currentMethod;
 
     public Linearizer(SemanticChecker sc) {
         symbolTable = new CFGSymbolTable();
@@ -38,10 +39,10 @@ public class Linearizer {
         symbols = new IdentityHashMap<>();
 
         local = false;
+        currentMethod = null;
     }
 
     public CFGProgram linearize(ASTProgram ast) {
-
         for (ASTDeclaration decl : ast.decls()) {
             switch (decl) {
                 case ASTVarDecl vd -> {
@@ -58,30 +59,72 @@ public class Linearizer {
             }
         }
 
-        // TODO
-        return null;
-        // TODO set ctx program in each method decl
+        return ctx.setProgram(new CFGProgram(ctx,
+                ast.decls().stream()
+                        .filter(ASTMethodDecl.class::isInstance)
+                        .map(ASTMethodDecl.class::cast)
+                        .map(this::linearize)
+                        .flatMap(Optional::stream)
+                        .toList()));
     }
 
-    private void linearize(ASTVarDecl vd) {
-        CFGVariable variable = switch (vd.type()) {
+    private void linearize(ASTVarDecl ast) {
+        CFGVariable variable = switch (ast.type()) {
             case ASTArrayType _, ASTRecordType _ ->
-                new CFGVariable(symbolTable, vd.id().text(), Type.RECORD, sizeof(vd.type()));
+                new CFGVariable(symbolTable, ast.id().text(), Type.RECORD, sizeof(ast.type()));
             case ASTEnumType _ ->
-                    new CFGVariable(symbolTable, vd.id().text(), Type.INT);
+                    new CFGVariable(symbolTable, ast.id().text(), Type.INT);
             case ASTPointerType _ ->
-                    new CFGVariable(symbolTable, vd.id().text(), Type.POINTER);
+                    new CFGVariable(symbolTable, ast.id().text(), Type.POINTER);
             case ASTPrimitiveType pr ->
-                new CFGVariable(symbolTable, vd.id().text(), pr.type());
+                new CFGVariable(symbolTable, ast.id().text(), pr.type());
+            // already reduced
             default -> throw new AssertionError("This should never happen.");
         };
 
-        (local ? localVars : globalVars).put(vd.id().text(), vd);
-        symbols.put(vd, variable);
+        (local ? localVars : globalVars).put(ast.id().text(), ast);
+        symbols.put(ast, variable);
     }
 
-    private void linearize(ASTTypeDecl td) {
-        (local ? localTypes : globalTypes).put(td.id().text(), td.type());
+    private void linearize(ASTTypeDecl ast) {
+        (local ? localTypes : globalTypes).put(ast.id().text(), ast.type());
+    }
+
+    private Optional<CFGMethod> linearize(ASTMethodDecl ast) {
+        if (ast.block().isEmpty()) return Optional.empty();
+
+        currentMethod = ast.id().text();
+        local = true;
+        localTypes = new HashMap<>();
+        localVars = new HashMap<>();
+
+        for (ASTDeclaration decl : ast.decls()) {
+            if (decl instanceof ASTVarDecl vd) linearize(vd);
+            else if (decl instanceof ASTTypeDecl td) linearize(td);
+            // ignore const decls
+        }
+
+        cfg = new CFGBuilder(ctx);
+        cfg.newBlock();
+        linearize(ast.block().get());
+
+        local = false;
+        return Optional.of(new CFGMethod(ctx,
+                ast.returnType().map(this::reduceType).orElse(Type.VOID),
+                ast.id().text(),
+                ast.params().orElseThrow().stream()
+                        .map(symbols::get)
+                        .map(CFGVariable::getAddress)
+                        .toList(),
+                cfg));
+    }
+
+    private void linearize(ASTBlock ast) {
+        ast.statements().forEach(this::dispatch);
+    }
+
+    private void dispatch(ASTStatement ast) {
+        // TODO
     }
 
     private ASTType getType(ASTIdentifier id) {
@@ -89,6 +132,16 @@ public class Linearizer {
         if (local)
             if (localTypes.containsKey(key)) return localTypes.get(key);
         return globalTypes.get(key);
+    }
+
+    private Type reduceType(ASTType type) {
+        return switch (type) {
+            case ASTPrimitiveType pt -> pt.type();
+            case ASTEnumType _ -> Type.INT;
+            case ASTPointerType _ -> Type.POINTER;
+            case ASTArrayType _, ASTRecordType _ -> Type.RECORD;
+            default -> throw new AssertionError("This should never happen.");
+        };
     }
 
     private int sizeof(ASTType type) {

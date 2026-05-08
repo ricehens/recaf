@@ -42,9 +42,10 @@ public class CFGContext {
      * Sets the CFG program instance this context is associated with.
      *
      * @param program the CFG program
+     * @return the input
      */
-    public void setProgram(CFGProgram program) {
-        this.program = program;
+    public CFGProgram setProgram(CFGProgram program) {
+        return this.program = program;
     }
 
     /**
@@ -92,6 +93,9 @@ public class CFGContext {
      * @return whether it is first global variable
      */
     public boolean isGlobalVar(CFGAddress addr) {
+        // TODO
+        // if allow var parameters (passing by reference),
+        // generalize this to "is dereferenced?"
         return globalVars.contains(addr);
     }
 
