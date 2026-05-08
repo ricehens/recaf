@@ -45,23 +45,25 @@ public class Linearizer {
         for (ASTDeclaration decl : ast.decls()) {
             switch (decl) {
                 case ASTVarDecl vd -> {
-
+                    linearize(vd);
+                    ctx.addGlobalVar(symbols.get(vd).getAddress());
                 }
                 case ASTMethodDecl md -> {
                     // preprocess methods first
                     methods.put(md.id().text(), md.returnType());
+                    if (md.external()) symbolTable.addExternalMethod(md.id().text());
                 }
                 case ASTTypeDecl td -> linearize(td);
                 default -> {} // ignore const decls
             }
         }
 
+        // TODO
         return null;
-        // TODO set ctx program
+        // TODO set ctx program in each method decl
     }
 
     private void linearize(ASTVarDecl vd) {
-        (local ? localVars : globalVars).put(vd.id().text(), vd);
         CFGVariable variable = switch (vd.type()) {
             case ASTArrayType _, ASTRecordType _ ->
                 new CFGVariable(symbolTable, vd.id().text(), Type.RECORD, sizeof(vd.type()));
@@ -73,19 +75,9 @@ public class Linearizer {
                 new CFGVariable(symbolTable, vd.id().text(), pr.type());
             default -> throw new AssertionError("This should never happen.");
         };
-        // TODO
-        /*
-        symbols.put(vd, vd)
 
-
-        var variable = vd.arrayLen() == null ? new Variable(symbolTable, vd.name().text(), vd.type())
-                : new Variable(symbolTable, vd.name().text(), vd.type().toArray(), ((IntLiteral) vd.arrayLen()).value());
-        var cfgInst = vd.arrayLen() == null ? new CFGVarDeclInstruction(ctx, variable.getAddress(), vd.type(), cfg == null)
-                : new CFGVarDeclInstruction(ctx, variable.getAddress(), vd.type().toArray(), ((IntLiteral) vd.arrayLen()).value(), cfg == null);
-        addSymbol(vd.name().text(), variable);
-        if (cfg != null) cfg.offer(cfgInst);
-        return cfgInst;
-         */
+        (local ? localVars : globalVars).put(vd.id().text(), vd);
+        symbols.put(vd, variable);
     }
 
     private void linearize(ASTTypeDecl td) {

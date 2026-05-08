@@ -16,12 +16,10 @@ public class CFGProgram implements CFG {
      * Creates a new CFG program instance
      *
      * @param ctx the CFG context
-     * @param externalMethods the external methods, as strings
      * @param methods the methods
      */
-    public CFGProgram(CFGContext ctx, List<String> externalMethods, List<CFGMethod> methods) {
+    public CFGProgram(CFGContext ctx, List<CFGMethod> methods) {
         this.ctx = ctx;
-        externalMethods.forEach(ctx.getSymbolTable()::addExternalMethod);
         this.methods = new ArrayList<>(methods);
         methods.forEach(m -> ctx.getSymbolTable().addMethod(m));
     }
