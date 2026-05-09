@@ -102,6 +102,7 @@ public class Linearizer {
         localTypes = new HashMap<>();
         localVars = new HashMap<>();
 
+        md.params().orElseThrow().forEach(this::linearize);
         for (ASTDeclaration decl : md.decls()) {
             if (decl instanceof ASTVarDecl vd) linearize(vd);
             else if (decl instanceof ASTTypeDecl td) linearize(td);
@@ -491,7 +492,7 @@ public class Linearizer {
                     type = fieldType(rt, field);
                 }
 
-                case ASTDerefAccess deref -> {
+                case ASTDerefAccess _ -> {
                     ASTPointerType pt = (ASTPointerType) type;
 
                     if (i > 0) {
@@ -521,6 +522,7 @@ public class Linearizer {
 
     private ASTType getType(ASTIdentifier id) {
         String key = id.text();
+System.out.println(key);
         if (local)
             if (localTypes.containsKey(key)) return localTypes.get(key);
         return globalTypes.get(key);

@@ -1,11 +1,10 @@
 package recaf.ast;
 
 import recaf.ast.nodes.*;
-import recaf.ast.nodes.ASTType;
-import recaf.general.Type;
 import recaf.general.*;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 import static recaf.ast.ASTUtils.*;
 
@@ -109,6 +108,14 @@ public class SemanticChecker {
     }
 
     private ASTBaseType check(ASTBaseType ast) {
+        return check2(check1(ast));
+    }
+
+    private ASTBaseType check1(ASTBaseType ast) {
+        return new ASTBaseType(ast.ctx(), check(ast.id()));
+    }
+
+    private ASTBaseType check2(ASTBaseType ast) {
         if (!(globalTypes.containsKey(key(ast.id()))
                 || local && localTypes.containsKey(key(ast.id())))) {
             ast.ctx().error("type " + key(ast.id()) + " not found");
@@ -149,14 +156,15 @@ public class SemanticChecker {
     }
 
     private ASTPointerType check(ASTPointerType ast) {
-        promisedTypes.add(ast.type());
-        return new ASTPointerType(ast.ctx(), ast.type());
+        ASTBaseType halfChecked = check1(ast.type());
+        promisedTypes.add(halfChecked);
+        return new ASTPointerType(ast.ctx(), halfChecked);
     }
 
     private void flushPromises() {
         for (ASTBaseType promise : promisedTypes)
             if (!checkedTypes.containsKey(promise))
-                checkedTypes.put(promise, check(promise));
+                checkedTypes.put(promise, check2(promise));
     }
 
     private ASTRecordType check(ASTRecordType ast) {
@@ -230,13 +238,14 @@ public class SemanticChecker {
                 returnType, id, params, null, null,
                 ast.forward(), ast.external(), ast.internal()));
 
+        Optional<ASTVarDecl> rv = Optional.empty();
         if (returnType.isPresent()) {
             if (returnType.get() instanceof ASTArrayType)
                 returnType.get().ctx().error("functions may not return arrays");
             if (returnType.get() instanceof ASTRecordType)
                 returnType.get().ctx().error("functions may not return records");
-            ASTVarDecl rv = check(new ASTVarDecl(ast.ctx(), returnType.get(), id));
-            registerVar(rv.id(), rv.type());
+            rv = Optional.of(check(new ASTVarDecl(ast.ctx(), returnType.get(), id)));
+            registerVar(rv.get().id(), rv.get().type());
         }
 
         if (params.isPresent()) {
@@ -250,7 +259,10 @@ public class SemanticChecker {
             }
         }
 
-        List<ASTDeclaration> decls = ast.decls().stream().map(this::dispatch).toList();
+        List<ASTDeclaration> decls = Stream.concat(
+                rv.stream(),
+                ast.decls().stream().map(this::dispatch)
+        ).toList();
         flushPromises();
         Optional<ASTBlock> block = ast.block().map(this::check);
 
