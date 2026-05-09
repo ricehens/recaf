@@ -26,7 +26,7 @@ public class Linearizer {
     private boolean local;
     private Map<String, ASTType> localTypes;
     private Map<String, ASTVarDecl> localVars;
-    private String currentMethod; // TODO return 0 at end of main
+    private String currentMethod;
 
     private CFGAddress breakAddress;
     private CFGAddress continueAddress;
@@ -409,7 +409,13 @@ public class Linearizer {
     }
 
     private void read(CFGAddress addr, ASTLocation loc) {
-        // TODO
+        if (loc.accesses().isEmpty()) {
+            CFGAddress src = linearize(loc);
+            cfg.offer(new CFGCopyInstruction(ctx, addr, src));
+            return;
+        }
+
+        // TODO emit CFG read instruction(s)
     }
 
     // write scalar value to loc
@@ -422,7 +428,7 @@ public class Linearizer {
             return;
         }
 
-        // TODO emit write inst
+        // TODO emit CFG write instruction (+ read instructions if deref?)
     }
 
     private ASTVarDecl getVar(ASTIdentifier id) {
