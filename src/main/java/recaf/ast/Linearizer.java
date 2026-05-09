@@ -10,7 +10,7 @@ import static recaf.ast.ASTUtils.*;
 
 public class Linearizer {
 
-    private final SemanticChecker sc;
+    private SemanticChecker sc;
 
     private final CFGContext ctx;
     private final CFGSymbolTable symbolTable;
@@ -31,8 +31,7 @@ public class Linearizer {
     private CFGAddress breakAddress;
     private CFGAddress continueAddress;
 
-    public Linearizer(SemanticChecker sc) {
-        this.sc = sc;
+    public Linearizer() {
         symbolTable = new CFGSymbolTable();
         ctx = new CFGContext(null, symbolTable);
 
@@ -46,6 +45,8 @@ public class Linearizer {
     }
 
     public CFGProgram linearize(ASTProgram prog) {
+        sc = prog.ctx().getSemanticChecker();
+
         for (ASTDeclaration decl : prog.decls()) {
             switch (decl) {
                 case ASTVarDecl vd -> {
@@ -147,8 +148,8 @@ public class Linearizer {
 
         if (type instanceof ASTArrayType || type instanceof ASTRecordType) {
             symbolTable.addExternalMethod(MEMCPY);
-            CFGAddress dest = reduce(linearize(loc));
-            CFGAddress src = reduce(linearize((ASTLocation) expr));
+            CFGAddress dest = reduce(locate(loc));
+            CFGAddress src = reduce(locate((ASTLocation) expr));
             cfg.offer(new CFGMethodCallInstruction(ctx, null, MEMCPY, List.of(dest, src)));
             return;
         }
@@ -428,7 +429,7 @@ public class Linearizer {
             CFGAddress src = symbols.get(getVar(loc.id())).getAddress();
             cfg.offer(new CFGCopyInstruction(ctx, addr, src));
         } else {
-            LocationTarget target = linearize(loc);
+            LocationTarget target = locate(loc);
             cfg.offer(new CFGReadInstruction(ctx, addr, target.base(), target.width(), target.offset()));
         }
     }
@@ -439,15 +440,76 @@ public class Linearizer {
             CFGAddress dest = symbols.get(getVar(loc.id())).getAddress();
             cfg.offer(new CFGCopyInstruction(ctx, dest, addr));
         } else {
-            LocationTarget target = linearize(loc);
+            LocationTarget target = locate(loc);
             cfg.offer(new CFGWriteInstruction(ctx, target.base(), target.width(), target.offset(), addr));
         }
     }
 
     private record LocationTarget(CFGAddress base, int width, CFGAddress offset) {}
 
-    private LocationTarget linearize(ASTLocation loc) {
-        return null; // TODO
+    private LocationTarget locate(ASTLocation loc) {
+        int finalWidth = sizeof(sc.exprType(loc));
+        ASTVarDecl root = getVar(loc.id());
+
+        int lastDeref = -1;
+        for (int i = loc.accesses().size(); i-- > 0; ) {
+            if (loc.accesses().get(i) instanceof ASTDerefAccess) {
+                lastDeref = i;
+                break;
+            }
+        }
+
+        CFGAddress base = symbols.get(root).getAddress();
+        ASTType type = root.type();
+        int width = lastDeref == -1 ? finalWidth : 8;
+        CFGAddress offset = makeIntLiteral(0);
+
+        for (int i = 0; i < loc.accesses().size(); i++) {
+            while (type instanceof ASTBaseType bt)
+                type = getType(bt.id());
+
+            switch (loc.accesses().get(i)) {
+                case ASTIndexAccess index -> {
+                    ASTArrayType at = (ASTArrayType) type;
+
+                    CFGAddress delta = reduceIndex(at, index);
+                    int scale = sizeof(at.type()) / width;
+                    cfg.offer(new CFGBinaryInstruction(ctx, delta, BinaryOperator.TIMES,
+                            delta, makeIntLiteral(scale)));
+
+                    cfg.offer(new CFGBinaryInstruction(ctx, base, BinaryOperator.PLUS,
+                            base, delta));
+                    type = at.type();
+                }
+
+                case ASTFieldAccess field -> {
+                    ASTRecordType rt = (ASTRecordType) type;
+
+                    int delta = reduceIndex(rt, field) / width;
+                    cfg.offer(new CFGBinaryInstruction(ctx, base, BinaryOperator.PLUS,
+                            base, makeIntLiteral(delta)));
+                    type = fieldType(rt, field);
+                }
+
+                case ASTDerefAccess deref -> {
+                    ASTPointerType pt = (ASTPointerType) type;
+
+                    if (i > 0) {
+                        CFGAddress next = ctx.newAddress(Type.POINTER);
+                        cfg.offer(new CFGReadInstruction(ctx, next, base, 0, offset));
+                        base = next;
+                    }
+
+                    type = pt.type();
+                    offset = makeIntLiteral(0);
+                    width = i < lastDeref ? finalWidth : 8;
+                }
+
+                default -> throw new AssertionError("This should never happen.");
+            }
+        }
+
+        return new LocationTarget(base, width, offset);
     }
 
     private ASTVarDecl getVar(ASTIdentifier id) {
@@ -531,6 +593,13 @@ public class Linearizer {
             offset += sizeof(field.type());
         }
         return roundUp(offset, maxAlign);
+    }
+
+    private ASTType fieldType(ASTRecordType rt, ASTFieldAccess access) {
+        for (ASTVarDecl field : rt.fields())
+            if (field.id().text().equals(access.field().text()))
+                return field.type();
+        throw new AssertionError("This should never happen.");
     }
 
     private int align(ASTType type) {

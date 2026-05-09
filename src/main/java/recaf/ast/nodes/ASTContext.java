@@ -3,6 +3,7 @@ package recaf.ast.nodes;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.TerminalNode;
+import recaf.ast.SemanticChecker;
 
 public class ASTContext {
 
@@ -32,6 +33,15 @@ public class ASTContext {
      */
     public void error(String message) {
         inv.getErrorHandler().error(inv.getFile(), line, charPositionInLine, message);
+    }
+
+    public SemanticChecker getSemanticChecker() {
+        return inv.getSemanticChecker();
+    }
+
+    public SemanticChecker setSemanticChecker(SemanticChecker sc) {
+        this.inv.setSemanticChecker(sc);
+        return sc;
     }
 
 }

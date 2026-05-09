@@ -59,6 +59,8 @@ public class SemanticChecker {
             if (md.forward())
                 md.ctx().error("forward definition has no implementation");
 
+        ast.ctx().setSemanticChecker(this);
+
         return ret;
     }
 

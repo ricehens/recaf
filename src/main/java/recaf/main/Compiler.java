@@ -2,6 +2,9 @@ package recaf.main;
 
 import org.antlr.v4.runtime.CommonTokenStream;
 import recaf.antlr.RecafParser;
+import recaf.ast.ASTBuilder;
+import recaf.ast.Linearizer;
+import recaf.ast.SemanticChecker;
 import recaf.ast.nodes.ASTProgram;
 import recaf.cfg.CFGProgram;
 
@@ -120,13 +123,16 @@ public class Compiler {
     }
 
     private ASTProgram generate(RecafParser.ProgramContext cst) {
-        ASTGenerator gen = new ASTGenerator(errorHandler, infile, optLevel);
-        return gen.generate(cst);
+        ASTProgram ast = new ASTBuilder(infile, errorHandler, optLevel).visit(cst);
+        if (errorHandler.hasErrors()) return null;
+        ast = new SemanticChecker().check(ast);
+        if (errorHandler.hasErrors()) return null;
+        return ast;
     }
 
     private CFGProgram linearize(ASTProgram ast) {
-        CFGGenerator gen = new CFGGenerator();
-        return gen.linearize(ast);
+        Linearizer linearizer = new Linearizer();
+        return linearizer.linearize(ast);
     }
 
     private void makeExecutable() {

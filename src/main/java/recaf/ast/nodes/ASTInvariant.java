@@ -1,11 +1,14 @@
 package recaf.ast.nodes;
 
+import recaf.ast.SemanticChecker;
 import recaf.main.RecafErrorHandler;
 
 public class ASTInvariant {
+
     private final String file;
     private final RecafErrorHandler errorHandler;
     private final int optLevel;
+    private SemanticChecker semanticChecker;
 
     public ASTInvariant(String file, RecafErrorHandler errorHandler, int optLevel) {
         this.file = file;
@@ -23,6 +26,14 @@ public class ASTInvariant {
 
     public int getOptLevel() {
         return optLevel;
+    }
+
+    public SemanticChecker getSemanticChecker() {
+        return semanticChecker;
+    }
+
+    public void setSemanticChecker(SemanticChecker semanticChecker) {
+        this.semanticChecker = semanticChecker;
     }
 
 }
