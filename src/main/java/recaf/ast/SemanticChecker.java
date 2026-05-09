@@ -521,8 +521,13 @@ public class SemanticChecker {
             case NEW, DISPOSE -> {
                 if (ast.args().size() != 1)
                     ast.ctx().error(key(ast.id()) + " expects exactly one argument");
-                else if (!(exprType(dispatch(ast.args().getFirst())) instanceof ASTPointerType))
-                    ast.args().getFirst().ctx().error(key(ast.id()) + " expects argument of pointer type");
+                else {
+                    ASTExpression ptr = dispatch(ast.args().getFirst());
+                    if (NEW.equals(key(ast.id())) && !(ptr instanceof ASTLocation))
+                        ast.args().getFirst().ctx().error(key(ast.id()) + " expects location as argument");
+                    if (!(exprType(ptr) instanceof ASTPointerType))
+                        ast.args().getFirst().ctx().error(key(ast.id()) + " expects argument of pointer type");
+                }
             }
             case INTEGER, INT64 -> {
                 if (ast.args().size() != 1)

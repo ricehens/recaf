@@ -81,50 +81,6 @@ public class CFGBuilder {
         return blocks;
     }
 
-    // loop construction
-    private CFGAddress breakAddress;
-    private CFGAddress continueAddress;
-
-    /**
-     * Gets the stored break address.
-     *
-     * @return the address to which first break instruction should jump
-     */
-    public CFGAddress getBreakAddress() {
-        return breakAddress;
-    }
-
-    /**
-     * Gets the stored continue address.
-     *
-     * @return the address to which first continue instruction should jump
-     */
-    public CFGAddress getContinueAddress() {
-        return continueAddress;
-    }
-
-    /**
-     * Sets the current break address.
-     * The previously stored break address is not preserved. The caller
-     * is responsible for storing said address if it is needed afterward.
-     *
-     * @param breakAddress the new break address
-     */
-    public void setBreakAddress(CFGAddress breakAddress) {
-        this.breakAddress = breakAddress;
-    }
-
-    /**
-     * Sets the current continue address.
-     * The previously stored continue address is not preserved. The caller
-     * is responsible for storing said address if it is needed afterward.
-     *
-     * @param continueAddress the new continue address
-     */
-    public void setContinueAddress(CFGAddress continueAddress) {
-        this.continueAddress = continueAddress;
-    }
-
     private static String getFalloffString(String m) {
         return String.format("Runtime error: non-void method %s fell off the end without returning first value.\\n", m);
     }

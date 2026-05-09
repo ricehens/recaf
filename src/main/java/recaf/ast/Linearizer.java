@@ -4,12 +4,12 @@ import recaf.ast.nodes.*;
 import recaf.cfg.*;
 import recaf.general.BinaryOperator;
 import recaf.general.IntLiteral;
+import recaf.general.StringLiteral;
 import recaf.general.Type;
 
-import java.util.HashMap;
-import java.util.IdentityHashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+
+import static recaf.ast.ASTUtils.*;
 
 public class Linearizer {
 
@@ -31,6 +31,9 @@ public class Linearizer {
     private Map<String, ASTVarDecl> localVars;
     private String currentMethod; // TODO return 0 at end of main
 
+    private CFGAddress breakAddress;
+    private CFGAddress continueAddress;
+
     public Linearizer(SemanticChecker sc) {
         this.sc = sc;
         symbolTable = new CFGSymbolTable();
@@ -43,7 +46,6 @@ public class Linearizer {
         symbols = new IdentityHashMap<>();
 
         local = false;
-        currentMethod = null;
     }
 
     public CFGProgram linearize(ASTProgram prog) {
@@ -111,16 +113,7 @@ public class Linearizer {
         cfg = new CFGBuilder(ctx);
         cfg.newBlock();
         linearize(md.block().get());
-
-        if (md.returnType().isPresent()) {
-            cfg.offer(new CFGReturnInstruction(ctx, symbols.get(localVars.get(md.id().text())).getAddress()));
-            cfg.newBlock();
-        } else if (currentMethod.equals("main")) {
-            CFGAddress exitCode = ctx.newAddress(Type.INT);
-            cfg.offer(new CFGLiteralInstruction(ctx, exitCode, 0));
-            cfg.offer(new CFGReturnInstruction(ctx, exitCode));
-            cfg.newBlock();
-        }
+        linearize(null, new ASTMethodCall(md.ctx(), new ASTIdentifier(md.ctx(), EXIT), List.of()));
 
         local = false;
         return Optional.of(new CFGMethod(ctx,
@@ -141,6 +134,13 @@ public class Linearizer {
         // TODO
     }
 
+    private void linearize(ASTAssignment as) {
+        ASTLocation loc = as.location();
+        ASTExpression expr = as.expr();
+        CFGAddress addr = linearize(expr);
+        write(loc, addr);
+    }
+
     private CFGAddress linearize(ASTExpression expr) {
         if (expr instanceof ASTLocation loc && loc.accesses().isEmpty())
             return symbols.get(getVar(loc.id())).getAddress();
@@ -150,7 +150,117 @@ public class Linearizer {
     }
 
     private void dispatch(CFGAddress dest, ASTExpression expr) {
-        // TODO
+        switch (expr) {
+            case ASTLocation loc -> read(dest, loc);
+            case ASTMethodCall mc -> linearize(dest, mc);
+            case ASTLiteral lit -> linearize(dest, lit);
+            case ASTBinaryExpression be -> linearize(dest, be);
+            case ASTUnaryExpression ue -> linearize(dest, ue);
+            default -> throw new AssertionError("This should never happen.");
+        }
+    }
+
+    private void linearize(CFGAddress dest, ASTMethodCall mc) {
+        switch (mc.id().text()) {
+            case BREAK -> {
+                cfg.offer(new CFGJumpInstruction(ctx, breakAddress));
+                cfg.newBlock();
+            }
+
+            case CONTINUE -> {
+                cfg.offer(new CFGJumpInstruction(ctx, continueAddress));
+                cfg.newBlock();
+            }
+
+            case EXIT -> {
+                if (methods.get(currentMethod).isPresent()) {
+                    cfg.offer(new CFGReturnInstruction(ctx, symbols.get(localVars.get(currentMethod)).getAddress()));
+                    cfg.newBlock();
+                } else if (currentMethod.equals("main")) {
+                    CFGAddress exitCode = makeIntLiteral(0);
+                    cfg.offer(new CFGReturnInstruction(ctx, exitCode));
+                    cfg.newBlock();
+                } else cfg.offer(new CFGReturnInstruction(ctx));
+            }
+
+            case INTEGER ->
+                    cfg.offer(new CFGCastInstruction(ctx, dest, Type.INT, linearize(mc.args().getFirst())));
+            case INT64 ->
+                    cfg.offer(new CFGCastInstruction(ctx, dest, Type.LONG, linearize(mc.args().getFirst())));
+
+            case NEW -> {
+                symbolTable.addExternalMethod(MALLOC);
+                ASTLocation loc = (ASTLocation) mc.args().getFirst();
+                ASTPointerType type = (ASTPointerType) sc.exprType(loc);
+
+                CFGAddress tmp = ctx.newAddress(Type.POINTER);
+                CFGAddress size = makeIntLiteral(sizeof(type.type()));
+                cfg.offer(new CFGMethodCallInstruction(ctx, tmp, MALLOC, List.of(size)));
+
+                write(loc, tmp);
+            }
+
+            case DISPOSE -> {
+                symbolTable.addExternalMethod(FREE);
+                CFGAddress ptr = linearize(mc.args().getFirst());
+                cfg.offer(new CFGMethodCallInstruction(ctx, null, FREE, List.of(ptr)));
+            }
+
+            case WRITE, WRITELN -> {
+                for (ASTExpression arg : mc.args()) {
+                    CFGAddress addr = linearize(arg);
+                    if (ctx.getType(addr) == Type.BOOL) {
+                        CFGAddress trueAddr = new CFGAddress();
+                        CFGAddress falseAddr = new CFGAddress();
+                        CFGAddress postAddr = new CFGAddress();
+
+                        cfg.offer(new CFGBranchInstruction(ctx, addr, trueAddr, falseAddr));
+
+                        trueAddr.set(cfg.newBlock().address());
+                        CFGAddress trueStr = makeStringLiteral("TRUE");
+                        cfg.offer(new CFGMethodCallInstruction(ctx, null, PRINTF, List.of(trueStr)));
+                        cfg.offer(new CFGJumpInstruction(ctx, postAddr));
+
+                        falseAddr.set(cfg.newBlock().address());
+                        CFGAddress falseStr = makeStringLiteral("FALSE");
+                        cfg.offer(new CFGMethodCallInstruction(ctx, null, PRINTF, List.of(falseStr)));
+                        cfg.offer(new CFGJumpInstruction(ctx, postAddr));
+
+                        postAddr.set(cfg.newBlock().address());
+                    } else {
+                        CFGAddress fmt = makeStringLiteral(
+                                switch (ctx.getType(addr)) {
+                                    case INT -> "%d";
+                                    case LONG -> "%lld";
+                                    case STRING -> "%s";
+                                    default -> throw new AssertionError("This should never happen.");
+                                }
+                        );
+                        cfg.offer(new CFGMethodCallInstruction(ctx, null, PRINTF,
+                                List.of(fmt, addr)));
+                    }
+                }
+                CFGAddress newline = makeStringLiteral("\\n");
+                if (WRITELN.equals(mc.id().text()))
+                    cfg.offer(new CFGMethodCallInstruction(ctx, null, PRINTF, List.of(newline)));
+            }
+
+            default -> {
+                Optional<ASTType> returnType = methods.get(mc.id().text());
+                cfg.offer(new CFGMethodCallInstruction(ctx,
+                        returnType.isEmpty() ? null : dest,
+                        mc.id().text(),
+                        mc.args().stream().map(this::linearize).toList()));
+            }
+        }
+    }
+
+    private void linearize(CFGAddress dest, ASTLiteral lit) {
+        cfg.offer(new CFGLiteralInstruction(ctx, dest, lit.literal()));
+    }
+
+    private void linearize(CFGAddress dest, ASTUnaryExpression unary) {
+        cfg.offer(new CFGUnaryInstruction(ctx, dest, unary.op(), linearize(unary.expr())));
     }
 
     private void linearize(CFGAddress dest, ASTBinaryExpression bin) {
@@ -173,6 +283,25 @@ public class Linearizer {
             CFGAddress rAddr = linearize(bin.right());
             cfg.offer(new CFGBinaryInstruction(ctx, dest, bin.op(), lAddr, rAddr));
         }
+    }
+
+    private void read(CFGAddress addr, ASTLocation loc) {
+        // TODO
+    }
+
+    private void write(ASTLocation loc, CFGAddress addr) {
+        ASTType type = sc.exprType(loc);
+
+        if (type instanceof ASTArrayType || type instanceof ASTRecordType) {
+            // TODO emit memcpy
+        }
+
+        if (loc.accesses().isEmpty()) {
+            CFGAddress dest = linearize(loc);
+            cfg.offer(new CFGCopyInstruction(ctx, dest, addr));
+        }
+
+        // TODO emit write inst
     }
 
     private ASTVarDecl getVar(ASTIdentifier id) {
@@ -275,5 +404,18 @@ public class Linearizer {
     private int roundUp(int a, int m) {
         return (a + m - 1) / m * m;
     }
+
+    private CFGAddress makeIntLiteral(int value) {
+        CFGAddress addr = ctx.newAddress(Type.INT);
+        cfg.offer(new CFGLiteralInstruction(ctx, addr, value));
+        return addr;
+    }
+
+    private CFGAddress makeStringLiteral(String value) {
+        CFGAddress addr = ctx.newAddress(Type.STRING);
+        cfg.offer(new CFGLiteralInstruction(ctx, addr, new StringLiteral(value)));
+        return addr;
+    }
+
 
 }
