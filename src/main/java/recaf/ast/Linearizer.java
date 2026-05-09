@@ -143,6 +143,15 @@ public class Linearizer {
     private void linearize(ASTAssignment as) {
         ASTLocation loc = as.location();
         ASTExpression expr = as.expr();
+        ASTType type = sc.exprType(loc);
+
+        if (type instanceof ASTArrayType || type instanceof ASTRecordType) {
+            ASTLocation rhs = (ASTLocation) expr;
+            // TODO emit memcpy
+
+            return;
+        }
+
         CFGAddress addr = linearize(expr);
         write(loc, addr);
     }
@@ -403,16 +412,14 @@ public class Linearizer {
         // TODO
     }
 
+    // write scalar value to loc
     private void write(ASTLocation loc, CFGAddress addr) {
         ASTType type = sc.exprType(loc);
-
-        if (type instanceof ASTArrayType || type instanceof ASTRecordType) {
-            // TODO emit memcpy
-        }
 
         if (loc.accesses().isEmpty()) {
             CFGAddress dest = linearize(loc);
             cfg.offer(new CFGCopyInstruction(ctx, dest, addr));
+            return;
         }
 
         // TODO emit write inst
