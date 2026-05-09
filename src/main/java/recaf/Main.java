@@ -144,8 +144,13 @@ public class Main {
             System.exit(1);
         }
 
-        Compiler compiler = new Compiler(infile, outfile, target, true, optLevel, libraries);
-        compiler.run();
+        try {
+            Compiler compiler = new Compiler(infile, outfile, target, true, optLevel, libraries);
+            compiler.run();
+        } catch (Exception e) {
+            System.err.println(new RecafError("recaf", -1, -1, "fatal error compiling " + infile + "; exiting now"));
+            throw e;
+        }
 
         if (i + 1 < args.length) {
             String[] newArgs = new String[args.length - i - 1];

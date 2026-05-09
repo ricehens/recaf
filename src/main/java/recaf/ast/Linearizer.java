@@ -478,8 +478,8 @@ public class Linearizer {
                     cfg.offer(new CFGBinaryInstruction(ctx, delta, BinaryOperator.TIMES,
                             delta, makeIntLiteral(scale)));
 
-                    cfg.offer(new CFGBinaryInstruction(ctx, base, BinaryOperator.PLUS,
-                            base, delta));
+                    cfg.offer(new CFGBinaryInstruction(ctx, offset, BinaryOperator.PLUS,
+                            offset, delta));
                     type = at.type();
                 }
 
@@ -487,8 +487,8 @@ public class Linearizer {
                     ASTRecordType rt = (ASTRecordType) type;
 
                     int delta = reduceIndex(rt, field) / width;
-                    cfg.offer(new CFGBinaryInstruction(ctx, base, BinaryOperator.PLUS,
-                            base, makeIntLiteral(delta)));
+                    cfg.offer(new CFGBinaryInstruction(ctx, offset, BinaryOperator.PLUS,
+                            offset, makeIntLiteral(delta)));
                     type = fieldType(rt, field);
                 }
 
@@ -522,7 +522,6 @@ public class Linearizer {
 
     private ASTType getType(ASTIdentifier id) {
         String key = id.text();
-System.out.println(key);
         if (local)
             if (localTypes.containsKey(key)) return localTypes.get(key);
         return globalTypes.get(key);

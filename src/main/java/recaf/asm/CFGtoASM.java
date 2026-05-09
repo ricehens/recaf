@@ -480,11 +480,7 @@ public class CFGtoASM implements CFGVisitor {
                 asm.emit(ASMOperator.MOVL, srcLoc, ASMRegister.EAX);
                 asm.emit(ASMOperator.MOVL, ASMRegister.EAX, dest);
                 break;
-            case LONG:
-                asm.emit(ASMOperator.MOVQ, srcLoc, ASMRegister.RAX);
-                asm.emit(ASMOperator.MOVQ, ASMRegister.RAX, dest);
-                break;
-            case POINTER:
+            case LONG, POINTER:
                 asm.emit(ASMOperator.MOVQ, srcLoc, ASMRegister.RAX);
                 asm.emit(ASMOperator.MOVQ, ASMRegister.RAX, dest);
                 break;
