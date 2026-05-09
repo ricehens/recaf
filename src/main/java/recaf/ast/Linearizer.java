@@ -2,10 +2,7 @@ package recaf.ast;
 
 import recaf.ast.nodes.*;
 import recaf.cfg.*;
-import recaf.general.BinaryOperator;
-import recaf.general.IntLiteral;
-import recaf.general.StringLiteral;
-import recaf.general.Type;
+import recaf.general.*;
 
 import java.util.*;
 
@@ -131,7 +128,16 @@ public class Linearizer {
     }
 
     private void dispatch(ASTStatement statement) {
-        // TODO
+        switch (statement) {
+            case ASTAssignment as -> linearize(as);
+            case ASTMethodCall mc -> linearize(mc);
+            case ASTIfElse ie -> linearize(ie);
+            case ASTForLoop fl -> linearize(fl);
+            case ASTWhileLoop wl -> linearize(wl);
+            case ASTRepeatLoop rl -> linearize(rl);
+            case ASTBlock blk -> linearize(blk);
+            default -> throw new AssertionError("This should never happen.");
+        };
     }
 
     private void linearize(ASTAssignment as) {
@@ -139,6 +145,114 @@ public class Linearizer {
         ASTExpression expr = as.expr();
         CFGAddress addr = linearize(expr);
         write(loc, addr);
+    }
+
+    private void linearize(ASTIfElse ifElse) {
+        CFGAddress boolAddr = linearize(ifElse.cond());
+        CFGAddress thenAddr = new CFGAddress();
+        CFGAddress elseAddr = new CFGAddress();
+        CFGAddress postAddr = new CFGAddress();
+
+        cfg.offer(new CFGBranchInstruction(ctx, boolAddr, thenAddr,
+                ifElse.elseBlock().isPresent() ? elseAddr : postAddr));
+        thenAddr.set(cfg.newBlock().address());
+        dispatch(ifElse.thenBlock());
+        cfg.offer(new CFGJumpInstruction(ctx, postAddr));
+
+        if (ifElse.elseBlock().isPresent()) {
+            elseAddr.set(cfg.newBlock().address());
+            dispatch(ifElse.elseBlock().get());
+            cfg.offer(new CFGJumpInstruction(ctx, postAddr));
+        }
+        postAddr.set(cfg.newBlock().address());
+    }
+
+    private void linearize(ASTForLoop fl) {
+        CFGAddress dummyAddr = symbols.get(getVar(fl.dummy().id())).getAddress();
+        CFGAddress startAddr = linearize(fl.start());
+        CFGAddress endAddr = linearize(fl.end());
+        cfg.offer(new CFGCopyInstruction(ctx, dummyAddr, startAddr));
+
+        CFGAddress loopAddr = new CFGAddress();
+        CFGAddress incrementAddr = new CFGAddress();
+        CFGAddress exitAddr = new CFGAddress();
+
+        CFGAddress prevBreakAddr = breakAddress;
+        CFGAddress prevContinueAddr = continueAddress;
+        breakAddress = exitAddr;
+        continueAddress = incrementAddr;
+
+        // inverted loop logic
+        CFGAddress boolAddr = ctx.newAddress(Type.BOOL);
+        cfg.offer(new CFGBinaryInstruction(ctx, boolAddr,
+                fl.descending() ? BinaryOperator.GEQ : BinaryOperator.LEQ,
+                dummyAddr, endAddr));
+        cfg.offer(new CFGBranchInstruction(ctx, boolAddr, loopAddr, exitAddr));
+
+        loopAddr.set(cfg.newBlock().address());
+        dispatch(fl.body());
+
+        incrementAddr.set(cfg.newBlock().address());
+        cfg.offer(new CFGBinaryInstruction(ctx, dummyAddr,
+                fl.descending() ? BinaryOperator.MINUS : BinaryOperator.PLUS,
+                dummyAddr,
+                ctx.getType(dummyAddr) == Type.LONG
+                        ? makeLongLiteral(1) : makeIntLiteral(1)));
+
+        CFGAddress boolAddr2 = ctx.newAddress(Type.BOOL);
+        cfg.offer(new CFGBinaryInstruction(ctx, boolAddr2,
+                fl.descending() ? BinaryOperator.GEQ : BinaryOperator.LEQ,
+                dummyAddr, endAddr));
+        cfg.offer(new CFGBranchInstruction(ctx, boolAddr2, loopAddr, exitAddr));
+        exitAddr.set(cfg.newBlock().address());
+
+        breakAddress = prevBreakAddr;
+        continueAddress = prevContinueAddr;
+    }
+
+    private void linearize(ASTWhileLoop wl) {
+        CFGAddress condAddr = new CFGAddress();
+        CFGAddress loopAddr = new CFGAddress();
+        CFGAddress exitAddr = new CFGAddress();
+
+        CFGAddress prevBreakAddr = breakAddress;
+        CFGAddress prevContinueAddr = continueAddress;
+        breakAddress = exitAddr;
+        continueAddress = condAddr;
+
+        // inverted loop logic
+        CFGAddress boolAddr = linearize(wl.cond());
+        cfg.offer(new CFGBranchInstruction(ctx, boolAddr, loopAddr, exitAddr));
+        loopAddr.set(cfg.newBlock().address());
+        dispatch(wl.body());
+        condAddr.set(cfg.newBlock().address());
+        CFGAddress boolAddr2 = linearize(wl.cond());
+        cfg.offer(new CFGBranchInstruction(ctx, boolAddr2, loopAddr, exitAddr));
+        exitAddr.set(cfg.newBlock().address());
+
+        breakAddress = prevBreakAddr;
+        continueAddress = prevContinueAddr;
+    }
+
+    private void linearize(ASTRepeatLoop rl) {
+        CFGAddress loopAddr = new CFGAddress();
+        CFGAddress condAddr = new CFGAddress();
+        CFGAddress exitAddr = new CFGAddress();
+
+        CFGAddress prevBreakAddr = breakAddress;
+        CFGAddress prevContinueAddr = continueAddress;
+        breakAddress = exitAddr;
+        continueAddress = condAddr;
+
+        loopAddr.set(cfg.currentBlock().address());
+        dispatch(rl.body());
+        condAddr.set(cfg.newBlock().address());
+        CFGAddress cond = linearize(rl.cond());
+        cfg.offer(new CFGBranchInstruction(ctx, cond, exitAddr, loopAddr));
+        exitAddr.set(cfg.newBlock().address());
+
+        breakAddress = prevBreakAddr;
+        continueAddress = prevContinueAddr;
     }
 
     private CFGAddress linearize(ASTExpression expr) {
@@ -407,7 +521,13 @@ public class Linearizer {
 
     private CFGAddress makeIntLiteral(int value) {
         CFGAddress addr = ctx.newAddress(Type.INT);
-        cfg.offer(new CFGLiteralInstruction(ctx, addr, value));
+        cfg.offer(new CFGLiteralInstruction(ctx, addr, new IntLiteral(value)));
+        return addr;
+    }
+
+    private CFGAddress makeLongLiteral(long value) {
+        CFGAddress addr = ctx.newAddress(Type.LONG);
+        cfg.offer(new CFGLiteralInstruction(ctx, addr, new LongLiteral(value)));
         return addr;
     }
 

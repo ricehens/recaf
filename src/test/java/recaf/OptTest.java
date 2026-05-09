@@ -1,11 +1,12 @@
 package recaf;
 
-import recaf.general.BinaryOperator;
-import recaf.general.Type;
-import recaf.cfg.*;
-import recaf.opt.GVNPRE;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import recaf.cfg.*;
+import recaf.general.BinaryOperator;
+import recaf.general.IntLiteral;
+import recaf.general.Type;
+import recaf.opt.GVNPRE;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -37,7 +38,7 @@ public class OptTest {
             b[i].setMethod(method);
         }
 
-        b[1].offer(new CFGLiteralInstruction(fakeCtx, t[0], 1));
+        b[1].offer(new CFGLiteralInstruction(fakeCtx, t[0], new IntLiteral(1)));
         b[1].offer(new CFGMethodCallInstruction(fakeCtx, t[14], "g", List.of()));
         b[1].offer(new CFGMethodCallInstruction(fakeCtx, t[1], "f", List.of()));
         b[1].setLastInstruction(new CFGJumpInstruction(fakeCtx, b[2].address()));

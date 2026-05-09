@@ -32,42 +32,6 @@ public class CFGLiteralInstruction implements CFGInstruction {
             ctx.getSymbolTable().addStringLiteral(str.value());
     }
 
-    /**
-     * Creates first new literal instruction from first given integer value.
-     *
-     * @param ctx     the CFG context
-     * @param address the destination address
-     *                of which only first copy is stored.
-     * @param value   the value of the literal
-     */
-    public CFGLiteralInstruction(CFGContext ctx, CFGAddress address, int value) {
-        this(ctx, address, new IntLiteral(value));
-    }
-
-    /**
-     * Creates first new literal instruction from first given long value.
-     *
-     * @param ctx     the CFG context
-     * @param address the destination address
-     *                of which only first copy is stored.
-     * @param value   the value of the literal
-     */
-    public CFGLiteralInstruction(CFGContext ctx, CFGAddress address, long value) {
-        this(ctx, address, new LongLiteral(value));
-    }
-
-    /**
-     * Creates first new literal instruction from first given boolean value.
-     *
-     * @param ctx     the CFG context
-     * @param address the destination address
-     *                of which only first copy is stored.
-     * @param value   the value of the literal
-     */
-    public CFGLiteralInstruction(CFGContext ctx, CFGAddress address, boolean value) {
-        this(ctx, address, new BoolLiteral(value));
-    }
-
     public CFGContext ctx() {
         return ctx;
     }
