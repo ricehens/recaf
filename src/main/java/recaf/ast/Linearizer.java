@@ -2,6 +2,7 @@ package recaf.ast;
 
 import recaf.ast.nodes.*;
 import recaf.cfg.*;
+import recaf.general.BinaryOperator;
 import recaf.general.IntLiteral;
 import recaf.general.Type;
 
@@ -11,6 +12,8 @@ import java.util.Map;
 import java.util.Optional;
 
 public class Linearizer {
+
+    private final SemanticChecker sc;
 
     private final CFGContext ctx;
     private final CFGSymbolTable symbolTable;
@@ -29,6 +32,7 @@ public class Linearizer {
     private String currentMethod; // TODO return 0 at end of main
 
     public Linearizer(SemanticChecker sc) {
+        this.sc = sc;
         symbolTable = new CFGSymbolTable();
         ctx = new CFGContext(null, symbolTable);
 
@@ -42,8 +46,8 @@ public class Linearizer {
         currentMethod = null;
     }
 
-    public CFGProgram linearize(ASTProgram ast) {
-        for (ASTDeclaration decl : ast.decls()) {
+    public CFGProgram linearize(ASTProgram prog) {
+        for (ASTDeclaration decl : prog.decls()) {
             switch (decl) {
                 case ASTVarDecl vd -> {
                     linearize(vd);
@@ -60,7 +64,7 @@ public class Linearizer {
         }
 
         return ctx.setProgram(new CFGProgram(ctx,
-                ast.decls().stream()
+                prog.decls().stream()
                         .filter(ASTMethodDecl.class::isInstance)
                         .map(ASTMethodDecl.class::cast)
                         .map(this::linearize)
@@ -68,37 +72,37 @@ public class Linearizer {
                         .toList()));
     }
 
-    private void linearize(ASTVarDecl ast) {
-        CFGVariable variable = switch (ast.type()) {
+    private void linearize(ASTVarDecl vd) {
+        CFGVariable variable = switch (vd.type()) {
             case ASTArrayType _, ASTRecordType _ ->
-                new CFGVariable(symbolTable, ast.id().text(), Type.RECORD, sizeof(ast.type()));
+                new CFGVariable(symbolTable, vd.id().text(), Type.RECORD, sizeof(vd.type()));
             case ASTEnumType _ ->
-                    new CFGVariable(symbolTable, ast.id().text(), Type.INT);
+                    new CFGVariable(symbolTable, vd.id().text(), Type.INT);
             case ASTPointerType _ ->
-                    new CFGVariable(symbolTable, ast.id().text(), Type.POINTER);
+                    new CFGVariable(symbolTable, vd.id().text(), Type.POINTER);
             case ASTPrimitiveType pr ->
-                new CFGVariable(symbolTable, ast.id().text(), pr.type());
+                new CFGVariable(symbolTable, vd.id().text(), pr.type());
             // already reduced
             default -> throw new AssertionError("This should never happen.");
         };
 
-        (local ? localVars : globalVars).put(ast.id().text(), ast);
-        symbols.put(ast, variable);
+        (local ? localVars : globalVars).put(vd.id().text(), vd);
+        symbols.put(vd, variable);
     }
 
-    private void linearize(ASTTypeDecl ast) {
-        (local ? localTypes : globalTypes).put(ast.id().text(), ast.type());
+    private void linearize(ASTTypeDecl td) {
+        (local ? localTypes : globalTypes).put(td.id().text(), td.type());
     }
 
-    private Optional<CFGMethod> linearize(ASTMethodDecl ast) {
-        if (ast.block().isEmpty()) return Optional.empty();
+    private Optional<CFGMethod> linearize(ASTMethodDecl md) {
+        if (md.block().isEmpty()) return Optional.empty();
 
-        currentMethod = ast.id().text();
+        currentMethod = md.id().text();
         local = true;
         localTypes = new HashMap<>();
         localVars = new HashMap<>();
 
-        for (ASTDeclaration decl : ast.decls()) {
+        for (ASTDeclaration decl : md.decls()) {
             if (decl instanceof ASTVarDecl vd) linearize(vd);
             else if (decl instanceof ASTTypeDecl td) linearize(td);
             // ignore const decls
@@ -106,10 +110,10 @@ public class Linearizer {
 
         cfg = new CFGBuilder(ctx);
         cfg.newBlock();
-        linearize(ast.block().get());
+        linearize(md.block().get());
 
-        if (ast.returnType().isPresent()) {
-            cfg.offer(new CFGReturnInstruction(ctx, symbols.get(localVars.get(ast.id().text())).getAddress()));
+        if (md.returnType().isPresent()) {
+            cfg.offer(new CFGReturnInstruction(ctx, symbols.get(localVars.get(md.id().text())).getAddress()));
             cfg.newBlock();
         } else if (currentMethod.equals("main")) {
             CFGAddress exitCode = ctx.newAddress(Type.INT);
@@ -120,21 +124,62 @@ public class Linearizer {
 
         local = false;
         return Optional.of(new CFGMethod(ctx,
-                ast.returnType().map(this::reduceType).orElse(Type.VOID),
-                ast.id().text(),
-                ast.params().orElseThrow().stream()
+                md.returnType().map(this::reduceType).orElse(Type.VOID),
+                md.id().text(),
+                md.params().orElseThrow().stream()
                         .map(symbols::get)
                         .map(CFGVariable::getAddress)
                         .toList(),
                 cfg));
     }
 
-    private void linearize(ASTBlock ast) {
-        ast.statements().forEach(this::dispatch);
+    private void linearize(ASTBlock blk) {
+        blk.statements().forEach(this::dispatch);
     }
 
-    private void dispatch(ASTStatement ast) {
+    private void dispatch(ASTStatement statement) {
         // TODO
+    }
+
+    private CFGAddress linearize(ASTExpression expr) {
+        if (expr instanceof ASTLocation loc && loc.accesses().isEmpty())
+            return symbols.get(getVar(loc.id())).getAddress();
+        CFGAddress addr = ctx.newAddress(reduceType(sc.exprType(expr)));
+        dispatch(addr, expr);
+        return addr;
+    }
+
+    private void dispatch(CFGAddress dest, ASTExpression expr) {
+        // TODO
+    }
+
+    private void linearize(CFGAddress dest, ASTBinaryExpression bin) {
+        if (bin.op().getType() == BinaryOperator.BinOpType.COND_OP) {
+            // short circuit conditionals
+            CFGAddress thenAddr = new CFGAddress();
+            CFGAddress postAddr = new CFGAddress();
+
+            dispatch(dest, bin.left());
+            cfg.offer(bin.op() == BinaryOperator.AND ? new CFGBranchInstruction(ctx, dest, thenAddr, postAddr)
+                    : new CFGBranchInstruction(ctx, dest, postAddr, thenAddr));
+
+            thenAddr.set(cfg.newBlock().address());
+            dispatch(dest, bin.right());
+            cfg.offer(new CFGJumpInstruction(ctx, postAddr));
+
+            postAddr.set(cfg.newBlock().address());
+        } else {
+            CFGAddress lAddr = linearize(bin.left());
+            CFGAddress rAddr = linearize(bin.right());
+            cfg.offer(new CFGBinaryInstruction(ctx, dest, bin.op(), lAddr, rAddr));
+        }
+    }
+
+    private ASTVarDecl getVar(ASTIdentifier id) {
+        String key = id.text();
+        if (local)
+            if (localVars.containsKey(key)) return localVars.get(key);
+        return globalVars.get(key);
     }
 
     private ASTType getType(ASTIdentifier id) {
