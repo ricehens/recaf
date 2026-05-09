@@ -146,14 +146,29 @@ public class Linearizer {
         ASTType type = sc.exprType(loc);
 
         if (type instanceof ASTArrayType || type instanceof ASTRecordType) {
-            ASTLocation rhs = (ASTLocation) expr;
-            // TODO emit memcpy
-
+            symbolTable.addExternalMethod(MEMCPY);
+            CFGAddress dest = reduce(linearize(loc));
+            CFGAddress src = reduce(linearize((ASTLocation) expr));
+            cfg.offer(new CFGMethodCallInstruction(ctx, null, MEMCPY, List.of(dest, src)));
             return;
         }
 
         CFGAddress addr = linearize(expr);
         write(loc, addr);
+    }
+
+    private CFGAddress reduce(LocationTarget target) {
+        CFGAddress ret = ctx.newAddress(Type.LONG);
+        CFGAddress tmp = ctx.newAddress(Type.LONG);
+        cfg.offer(new CFGCastInstruction(ctx, tmp, Type.LONG, target.offset));
+        cfg.offer(new CFGBinaryInstruction(ctx, tmp, BinaryOperator.TIMES,
+                tmp, makeLongLiteral(target.width)));
+
+        // here target.base is of type POINTER, not LONG
+        // but i don't think this causes any issues?
+        cfg.offer(new CFGBinaryInstruction(ctx, ret, BinaryOperator.PLUS,
+                tmp, target.base));
+        return ret;
     }
 
     private void linearize(ASTIfElse ifElse) {
@@ -265,8 +280,6 @@ public class Linearizer {
     }
 
     private CFGAddress linearize(ASTExpression expr) {
-        if (expr instanceof ASTLocation loc && loc.accesses().isEmpty())
-            return symbols.get(getVar(loc.id())).getAddress();
         CFGAddress addr = ctx.newAddress(reduceType(sc.exprType(expr)));
         dispatch(addr, expr);
         return addr;
@@ -330,6 +343,8 @@ public class Linearizer {
             }
 
             case WRITE, WRITELN -> {
+                symbolTable.addExternalMethod(PRINTF);
+
                 for (ASTExpression arg : mc.args()) {
                     CFGAddress addr = linearize(arg);
                     if (ctx.getType(addr) == Type.BOOL) {
@@ -410,25 +425,29 @@ public class Linearizer {
 
     private void read(CFGAddress addr, ASTLocation loc) {
         if (loc.accesses().isEmpty()) {
-            CFGAddress src = linearize(loc);
+            CFGAddress src = symbols.get(getVar(loc.id())).getAddress();
             cfg.offer(new CFGCopyInstruction(ctx, addr, src));
-            return;
+        } else {
+            LocationTarget target = linearize(loc);
+            cfg.offer(new CFGReadInstruction(ctx, addr, target.base(), target.width(), target.offset()));
         }
-
-        // TODO emit CFG read instruction(s)
     }
 
-    // write scalar value to loc
+    // write scalar value (not array, record) to loc
     private void write(ASTLocation loc, CFGAddress addr) {
-        ASTType type = sc.exprType(loc);
-
         if (loc.accesses().isEmpty()) {
-            CFGAddress dest = linearize(loc);
+            CFGAddress dest = symbols.get(getVar(loc.id())).getAddress();
             cfg.offer(new CFGCopyInstruction(ctx, dest, addr));
-            return;
+        } else {
+            LocationTarget target = linearize(loc);
+            cfg.offer(new CFGWriteInstruction(ctx, target.base(), target.width(), target.offset(), addr));
         }
+    }
 
-        // TODO emit CFG write instruction (+ read instructions if deref?)
+    private record LocationTarget(CFGAddress base, int width, CFGAddress offset) {}
+
+    private LocationTarget linearize(ASTLocation loc) {
+        return null; // TODO
     }
 
     private ASTVarDecl getVar(ASTIdentifier id) {
@@ -470,25 +489,37 @@ public class Linearizer {
 
             case ASTArrayType at -> {
                 int size = sizeof(at.type());
-                for (ASTArrayRange range : at.ranges()) {
-                    if (!(range.lower() instanceof ASTLiteral lower)
-                            || !(range.upper() instanceof ASTLiteral upper)
-                            || !(lower.literal() instanceof IntLiteral(int l))
-                            || !(upper.literal() instanceof IntLiteral(int u)))
-                        throw new AssertionError("This should never happen.");
-                    size *= u - l;
-                }
+                for (ASTArrayRange range : at.ranges())
+                    size *= extractInt(range.upper()) - extractInt(range.lower()) + 1;
                 yield size;
             }
 
-            case ASTRecordType rt -> fieldToIndex(rt, "");
+            case ASTRecordType rt -> reduceIndex(rt, null);
 
             default -> throw new AssertionError("This should never happen.");
         };
     }
 
     // in bytes
-    private int fieldToIndex(ASTRecordType rt, String key) {
+    private CFGAddress reduceIndex(ASTArrayType at, ASTIndexAccess access) {
+        CFGAddress ret = makeIntLiteral(0);
+        for (int i = 0; i < at.ranges().size(); i++) {
+            int l = extractInt(at.ranges().get(i).lower());
+            int u = extractInt(at.ranges().get(i).upper());
+            CFGAddress index = linearize(access.indices().get(i));
+            cfg.offer(new CFGBinaryInstruction(ctx, index, BinaryOperator.MINUS,
+                    index, makeIntLiteral(l)));
+            cfg.offer(new CFGBinaryInstruction(ctx, ret, BinaryOperator.TIMES,
+                    ret, makeIntLiteral(u - l + 1)));
+            cfg.offer(new CFGBinaryInstruction(ctx, ret, BinaryOperator.PLUS,
+                    ret, index));
+        }
+        return ret;
+    }
+
+    // in bytes
+    private int reduceIndex(ASTRecordType rt, ASTFieldAccess access) {
+        String key = access == null ? "" : access.field().text();
         int offset = 0;
         int maxAlign = 1;
         for (ASTVarDecl field : rt.fields()) {
@@ -530,6 +561,13 @@ public class Linearizer {
 
     private int roundUp(int a, int m) {
         return (a + m - 1) / m * m;
+    }
+
+    private int extractInt(ASTExpression expr) {
+        if (!(expr instanceof ASTLiteral lit)
+                || !(lit.literal() instanceof IntLiteral(int i)))
+            throw new AssertionError("This should never happen.");
+        return i;
     }
 
     private CFGAddress makeIntLiteral(int value) {
