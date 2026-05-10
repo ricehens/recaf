@@ -32,8 +32,8 @@ public class Linearizer {
     private CFGAddress breakAddress;
     private CFGAddress continueAddress;
 
-    private Optional<CFGAddress> localIntBuffer;
-    private Optional<CFGAddress> localLongBuffer;
+    private CFGAddress localIntBuffer;
+    private CFGAddress localLongBuffer;
 
     public Linearizer() {
         symbolTable = new CFGSymbolTable();
@@ -105,8 +105,8 @@ public class Linearizer {
         local = true;
         localTypes = new HashMap<>();
         localVars = new HashMap<>();
-        localIntBuffer = Optional.empty();
-        localLongBuffer = Optional.empty();
+        localIntBuffer = null;
+        localLongBuffer = null;
 
         md.params().orElseThrow().forEach(this::linearize);
         for (ASTDeclaration decl : md.decls()) {
@@ -129,7 +129,7 @@ public class Linearizer {
                         .map(CFGVariable::getAddress)
                         .toList(),
                 Stream.concat(
-                        Stream.concat(localIntBuffer.stream(), localLongBuffer.stream()),
+                        Stream.of(localIntBuffer, localLongBuffer).flatMap(Stream::ofNullable),
                         localVars.values().stream().map(symbols::get).map(CFGVariable::getAddress)
                 ).toList(),
                 cfg));
@@ -401,24 +401,24 @@ public class Linearizer {
                     switch (((ASTPrimitiveType) sc.exprType(loc)).type()) {
                         case INT -> {
                             CFGAddress tmp = ctx.newAddress(Type.INT);
-                            if (localIntBuffer.isEmpty())
-                                localIntBuffer = Optional.of(new CFGVariable(symbolTable, "@intbuf",
-                                        Type.RECORD, 4).getAddress());
+                            if (localIntBuffer == null)
+                                localIntBuffer = new CFGVariable(symbolTable, "@intbuf",
+                                        Type.RECORD, 4).getAddress();
                             CFGAddress fmt = makeStringLiteral("%d");
                             cfg.offer(new CFGMethodCallInstruction(ctx, null, SCANF,
-                                    List.of(fmt, localIntBuffer.get())));
-                            cfg.offer(new CFGReadInstruction(ctx, tmp, localIntBuffer.get(), 4, makeIntLiteral(0)));
+                                    List.of(fmt, localIntBuffer)));
+                            cfg.offer(new CFGReadInstruction(ctx, tmp, localIntBuffer, 4, makeIntLiteral(0)));
                             write(loc, tmp);
                         }
                         case LONG -> {
                             CFGAddress tmp = ctx.newAddress(Type.LONG);
-                            if (localLongBuffer.isEmpty())
-                                localLongBuffer = Optional.of(new CFGVariable(symbolTable, "@longbuf",
-                                        Type.RECORD, 8).getAddress());
+                            if (localLongBuffer == null)
+                                localLongBuffer = new CFGVariable(symbolTable, "@longbuf",
+                                        Type.RECORD, 8).getAddress();
                             CFGAddress fmt = makeStringLiteral("%lld");
                             cfg.offer(new CFGMethodCallInstruction(ctx, null, SCANF,
-                                    List.of(fmt, localLongBuffer.get())));
-                            cfg.offer(new CFGReadInstruction(ctx, tmp, localLongBuffer.get(), 8, makeIntLiteral(0)));
+                                    List.of(fmt, localLongBuffer)));
+                            cfg.offer(new CFGReadInstruction(ctx, tmp, localLongBuffer, 8, makeIntLiteral(0)));
                             write(loc, tmp);
                         }
                         default -> throw new AssertionError("This should never happen.");
