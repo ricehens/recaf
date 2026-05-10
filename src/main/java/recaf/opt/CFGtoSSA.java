@@ -90,7 +90,7 @@ public class CFGtoSSA extends MethodTransformation {
         for (CFGAddress x : globals) {
             Set<CFGBasicBlock> visited = new HashSet<>();
 
-            Queue<CFGBasicBlock> workList = new LinkedList<>(blocks.get(x));
+            Queue<CFGBasicBlock> workList = new LinkedList<>(blocks.getOrDefault(x, Set.of()));
             while (!workList.isEmpty()) {
                 CFGBasicBlock b = workList.poll();
                 if (visited.contains(b)) continue;
@@ -169,9 +169,9 @@ public class CFGtoSSA extends MethodTransformation {
             if (inst instanceof CFGPhiInstruction) continue;
 
             for (CFGAddress y : inst.operands()) {
-                if (globalIndices.contains(y.index)) {
+                if (y != null && globalIndices.contains(y.index) && !stack.get(y.index).isEmpty()) {
                     y.set(new CFGAddress(y.index, stack.get(y.index).peek()));
-                } else if (inConsideration(y) && localCounter.containsKey(y.index)) {
+                } else if (inConsideration(y) && localCounter.containsKey(y.index) && !localStack.get(y.index).isEmpty()) {
                     y.set(new CFGAddress(y.index, localStack.get(y.index).peek()));
                 }
             }
@@ -214,4 +214,3 @@ public class CFGtoSSA extends MethodTransformation {
     }
 
 }
-

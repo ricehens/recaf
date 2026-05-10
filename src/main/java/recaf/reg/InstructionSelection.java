@@ -383,12 +383,15 @@ public class InstructionSelection implements CFGVisitor {
         var operandLoc = new ASMVirtualRegister(cfg.operand());
 
         Type startingType = cfg.ctx().getType(cfg.operand());
-        ASMOperator op = startingType == Type.LONG
-                ? (cfg.type() == Type.LONG ? ASMOperator.MOVQ : ASMOperator.MOVL)
-                : (cfg.type() == Type.LONG ? ASMOperator.MOVSLQ : ASMOperator.MOVL);
+        if (startingType == Type.RECORD) {
+            asm.emit(ASMOperator.LEAQ, asm.getMemoryLocation(cfg.operand()), dest);
+            return;
+        }
+        ASMOperator op = (startingType == Type.LONG || startingType == Type.POINTER)
+                ? (cfg.type() == Type.LONG || cfg.type() == Type.POINTER ? ASMOperator.MOVQ : ASMOperator.MOVL)
+                : (cfg.type() == Type.LONG || cfg.type() == Type.POINTER ? ASMOperator.MOVSLQ : ASMOperator.MOVL);
 
-        asm.emit(startingType == Type.LONG ? ASMOperator.MOVQ : ASMOperator.MOVSLQ,
-                operandLoc, dest);
+        asm.emit(op, operandLoc, dest);
     }
 
     @Override

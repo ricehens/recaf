@@ -174,10 +174,10 @@ public class Linearizer {
         cfg.offer(new CFGBinaryInstruction(ctx, tmp, BinaryOperator.TIMES,
                 tmp, makeLongLiteral(target.width)));
 
-        // here target.base is of type POINTER, not LONG
-        // but i don't think this causes any issues?
+        CFGAddress base = ctx.newAddress(Type.LONG);
+        cfg.offer(new CFGCastInstruction(ctx, base, Type.LONG, target.base));
         cfg.offer(new CFGBinaryInstruction(ctx, ret, BinaryOperator.PLUS,
-                tmp, target.base));
+                tmp, base));
         return ret;
     }
 
