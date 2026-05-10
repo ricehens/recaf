@@ -1,8 +1,5 @@
 program ICantBelieveItCanSort;
 
-procedure printf(...); external;
-procedure scanf(...); external;
-
 var
     a: array[0..1000] of integer;
     N, i: integer;
@@ -11,10 +8,10 @@ procedure PrintArray;
 var
     i: integer;
 begin
-    printf('[');
+    Write('[');
     for i := 1 to N - 1 do
-        printf('%d, ', a[i]);
-    printf('%d]'#10, a[N]);
+        Write(a[i], ', ');
+    WriteLn(a[N], ']')
 end;
 
 procedure Sort;
@@ -31,16 +28,9 @@ begin
 end;
 
 begin
-    scanf('%d', a);
-    N := a[0];
-
+    ReadLn(N);
     if N > 1000 then Exit;
-
-    for i := 1 to N do begin
-        scanf('%d', a);
-        a[i] := a[0]
-    end;
-
+    for i := 1 to N do Read(a[i]);
     Sort;
     PrintArray
 end.

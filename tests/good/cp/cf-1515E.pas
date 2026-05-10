@@ -1,16 +1,12 @@
 program Codeforces1515E;
 
-procedure scanf(...); external;
-
 var
     dp: array[0..400, 0..400] of int64;
     N, i, j: integer;
     M, ans: int64;
-    stdin: array[0..0] of integer;
 
 begin
-    scanf('%d', stdin); N := stdin[0];
-    scanf('%d', stdin); M := stdin[0];
+    Read(N, M);
 
     for i := 0 to N do
         for j := 0 to N do

@@ -559,7 +559,7 @@ public class Linearizer {
 
                     if (i > 0) {
                         CFGAddress next = ctx.newAddress(Type.POINTER);
-                        cfg.offer(new CFGReadInstruction(ctx, next, base, 0, offset));
+                        cfg.offer(new CFGReadInstruction(ctx, next, base, 8, offset));
                         base = next;
                     }
 

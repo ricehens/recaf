@@ -1,16 +1,12 @@
 program Leetcode0041;
 
-procedure scanf(...); external;
-
 var n, i, t;
     nums: array[0..100000];
 begin
-    scanf('%d', nums); n := nums[0];
+    Read(n);
     if n > 100000 then Exit;
 
-    for i := 1 to n do begin
-        scanf('%d', nums); nums[i] := nums[0]
-    end;
+    for i := 1 to n do Read(nums[i]);
 
     for i := 1 to n do
         while (nums[i] > 0) and (nums[i] <= n) 

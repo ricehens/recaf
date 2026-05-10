@@ -1,18 +1,6 @@
 program CollatzConjecture;
 
-procedure printf(...); external;
-procedure scanf(...); external;
-
 var n;
-
-function readInt;
-var input: ^integer;
-begin
-    new(input);
-    scanf('%d', input);
-    readInt := input^;
-    dispose(input)
-end;
 
 function collatz(n);
 begin
@@ -23,10 +11,10 @@ begin
 end;
 
 begin
-    n := readInt;
+    ReadLn(n);
     while n > 1 do
     begin
         n := collatz(n);
-        printf('%d'#10, n)
+        WriteLn(n)
     end
 end.

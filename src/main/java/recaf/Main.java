@@ -147,9 +147,9 @@ public class Main {
         try {
             Compiler compiler = new Compiler(infile, outfile, target, true, optLevel, libraries);
             compiler.run();
-        } catch (Exception e) {
+        } catch (Throwable t) {
             System.err.println(new RecafError("recaf", -1, -1, "fatal error compiling " + infile + "; exiting now"));
-            throw e;
+            throw t;
         }
 
         if (i + 1 < args.length) {

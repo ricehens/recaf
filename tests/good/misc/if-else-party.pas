@@ -1,22 +1,19 @@
 program IfElseParty;
 
-procedure scanf(...); external;
-procedure printf(...); external;
-
 var
-    a: array[0..0] of integer;
+    a: integer;
 begin
-    if False then printf('then'#10) else printf('else'#10);
+    if False then WriteLn('then') else WriteLn('else');
 
-    printf('Enter your age: ');
-    scanf('%d', a);
+    Write('Enter your age: ');
+    ReadLn(a);
 
-    if a[0] > 65 then
-        printf('You''re old!'#10)
-    else if a[0] > 18 then
-        printf('You''re an adult!'#10)
-    else if a[0] >= 13 then
-        printf('You''re a teen!'#10)
+    if a > 65 then
+        WriteLn('You''re old!')
+    else if a > 18 then
+        WriteLn('You''re an adult!')
+    else if a >= 13 then
+        WriteLn('You''re a teen!')
     else
-        printf('You''re tiny!'#10);
+        WriteLn('You''re tiny!')
 end.

@@ -1,10 +1,7 @@
 program Leetcode1143;
 
-procedure scanf(...); external;
-
 var
     a, b: Array[0..1000] of Int64;
-    stdin: Array[0..0] of Integer;
     len1, len2, i: Integer;
 
 function LongestCommonSubsequence;
@@ -30,16 +27,10 @@ begin
 end;
 
 begin
-    scanf('%d', stdin); len1 := stdin[0];
-    scanf('%d', stdin); len2 := stdin[0];
+    Read(len1, len2);
 
-    for i := 0 to len1 - 1 do begin
-        scanf('%lld', stdin); a[i] := stdin[0]
-    end;
-
-    for i := 0 to len2 - 1 do begin
-        scanf('%lld', stdin); b[i] := stdin[0]
-    end;
+    for i := 0 to len1 - 1 do Read(a[i]);
+    for i := 0 to len2 - 1 do Read(b[i]);
 
     WriteLn(LongestCommonSubsequence)
 end.

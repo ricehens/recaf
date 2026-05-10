@@ -1,6 +1,5 @@
 program cheappal;
 
-procedure scanf(...); external;
 function getchar; external;
 
 function min(x, y);
@@ -9,25 +8,26 @@ begin
 end;
 
 var
-    ia, ib, ic: array[0..0];
+    ia, ib, ic;
     N, M, i, l;
     s: array[0..2000];
     del: array[0..255];
     dp: array[0..1999, 0..2];
 
 begin
-    scanf('%d %d', ia, ib);
-    N := ia[0]; M := ib[0];
+    ReadLn(N, M);
 
     i := 0;
     while i < M do begin
         s[i] := getchar;
-        if (s[i] <> 10) and (s[i] <> 13)  then i := i + 1;
+        if (s[i] <> 10) and (s[i] <> 13) then i := i + 1;
     end;
+    getchar;
 
     for i := 0 to N - 1 do begin
-        scanf(' %c %d %d', ia, ib, ic);
-        del[ia[0]] := min(ib[0], ic[0])
+        ia := getchar;
+        ReadLn(ib, ic);
+        del[ia] := min(ib, ic)
     end;
 
     for i := 0 to M - 2 do begin

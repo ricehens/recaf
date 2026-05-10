@@ -1,10 +1,8 @@
 program ctravel;
 
-procedure scanf(...); external;
 function getchar; external;
 
 var
-    stdin: array[0..0];
     N, M, T;
     dp: array[0..1, 0..101, 0..101];
     r1, c1, r2, c2;
@@ -13,9 +11,7 @@ var
     x: array[0..101, 0..101] of boolean;
 
 begin
-    scanf('%d', stdin); N := stdin[0];
-    scanf('%d', stdin); M := stdin[0];
-    scanf('%d', stdin); T := stdin[0];
+    Read(N, M, T);
 
     for i := 0 to 101 do
         for j := 0 to 101 do begin
@@ -33,10 +29,7 @@ begin
             x[i, j] := c = 42
         end;
 
-    scanf('%d', stdin); r1 := stdin[0];
-    scanf('%d', stdin); c1 := stdin[0];
-    scanf('%d', stdin); r2 := stdin[0];
-    scanf('%d', stdin); c2 := stdin[0];
+    Read(r1, c1, r2, c2);
 
     dx[0] := 1; dx[1] := 0; dx[2] := -1; dx[3] := 0;
     dy[0] := 0; dy[1] := 1; dy[2] := 0; dy[3] := -1;

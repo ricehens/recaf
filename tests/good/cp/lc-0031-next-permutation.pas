@@ -1,7 +1,5 @@
 program Leetcode0031;
 
-procedure scanf(...); external;
-
 var n;
     nums: array[0..1000];
 
@@ -40,11 +38,9 @@ end;
 
 var i;
 begin
-    scanf('%d', nums); n := nums[0];
+    Read(n);
     if n > 1000 then Exit;
-    for i := 1 to n do begin
-        scanf('%d', nums); nums[i] := nums[0]
-    end;
+    for i := 1 to n do Read(nums[i]);
     NextPermutation;
     PrintArray
 end.

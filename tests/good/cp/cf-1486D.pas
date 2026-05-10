@@ -1,7 +1,5 @@
 program Codeforces1486D;
 
-procedure scanf(...); external;
-
 var
     N, K;
     a: array[0..200000];
@@ -32,11 +30,8 @@ end;
 
 var L, R, i, mid;
 begin
-    scanf('%d', a); N := a[0];
-    scanf('%d', a); K := a[0];
-    for i := 1 to N do begin
-        scanf('%d', a); a[i] := a[0]
-    end;
+    Read(N, K);
+    for i := 1 to N do Read(a[i]);
 
     L := 1;
     R := N;

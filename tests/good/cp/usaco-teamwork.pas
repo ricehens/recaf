@@ -2,8 +2,6 @@
 
 program teamwork;
 
-procedure scanf(...); external;
-
 var
     N, K;
     s, dp: array[0..10000];
@@ -20,12 +18,11 @@ end;
 
 var i, j, mac, alt;
 begin
-    scanf('%d', s); N := s[0];
-    scanf('%d', s); K := s[0];
+    Read(N, K);
 
     dp[0] := 0;
     for i := 1 to N do begin
-        scanf('%d', s); s[i] := s[0];
+        Read(s[i]);
         dp[i] := 0;
         dp[0] := dp[0] + s[i]
     end;
