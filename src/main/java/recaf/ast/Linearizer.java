@@ -157,12 +157,12 @@ public class Linearizer {
         ASTExpression expr = as.expr();
         ASTType type = sc.exprType(loc);
 
-        if (type instanceof ASTArrayType || type instanceof ASTRecordType)
+        if (type instanceof ASTArrayType || type instanceof ASTRecordType) {
             symbolTable.addExternalMethod(MEMCPY);
             cfg.offer(new CFGMethodCallInstruction(ctx, null, MEMCPY,
                     List.of(reduce(locate(loc)), reduce(locate((ASTLocation) expr)),
                             makeLongLiteral(sizeof(type)))));
-        else write(locate(loc), linearize(expr));
+        } else write(locate(loc), linearize(expr));
     }
 
     private CFGAddress reduce(LocationTarget target) {
