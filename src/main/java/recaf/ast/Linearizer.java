@@ -157,16 +157,33 @@ public class Linearizer {
         ASTExpression expr = as.expr();
         ASTType type = sc.exprType(loc);
 
-        if (type instanceof ASTArrayType || type instanceof ASTRecordType) {
-            symbolTable.addExternalMethod(MEMCPY);
-            CFGAddress dest = reduce(locate(loc));
-            CFGAddress src = reduce(locate((ASTLocation) expr));
-            cfg.offer(new CFGMethodCallInstruction(ctx, null, MEMCPY, List.of(dest, src)));
-            return;
+        if (loc.accesses().isEmpty()) {
+            if (type instanceof ASTArrayType || type instanceof ASTRecordType) {
+                symbolTable.addExternalMethod(MEMCPY);
+                CFGAddress dest = symbols.get(getVar(loc.id())).getAddress();
+                CFGAddress src = reduce(locate((ASTLocation) expr));
+                cfg.offer(new CFGMethodCallInstruction(ctx, null, MEMCPY,
+                        List.of(dest, src, makeLongLiteral(sizeof(type)))));
+                // TODO
+                System.out.println("AHHHH");
+            } else {
+                CFGAddress dest = symbols.get(getVar(loc.id())).getAddress();
+                CFGAddress addr = linearize(expr);
+                cfg.offer(new CFGCopyInstruction(ctx, dest, addr));
+            }
+        } else {
+            if (type instanceof ASTArrayType || type instanceof ASTRecordType) {
+                symbolTable.addExternalMethod(MEMCPY);
+                CFGAddress dest = reduce(locate(loc));
+                CFGAddress src = reduce(locate((ASTLocation) expr));
+                cfg.offer(new CFGMethodCallInstruction(ctx, null, MEMCPY,
+                        List.of(dest, src, makeLongLiteral(sizeof(type)))));
+            } else {
+                LocationTarget target = locate(loc);
+                CFGAddress addr = linearize(expr);
+                cfg.offer(new CFGWriteInstruction(ctx, target.base(), target.width(), target.offset(), addr));
+            }
         }
-
-        CFGAddress addr = linearize(expr);
-        write(loc, addr);
     }
 
     private CFGAddress reduce(LocationTarget target) {
@@ -299,7 +316,7 @@ public class Linearizer {
 
     private void dispatch(CFGAddress dest, ASTExpression expr) {
         switch (expr) {
-            case ASTLocation loc -> read(dest, loc);
+            case ASTLocation loc -> linearize(dest, loc);
             case ASTMethodCall mc -> linearize(dest, mc);
             case ASTLiteral lit -> linearize(dest, lit);
             case ASTBinaryExpression be -> linearize(dest, be);
@@ -487,7 +504,7 @@ public class Linearizer {
         }
     }
 
-    private void read(CFGAddress addr, ASTLocation loc) {
+    private void linearize(CFGAddress addr, ASTLocation loc) {
         if (loc.accesses().isEmpty()) {
             CFGAddress src = symbols.get(getVar(loc.id())).getAddress();
             cfg.offer(new CFGCopyInstruction(ctx, addr, src));
@@ -565,7 +582,7 @@ public class Linearizer {
 
                     type = pt.type();
                     offset = makeIntLiteral(0);
-                    width = i < lastDeref ? finalWidth : 8;
+                    width = i < lastDeref ? 8 : finalWidth;
                 }
 
                 default -> throw new AssertionError("This should never happen.");
