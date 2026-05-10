@@ -385,6 +385,16 @@ public class CFGtoASM implements CFGVisitor {
         var leftLoc = asm.getMemoryLocation(cfg.left());
         var rightLoc = asm.getMemoryLocation(cfg.right());
 
+        if (cfg.ctx().getType(cfg.left()) == Type.RECORD) {
+            asm.emit(ASMOperator.LEAQ, leftLoc, ASMRegister.RCX);
+            leftLoc = ASMRegister.RCX;
+        }
+
+        if (cfg.ctx().getType(cfg.right()) == Type.RECORD) {
+            asm.emit(ASMOperator.LEAQ, rightLoc, ASMRegister.R11);
+            rightLoc = ASMRegister.R11;
+        }
+
         // Load operands
         ASMRegister leftOperand = type == Type.LONG || type == Type.POINTER ? ASMRegister.RAX
                 : type == Type.BOOL ? ASMRegister.AL : ASMRegister.EAX;

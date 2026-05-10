@@ -314,6 +314,18 @@ public class InstructionSelection implements CFGVisitor {
         var leftLoc = new ASMVirtualRegister(cfg.left());
         var rightLoc = new ASMVirtualRegister(cfg.right());
 
+        if (cfg.ctx().getType(cfg.left()) == Type.RECORD) {
+            var leftAddr = new ASMVirtualRegister(cfg.ctx().getSymbolTable().addVar(Type.POINTER));
+            asm.emit(ASMOperator.LEAQ, asm.getMemoryLocation(cfg.left()), leftAddr);
+            leftLoc = leftAddr;
+        }
+
+        if (cfg.ctx().getType(cfg.right()) == Type.RECORD) {
+            var rightAddr = new ASMVirtualRegister(cfg.ctx().getSymbolTable().addVar(Type.POINTER));
+            asm.emit(ASMOperator.LEAQ, asm.getMemoryLocation(cfg.right()), rightAddr);
+            rightLoc = rightAddr;
+        }
+
         if (cfg.operator() == BinaryOperator.DIVIDES || cfg.operator() == BinaryOperator.MOD) {
             asm.emit(type == Type.LONG ? ASMOperator.MOVQ : ASMOperator.MOVL,
                     leftLoc, type == Type.LONG ? ASMRegister.RAX : ASMRegister.EAX);

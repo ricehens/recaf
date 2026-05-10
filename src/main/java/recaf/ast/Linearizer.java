@@ -157,17 +157,16 @@ public class Linearizer {
         ASTExpression expr = as.expr();
         ASTType type = sc.exprType(loc);
 
-        if (type instanceof ASTArrayType || type instanceof ASTRecordType) {
-            symbolTable.addExternalMethod(MEMCPY);
-            // TODO
-        } else {
-            LocationTarget target = locate(loc);
-            CFGAddress addr = linearize(expr);
-            write(target, addr);
-        }
+        if (type instanceof ASTArrayType || type instanceof ASTRecordType)
+            cfg.offer(new CFGMethodCallInstruction(ctx, null, MEMCPY,
+                    List.of(reduce(locate(loc)), reduce(locate((ASTLocation) expr)),
+                            makeLongLiteral(sizeof(type)))));
+        else write(locate(loc), linearize(expr));
     }
 
     private CFGAddress reduce(LocationTarget target) {
+        if (target.simple()) return target.base();
+
         CFGAddress ret = ctx.newAddress(Type.LONG);
         CFGAddress tmp = ctx.newAddress(Type.LONG);
         cfg.offer(new CFGCastInstruction(ctx, tmp, Type.LONG, target.offset));
