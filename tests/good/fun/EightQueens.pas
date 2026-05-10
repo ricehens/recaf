@@ -11,7 +11,7 @@ var i, j: Integer;
 begin
     for i := 0 to N-1 do begin
         for j := 0 to N-1 do 
-            if Col[i] = j then Write('Q') else Write('.');
+            if Col[i] = j then Write(' Q') else Write(' .');
         WriteLn
     end;
     WriteLn
