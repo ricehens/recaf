@@ -157,32 +157,13 @@ public class Linearizer {
         ASTExpression expr = as.expr();
         ASTType type = sc.exprType(loc);
 
-        if (loc.accesses().isEmpty()) {
-            if (type instanceof ASTArrayType || type instanceof ASTRecordType) {
-                symbolTable.addExternalMethod(MEMCPY);
-                CFGAddress dest = symbols.get(getVar(loc.id())).getAddress();
-                CFGAddress src = reduce(locate((ASTLocation) expr));
-                cfg.offer(new CFGMethodCallInstruction(ctx, null, MEMCPY,
-                        List.of(dest, src, makeLongLiteral(sizeof(type)))));
-                // TODO
-                System.out.println("AHHHH");
-            } else {
-                CFGAddress dest = symbols.get(getVar(loc.id())).getAddress();
-                CFGAddress addr = linearize(expr);
-                cfg.offer(new CFGCopyInstruction(ctx, dest, addr));
-            }
+        if (type instanceof ASTArrayType || type instanceof ASTRecordType) {
+            symbolTable.addExternalMethod(MEMCPY);
+            // TODO
         } else {
-            if (type instanceof ASTArrayType || type instanceof ASTRecordType) {
-                symbolTable.addExternalMethod(MEMCPY);
-                CFGAddress dest = reduce(locate(loc));
-                CFGAddress src = reduce(locate((ASTLocation) expr));
-                cfg.offer(new CFGMethodCallInstruction(ctx, null, MEMCPY,
-                        List.of(dest, src, makeLongLiteral(sizeof(type)))));
-            } else {
-                LocationTarget target = locate(loc);
-                CFGAddress addr = linearize(expr);
-                cfg.offer(new CFGWriteInstruction(ctx, target.base(), target.width(), target.offset(), addr));
-            }
+            LocationTarget target = locate(loc);
+            CFGAddress addr = linearize(expr);
+            write(target, addr);
         }
     }
 
@@ -505,29 +486,30 @@ public class Linearizer {
     }
 
     private void linearize(CFGAddress addr, ASTLocation loc) {
-        if (loc.accesses().isEmpty()) {
-            CFGAddress src = symbols.get(getVar(loc.id())).getAddress();
-            cfg.offer(new CFGCopyInstruction(ctx, addr, src));
-        } else {
-            LocationTarget target = locate(loc);
-            cfg.offer(new CFGReadInstruction(ctx, addr, target.base(), target.width(), target.offset()));
-        }
+        read(addr, locate(loc));
     }
 
-    // write scalar value (not array, record) to loc
     private void write(ASTLocation loc, CFGAddress addr) {
-        if (loc.accesses().isEmpty()) {
-            CFGAddress dest = symbols.get(getVar(loc.id())).getAddress();
-            cfg.offer(new CFGCopyInstruction(ctx, dest, addr));
-        } else {
-            LocationTarget target = locate(loc);
-            cfg.offer(new CFGWriteInstruction(ctx, target.base(), target.width(), target.offset(), addr));
-        }
+        write(locate(loc), addr);
     }
 
-    private record LocationTarget(CFGAddress base, int width, CFGAddress offset) {}
+    private record LocationTarget(CFGAddress base, int width, CFGAddress offset, boolean simple) {}
+
+    private void read(CFGAddress addr, LocationTarget target) {
+        if (target.simple()) cfg.offer(new CFGCopyInstruction(ctx, addr, target.base()));
+        else cfg.offer(new CFGReadInstruction(ctx, addr, target.base(), target.width(), target.offset()));
+    }
+
+    private void write(LocationTarget target, CFGAddress addr) {
+        if (target.simple()) cfg.offer(new CFGCopyInstruction(ctx, target.base(), addr));
+        else cfg.offer(new CFGWriteInstruction(ctx, target.base(), target.width(), target.offset(), addr));
+    }
 
     private LocationTarget locate(ASTLocation loc) {
+        if (loc.accesses().isEmpty())
+            return new LocationTarget(symbols.get(getVar(loc.id())).getAddress(),
+                    -1, null, true);
+
         int finalWidth = sizeof(sc.exprType(loc));
         ASTVarDecl root = getVar(loc.id());
 
@@ -589,7 +571,7 @@ public class Linearizer {
             }
         }
 
-        return new LocationTarget(base, width, offset);
+        return new LocationTarget(base, width, offset, false);
     }
 
     private ASTVarDecl getVar(ASTIdentifier id) {
