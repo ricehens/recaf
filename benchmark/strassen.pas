@@ -28,13 +28,6 @@ var
     M: array[A..M7, 0..2047, 0..1023];
     N, i, j;
 
-function readInt;
-var input: array[0..0];
-begin
-    scanf('%d', input);
-    readInt := input[0]
-end;
-
 (* 
   Print the matrix C.
   The matrix has dimension N×N and is stored with row stride 1024.
@@ -211,16 +204,16 @@ begin
 end;
 
 begin
-    N := readInt;
+    ReadLn(N);
     if N <= 1024 then
     begin
         for i := 0 to N - 1 do
             for j := 0 to N - 1 do
-                M[A, N + i, j] := readInt;
+                Read(M[A, N + i, j]);
 
         for i := 0 to N - 1 do
             for j := 0 to N - 1 do
-                M[B, N + i, j] := readInt;
+                Read(M[B, N + i, j]);
 
         strassen(N);
         printMatrix(N, C, N, 0)

@@ -14,8 +14,6 @@ program FiniteFieldGramSchmidt;
         pairwise orthogonal, spanning the original subspace
         (some might be all-zeros if original vectors are not spanning)
 }
-procedure scanf(...); external;
-
 const p = 1009; (* characteristic *)
 var
     n, (* num of vectors *)
@@ -79,21 +77,13 @@ begin
         Mat[j, k] := (Mat[j, k] - ((proj * Mat[i, k]) mod p) + p) mod p;
 end;
 
-function ReadInt;
-var stdin: Array[0..0];
-begin
-    scanf('%d', stdin);
-    ReadInt := stdin[0]
-end;
-
 var k, i, j;
 begin
-    d := ReadInt;
-    n := ReadInt;
+    ReadLn(d, n);
 
     for k := 0 to n - 1 do
         for i := 0 to d - 1 do
-            Mat[k, i] := ReadInt;
+            Read(Mat[k, i]);
 
     for k := 0 to n - 1 do
     begin

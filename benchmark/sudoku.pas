@@ -9,9 +9,6 @@ program Sudoku;
     For example, for a 16×16 puzzle use n = 4.
 *)
 
-procedure printf(...); external;
-procedure scanf(...); external;
-
 (* 
    We assume the maximum board (n^2) is at most 100.
    Hence the board has at most 100*100 = 10000 cells.
@@ -82,10 +79,9 @@ end;
 
 var i, j, d;
     r, c, b;
-    stdin: array[0..0];
 begin
     (* Read block dimension n *)
-    scanf('%d', stdin); n := stdin[0];
+    ReadLn(n);
     nn := n * n;
 
     if n > 10 then Exit;
@@ -107,7 +103,7 @@ begin
     (* Read the board: N lines with N numbers each *)
     for i := 0 to nn - 1 do
         for j := 0 to nn - 1 do begin
-            scanf('%d', stdin); d := stdin[0];
+            Read(d);
             Board[i, j] := d;
             if d <> 0 then begin
                 r := i;

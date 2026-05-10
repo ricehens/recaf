@@ -455,14 +455,14 @@ public class ASTBuilder {
                     char d = text.charAt(i);
                     if (d == '\'') {
                         if (i + 1 < text.length() && text.charAt(i + 1) == '\'') {
-                            sb.append('\'');
+                            append(sb, '\'');
                             i += 2;
                         } else {
                             i++;
                             break;
                         }
                     } else {
-                        sb.append(d);
+                        append(sb, d);
                         i++;
                     }
                 }
@@ -480,13 +480,29 @@ public class ASTBuilder {
                 int code = Integer.parseInt(text.substring(start, i));
                 if (code < 0 || code > 255)
                     error.accept("string escape code out of range: #" + code);
-                sb.append((char) (code & 0xFF));
+                append(sb, (char) (code & 0xFF));
                 continue;
             }
             error.accept("invalid string literal segment");
             i++;
         }
         return sb.toString();
+    }
+
+    private static void append(StringBuilder sb, char c) {
+        switch (c) {
+            case '\\' -> sb.append("\\\\");
+            case '"' -> sb.append("\\\"");
+            case '\n' -> sb.append("\\n");
+            case '\r' -> sb.append("\\r");
+            case '\t' -> sb.append("\\t");
+            case '\0' -> sb.append("\\0");
+            default -> {
+                if (c < 32 || c >= 127)
+                    sb.append(String.format("\\x%02x", (int) c));
+                else sb.append(c);
+            }
+        }
     }
 
     private BinaryOperator extractBinaryOperator(RecafParser.ExprContext cst) {

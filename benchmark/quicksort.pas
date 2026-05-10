@@ -58,13 +58,6 @@ begin
     end
 end;
 
-function ReadInt;
-var stdin: Array[0..0];
-begin
-    scanf('%d', stdin);
-    ReadInt := stdin[0]
-end;
-
 procedure PrintArray;
 var i;
 begin
@@ -76,11 +69,11 @@ end;
 
 var i;
 begin
-    N := ReadInt;
+    ReadLn(N);
     if N > MAX_SIZE then exit;
 
     for i := 1 to N do
-        a[i] := ReadInt;
+        Read(a[i]);
 
     QuicksortRange(1, N);
     PrintArray

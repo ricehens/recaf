@@ -10,8 +10,6 @@ program Correlation;
     correlation matrix, expressed as M lines each containing
     M space-separated floating point numbers to two decimal places.
 }
-procedure printf(...); external;
-procedure scanf(...); external;
 function fl_I2f(x); external;
 function fl_Mul(x, y); external;
 function fl_Div(x, y); external;
@@ -24,25 +22,17 @@ var
     Variance: array[0..999] of integer;
     Cov: array[0..999, 0..999] of integer;
 
-function ReadInt;
-var stdin: array[0..0] of integer;
-begin
-    scanf('%d', stdin);
-    ReadInt := stdin[0]
-end;
-
 var M, N, i, j, k;
 begin
-    M := ReadInt;
-    N := ReadInt;
+    Read(M, N);
 
     if (M > 1000) or (N > 1000) then
-        printf('M and N must be <= 1000')
+        WriteLn('M and N must be <= 1000')
     else
     begin
         for i := 0 to M - 1 do
             for j := 0 to N - 1 do
-                A[i, j] := ReadInt;
+                Read(A[i, j]);
 
         for i := 0 to M - 1 do
         begin
@@ -77,9 +67,9 @@ begin
                     ),
                     2
                 );
-                printf(' ')
+                Write(' ')
             end;
-            printf(''#10)
+            WriteLn
         end
     end;
 end.

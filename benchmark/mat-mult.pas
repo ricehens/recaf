@@ -6,8 +6,6 @@ program MatrixMultiply;
     (filling the first row left-to-right, then the second row, and so on),
     and then N^2 entries that fill the second matrix likewise.
 }
-procedure scanf(...); external;
-
 var
     N;
     a, b, c: array[0..1023, 0..1023];
@@ -24,13 +22,6 @@ begin
         end
 end;
 
-function ReadInt;
-var stdin: array[0..0];
-begin
-    scanf('%d', stdin);
-    ReadInt := stdin[0]
-end;
-
 procedure PrintMatrix;
 var i, j;
 begin
@@ -44,15 +35,15 @@ end;
 
 var i, j;
 begin
-    N := ReadInt;
+    ReadLn(N);
     if N <= 1024 then
     begin
         for i := 0 to N - 1 do
             for j := 0 to N - 1 do
-                a[i, j] := ReadInt;
+                Read(a[i, j]);
         for i := 0 to N - 1 do
             for j := 0 to N - 1 do
-                b[i, j] := ReadInt;
+                Read(b[i, j]);
 
         MatMult;
         PrintMatrix
