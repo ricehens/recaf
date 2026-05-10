@@ -158,6 +158,7 @@ public class Linearizer {
         ASTType type = sc.exprType(loc);
 
         if (type instanceof ASTArrayType || type instanceof ASTRecordType)
+            symbolTable.addExternalMethod(MEMCPY);
             cfg.offer(new CFGMethodCallInstruction(ctx, null, MEMCPY,
                     List.of(reduce(locate(loc)), reduce(locate((ASTLocation) expr)),
                             makeLongLiteral(sizeof(type)))));
