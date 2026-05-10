@@ -5,6 +5,7 @@ import recaf.cfg.*;
 import recaf.general.*;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 import static recaf.ast.ASTUtils.*;
 
@@ -30,6 +31,9 @@ public class Linearizer {
 
     private CFGAddress breakAddress;
     private CFGAddress continueAddress;
+
+    private Optional<CFGAddress> localIntBuffer;
+    private Optional<CFGAddress> localLongBuffer;
 
     public Linearizer() {
         symbolTable = new CFGSymbolTable();
@@ -101,6 +105,8 @@ public class Linearizer {
         local = true;
         localTypes = new HashMap<>();
         localVars = new HashMap<>();
+        localIntBuffer = Optional.empty();
+        localLongBuffer = Optional.empty();
 
         md.params().orElseThrow().forEach(this::linearize);
         for (ASTDeclaration decl : md.decls()) {
@@ -122,6 +128,10 @@ public class Linearizer {
                         .map(symbols::get)
                         .map(CFGVariable::getAddress)
                         .toList(),
+                Stream.concat(
+                        Stream.concat(localIntBuffer.stream(), localLongBuffer.stream()),
+                        localVars.values().stream().map(symbols::get).map(CFGVariable::getAddress)
+                ).toList(),
                 cfg));
     }
 
@@ -270,7 +280,7 @@ public class Linearizer {
         breakAddress = exitAddr;
         continueAddress = condAddr;
 
-        loopAddr.set(cfg.currentBlock().address());
+        loopAddr.set(cfg.newBlock().address());
         dispatch(rl.body());
         condAddr.set(cfg.newBlock().address());
         CFGAddress cond = linearize(rl.cond());
@@ -380,9 +390,61 @@ public class Linearizer {
                                 List.of(fmt, addr)));
                     }
                 }
-                CFGAddress newline = makeStringLiteral("\\n");
-                if (WRITELN.equals(mc.id().text()))
+                if (WRITELN.equals(mc.id().text())) {
+                    CFGAddress newline = makeStringLiteral("\\n");
                     cfg.offer(new CFGMethodCallInstruction(ctx, null, PRINTF, List.of(newline)));
+                }
+            }
+
+            case READ, READLN -> {
+                symbolTable.addExternalMethod(SCANF);
+                for (ASTExpression arg : mc.args()) {
+                    ASTLocation loc = (ASTLocation) arg;
+                    switch (((ASTPrimitiveType) sc.exprType(loc)).type()) {
+                        case INT -> {
+                            CFGAddress tmp = ctx.newAddress(Type.INT);
+                            if (localIntBuffer.isEmpty())
+                                localIntBuffer = Optional.of(new CFGVariable(symbolTable, "@intbuf",
+                                        Type.RECORD, 4).getAddress());
+                            CFGAddress fmt = makeStringLiteral("%d");
+                            cfg.offer(new CFGMethodCallInstruction(ctx, null, SCANF,
+                                    List.of(fmt, localIntBuffer.get())));
+                            cfg.offer(new CFGReadInstruction(ctx, tmp, localIntBuffer.get(), 4, makeIntLiteral(0)));
+                            write(loc, tmp);
+                        }
+                        case LONG -> {
+                            CFGAddress tmp = ctx.newAddress(Type.LONG);
+                            if (localLongBuffer.isEmpty())
+                                localLongBuffer = Optional.of(new CFGVariable(symbolTable, "@longbuf",
+                                        Type.RECORD, 8).getAddress());
+                            CFGAddress fmt = makeStringLiteral("%lld");
+                            cfg.offer(new CFGMethodCallInstruction(ctx, null, SCANF,
+                                    List.of(fmt, localLongBuffer.get())));
+                            cfg.offer(new CFGReadInstruction(ctx, tmp, localLongBuffer.get(), 8, makeIntLiteral(0)));
+                            write(loc, tmp);
+                        }
+                        default -> throw new AssertionError("This should never happen.");
+                    }
+                }
+                if (READLN.equals(mc.id().text())) {
+                    symbolTable.addExternalMethod(GETCHAR);
+                    CFGAddress chr = ctx.newAddress(Type.INT);
+                    CFGAddress cmp = ctx.newAddress(Type.BOOL);
+
+                    // getchar until newline
+                    CFGAddress loopAddr = new CFGAddress();
+                    CFGAddress condAddr = new CFGAddress();
+                    CFGAddress exitAddr = new CFGAddress();
+
+                    loopAddr.set(cfg.newBlock().address());
+                    cfg.offer(new CFGMethodCallInstruction(ctx, chr, GETCHAR, List.of()));
+                    cfg.offer(new CFGBinaryInstruction(ctx, cmp, BinaryOperator.EQ, chr, makeIntLiteral(10)));
+                    cfg.offer(new CFGBranchInstruction(ctx, cmp, exitAddr, condAddr));
+                    condAddr.set(cfg.newBlock().address());
+                    cfg.offer(new CFGBinaryInstruction(ctx, cmp, BinaryOperator.EQ, chr, makeIntLiteral(-1)));
+                    cfg.offer(new CFGBranchInstruction(ctx, cmp, exitAddr, loopAddr));
+                    exitAddr.set(cfg.newBlock().address());
+                }
             }
 
             default -> {

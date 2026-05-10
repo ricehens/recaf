@@ -532,6 +532,14 @@ public class SemanticChecker {
                     if (!(exprType(dispatch(arg)) instanceof ASTPrimitiveType))
                         arg.ctx().error(key(ast.id()) + " expects arguments of type integer/int64/boolean/string");
             }
+            case READ, READLN -> {
+                for (ASTExpression arg : ast.args()) {
+                    if (!(dispatch(arg) instanceof ASTLocation))
+                        arg.ctx().error(key(ast.id()) + " expects locations as arguments");
+                    if (!isNumeric(exprType(dispatch(arg))))
+                        arg.ctx().error(key(ast.id()) + " expects arguments of type integer or int64");
+                }
+            }
             case NEW, DISPOSE -> {
                 if (ast.args().size() != 1)
                     ast.ctx().error(key(ast.id()) + " expects exactly one argument");

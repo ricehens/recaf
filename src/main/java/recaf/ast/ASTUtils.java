@@ -8,16 +8,20 @@ import java.util.stream.Collectors;
 public class ASTUtils {
 
     static final String PRINTF = "printf";
+    static final String SCANF = "scanf";
+    static final String GETCHAR = "getchar";
     static final String MEMCPY = "memcpy";
     static final String MALLOC = "malloc";
     static final String FREE = "free";
     static final Set<String> LIBC_RESERVED = Set.of(
-            PRINTF, MEMCPY, MALLOC, FREE
+            PRINTF, SCANF, GETCHAR, MEMCPY, MALLOC, FREE
     );
 
     static final String MAIN = "main";
     static final String WRITE = "write";
     static final String WRITELN = "writeln";
+    static final String READ = "read";
+    static final String READLN = "readln";
     static final String BREAK = "break";
     static final String CONTINUE = "continue";
     static final String EXIT = "exit";

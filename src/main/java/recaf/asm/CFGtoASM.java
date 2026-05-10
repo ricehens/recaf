@@ -56,7 +56,10 @@ public class CFGtoASM implements CFGVisitor {
         for (int i = 6; i < cfg.getParams().size(); i++) {
             asm.manuallyRegisterVariable(cfg.getParams().get(i), 8 * i - 32);
         }
-        extractLocalVars(cfg).forEach(asm::registerVariable);
+
+        cfg.getLocalVars().forEach(asm::registerVariable);
+        extractLocalVars(cfg).forEach(asm::registerVariable); // catch temps
+
         int stackShift = asm.getStackOffset();
         // ensure 16-byte alignment
         int padding = (16 - (stackShift % 16)) % 16;

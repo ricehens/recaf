@@ -15,6 +15,7 @@ public class CFGMethod implements CFG {
     private final Type type;
     private final String name;
     private final List<CFGAddress> params;
+    private final List<CFGAddress> localVars;
     private final DoublyLinkedList<CFGBasicBlock> blocks;
 
     /**
@@ -24,13 +25,16 @@ public class CFGMethod implements CFG {
      * @param type    the return type
      * @param name    the text of the method
      * @param params  first list of parameters; defensive copies are made
+     * @param localVars list of local variables; defensive copies are made
      * @param builder the CFG builder object
      */
-    public CFGMethod(CFGContext ctx, Type type, String name, List<CFGAddress> params, CFGBuilder builder) {
+    public CFGMethod(CFGContext ctx, Type type, String name, List<CFGAddress> params,
+                     List<CFGAddress> localVars, CFGBuilder builder) {
         this.ctx = ctx;
         this.type = type;
         this.name = name;
         this.params = params.stream().map(CFGAddress::clone).collect(Collectors.toList());
+        this.localVars = localVars.stream().map(CFGAddress::clone).collect(Collectors.toList());
         blocks = builder.getBlocks(this);
     }
 
@@ -92,6 +96,15 @@ public class CFGMethod implements CFG {
      */
     public List<CFGAddress> getParams() {
         return params;
+    }
+
+    /**
+     * Returns the method's local variables.
+     *
+     * @return list of local variables
+     */
+    public List<CFGAddress> getLocalVars() {
+        return localVars;
     }
 
     /**

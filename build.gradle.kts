@@ -20,11 +20,7 @@ repositories {
 }
 
 dependencies {
-    testImplementation(platform("org.junit:junit-bom:5.11.4"))
-    testImplementation("org.junit.jupiter:junit-jupiter")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-
-    antlr("org.antlr:antlr4:4.13.2") 
+    antlr("org.antlr:antlr4:4.13.2")
     implementation("org.antlr:antlr4-runtime:4.13.2") 
 }
 
@@ -32,11 +28,7 @@ application {
     mainClass.set("recaf.Main")
 }
 
-tasks.test {
-    useJUnitPlatform()
-}
-
-// ANTLR 
+// ANTLR
 sourceSets {
     main {
         antlr {

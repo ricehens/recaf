@@ -6,8 +6,6 @@ import recaf.general.*;
 import recaf.utils.MagicUtils;
 import recaf.utils.NumUtils;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -67,7 +65,10 @@ public class InstructionSelection implements CFGVisitor {
                     throw new AssertionError("This should never happen.");
             }
         }
-        extractLocalArrays(cfg).forEach(asm::registerVariable);
+
+        cfg.getLocalVars().stream()
+                .filter(x -> cfg.ctx().getType(x) == Type.RECORD)
+                .forEach(asm::registerVariable);
 
         for (int i = 0; i < Math.min(6, cfg.getParams().size()); i++) {
             CFGAddress param = cfg.getParams().get(i);
@@ -88,19 +89,6 @@ public class InstructionSelection implements CFGVisitor {
 
         // generate basic blocks
         cfg.getBlocks().forEach(block -> block.accept(this));
-    }
-
-    private List<CFGAddress> extractLocalArrays(CFGMethod cfg) {
-        List<CFGAddress> localVars = new ArrayList<>(cfg.getParams());
-        for (CFGBasicBlock block : cfg.getBlocks()) {
-            for (CFGInstruction instruction : block.getInstructions()) {
-                CFGAddress addr = instruction.address();
-                if (!cfg.ctx().isGlobalVar(addr) && cfg.ctx().getSymbolTable().getVar(addr) != null
-                        && cfg.ctx().getSymbolTable().getVar(addr).isArray())
-                    localVars.add(addr);
-            }
-        }
-        return localVars;
     }
 
     @Override
