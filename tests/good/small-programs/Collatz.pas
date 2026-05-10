@@ -6,10 +6,12 @@ procedure scanf(...); external;
 var n;
 
 function readInt;
-var input: array[0..0] of integer;
+var input: ^integer;
 begin
+    new(input);
     scanf('%d', input);
-    readInt := input[0]
+    readInt := input^;
+    dispose(input)
 end;
 
 function collatz(n);

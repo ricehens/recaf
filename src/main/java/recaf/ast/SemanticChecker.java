@@ -488,15 +488,7 @@ public class SemanticChecker {
             ast.ctx().error("cannot call main routine");
         if (md.internal()) checkNativeCall(ast);
 
-        if (md.params().isEmpty()) {
-            ASTMethodCall ret = new ASTMethodCall(ast.ctx(), id,
-                    ast.args().stream().map(this::dispatch).toList());
-            if (md.returnType().isPresent())
-                exprTypes.put(ret, md.returnType().get());
-            return ret;
-        }
-
-        if (md.params().get().size() != ast.args().size()) {
+        if (md.params().isPresent() && md.params().get().size() != ast.args().size()) {
             ast.ctx().error("expected " + md.params().get().size()
                     + " arguments, got " + ast.args().size());
             return ast;
@@ -506,14 +498,22 @@ public class SemanticChecker {
         for (int i = 0; i < ast.args().size(); i++) {
             ASTExpression e = dispatch(ast.args().get(i));
             ASTType type = exprType(e);
-            if (equalTypesStrict(md.params().get().get(i).type(), primitiveType(Type.LONG))
-                    && equalTypesStrict(type, primitiveType(Type.INT))) {
-                e = castLong(e);
-                type = exprType(e);
-            }
-            if (!equalTypes(type, md.params().get().get(i).type())) {
-                ast.ctx().error("type mismatch for " + i + "th argument");
-                return ast;
+            if (md.params().isPresent()) {
+                ASTType expectedType = md.params().get().get(i).type();
+                if (equalTypesStrict(expectedType, primitiveType(Type.LONG))
+                        && equalTypesStrict(type, primitiveType(Type.INT))) {
+                    e = castLong(e);
+                    type = exprType(e);
+                }
+                if (!equalTypes(type, expectedType)) {
+                    ast.ctx().error("type mismatch for " + i + "th argument");
+                    return ast;
+                }
+            } else {
+                if (type instanceof ASTArrayType)
+                    ast.ctx().error("cannot pass array to external routine");
+                if (type instanceof ASTRecordType)
+                    ast.ctx().error("cannot pass record to external routine");
             }
             args.add(e);
         }
