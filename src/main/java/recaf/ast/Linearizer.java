@@ -337,7 +337,10 @@ public class Linearizer {
                     CFGAddress exitCode = makeIntLiteral(0);
                     cfg.offer(new CFGReturnInstruction(ctx, exitCode));
                     cfg.newBlock();
-                } else cfg.offer(new CFGReturnInstruction(ctx));
+                } else {
+                    cfg.offer(new CFGReturnInstruction(ctx));
+                    cfg.newBlock();
+                }
             }
 
             case INTEGER ->
