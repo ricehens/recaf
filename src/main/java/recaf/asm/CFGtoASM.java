@@ -554,7 +554,7 @@ public class CFGtoASM implements CFGVisitor {
                 asm.emit(ASMOperator.MOVB, new ASMLiteral(cfg.literal()), dest);
                 break;
             case STRING:
-                asm.emit(ASMOperator.LEAQ, asm.getStringLiteral(((StringLiteral) cfg.literal()).value()), ASMRegister.RAX);
+                asm.emit(ASMOperator.LEAQ, asm.getStringLiteral(((StringLiteral) cfg.literal()).escape()), ASMRegister.RAX);
                 asm.emit(ASMOperator.MOVQ, ASMRegister.RAX, dest);
                 break;
             default:

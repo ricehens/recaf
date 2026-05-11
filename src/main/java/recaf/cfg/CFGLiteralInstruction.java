@@ -29,7 +29,7 @@ public class CFGLiteralInstruction implements CFGInstruction {
         this.address = CFGAddress.clone(address);
         this.literal = literal;
         if (literal instanceof StringLiteral str)
-            ctx.getSymbolTable().addStringLiteral(str.value());
+            ctx.getSymbolTable().addStringLiteral(str.escape());
     }
 
     public CFGContext ctx() {

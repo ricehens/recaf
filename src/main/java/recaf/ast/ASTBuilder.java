@@ -303,17 +303,7 @@ public class ASTBuilder {
     }
 
     private Stream<ASTExpression> visit(RecafParser.ArgsContext cst) {
-        return cst == null ? Stream.empty() : cst.arg().stream().map(this::visit);
-    }
-
-    private ASTExpression visit(RecafParser.ArgContext cst) {
-        if (cst.expr() != null) return visit(cst.expr());
-        if (cst.STRING_LITERAL() != null) {
-            ASTContext ctx = ctx(cst);
-            return new ASTLiteral(ctx,
-                    new StringLiteral(parseString(cst.STRING_LITERAL().getText(), ctx::error)));
-        }
-        throw new AssertionError("This should never happen.");
+        return cst == null ? Stream.empty() : cst.expr().stream().map(this::visit);
     }
 
     private ASTIfElse visit(RecafParser.If_elseContext cst) {
@@ -386,6 +376,11 @@ public class ASTBuilder {
             return new ASTLiteral(ctx,
                     parseIntegerLiteral(cst.INT_LITERAL().getText(), ctx::error));
         }
+        if (cst.STRING_LITERAL() != null) {
+            ASTContext ctx = ctx(cst);
+            return new ASTLiteral(ctx,
+                    new StringLiteral(parseString(cst.STRING_LITERAL().getText(), ctx::error)));
+        }
         throw new AssertionError("This should never happen.");
     }
 
@@ -455,14 +450,14 @@ public class ASTBuilder {
                     char d = text.charAt(i);
                     if (d == '\'') {
                         if (i + 1 < text.length() && text.charAt(i + 1) == '\'') {
-                            append(sb, '\'');
+                            sb.append('\'');
                             i += 2;
                         } else {
                             i++;
                             break;
                         }
                     } else {
-                        append(sb, d);
+                        sb.append(d);
                         i++;
                     }
                 }
@@ -480,29 +475,13 @@ public class ASTBuilder {
                 int code = Integer.parseInt(text.substring(start, i));
                 if (code < 0 || code > 255)
                     error.accept("string escape code out of range: #" + code);
-                append(sb, (char) (code & 0xFF));
+                sb.append((char) (code & 0xFF));
                 continue;
             }
             error.accept("invalid string literal segment");
             i++;
         }
         return sb.toString();
-    }
-
-    private static void append(StringBuilder sb, char c) {
-        switch (c) {
-            case '\\' -> sb.append("\\\\");
-            case '"' -> sb.append("\\\"");
-            case '\n' -> sb.append("\\n");
-            case '\r' -> sb.append("\\r");
-            case '\t' -> sb.append("\\t");
-            case '\0' -> sb.append("\\0");
-            default -> {
-                if (c < 32 || c >= 127)
-                    sb.append(String.format("\\x%02x", (int) c));
-                else sb.append(c);
-            }
-        }
     }
 
     private BinaryOperator extractBinaryOperator(RecafParser.ExprContext cst) {

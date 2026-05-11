@@ -289,6 +289,11 @@ public class SemanticChecker {
         return equalTypes(type, primitiveType(Type.INT)) || equalTypes(type, primitiveType(Type.LONG));
     }
 
+    private boolean isCharArray(ASTType type) {
+        return type instanceof ASTArrayType at && equalTypes(at.type(), primitiveType(Type.INT))
+                && at.ranges().size() == 1;
+    }
+
     private ASTBlock check(ASTBlock ast) {
         return new ASTBlock(ast.ctx(), ast.statements().stream().map(this::dispatch).toList());
     }
@@ -318,10 +323,35 @@ public class SemanticChecker {
                 && equalTypesStrict(exprType(right), primitiveType(Type.INT)))
             return new ASTAssignment(ast.ctx(), left, castLong(right));
 
+        // array <- string assignment
+        if (equalTypesStrict(exprType(right), primitiveType(Type.STRING))) {
+            if (!isCharArray(exprType(left))) {
+                ast.ctx().error("can only copy string literal to integer array");
+                return ast;
+            }
+            ASTArrayType at = (ASTArrayType)  exprType(left);
+            if (at.ranges().size() != 1) {
+                ast.ctx().error("can only copy string literal to " +
+                        "single-dimensional integer array");
+                return ast;
+            }
+
+            ASTArrayRange range = at.ranges().getFirst();
+            IntLiteral l = (IntLiteral) evalConstant(range.lower());
+            IntLiteral u = (IntLiteral) evalConstant(range.upper());
+            StringLiteral lit = (StringLiteral) ((ASTLiteral) right).literal();
+            if (l == null || u == null || lit == null)
+                throw new AssertionError("This should never happen.");
+            // one extra bit for size at front
+            if (u.value() - l.value() < lit.value().length()) {
+                ast.ctx().error("array not large enough to copy string literal");
+                return ast;
+            }
+            return new ASTAssignment(ast.ctx(), left, right);
+        }
+
         if (!equalTypes(exprType(left), exprType(right))) {
             ast.ctx().error("type mismatch for assignment");
-// System.out.println(exprType(left));
-// System.out.println(exprType(right));
             return ast;
         }
 
@@ -509,7 +539,7 @@ public class SemanticChecker {
                     ast.ctx().error("type mismatch for " + i + "th argument");
                     return ast;
                 }
-            } else {
+            } else if (md.external()) {
                 if (type instanceof ASTArrayType)
                     ast.ctx().error("cannot pass array to external routine");
                 if (type instanceof ASTRecordType)
@@ -527,17 +557,23 @@ public class SemanticChecker {
     private void checkNativeCall(ASTMethodCall ast) {
         switch (key(ast.id())) {
             case WRITE, WRITELN -> {
-                for (ASTExpression arg : ast.args())
+                for (ASTExpression arg : ast.args()) {
                     // descend into expression twice but whatever
-                    if (!(exprType(dispatch(arg)) instanceof ASTPrimitiveType))
-                        arg.ctx().error(key(ast.id()) + " expects arguments of type integer/int64/boolean/string");
+                    ASTType type = exprType(dispatch(arg));
+                    if (!(type instanceof ASTPrimitiveType) && !isCharArray(type))
+                        arg.ctx().error(key(ast.id())
+                                + " expects arguments of type integer, int64, boolean, "
+                                + "string literal, or integer array");
+                }
             }
             case READ, READLN -> {
                 for (ASTExpression arg : ast.args()) {
-                    if (!(dispatch(arg) instanceof ASTLocation))
+                    ASTExpression dispatch = dispatch(arg);
+                    if (!(dispatch instanceof ASTLocation))
                         arg.ctx().error(key(ast.id()) + " expects locations as arguments");
-                    if (!isNumeric(exprType(dispatch(arg))))
-                        arg.ctx().error(key(ast.id()) + " expects arguments of type integer or int64");
+                    ASTType type = exprType(dispatch);
+                    if (!isNumeric(type) && !isCharArray(type))
+                        arg.ctx().error(key(ast.id()) + " expects arguments of type integer, int64, or integer array");
                 }
             }
             case NEW, DISPOSE -> {

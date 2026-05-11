@@ -459,7 +459,7 @@ public class InstructionSelection implements CFGVisitor {
                     asm.emit(ASMOperator.MOVB, new ASMLiteral(cfg.literal()), dest);
                 break;
             case STRING:
-                asm.emit(ASMOperator.LEAQ, asm.getStringLiteral(((StringLiteral) cfg.literal()).value()), dest);
+                asm.emit(ASMOperator.LEAQ, asm.getStringLiteral(((StringLiteral) cfg.literal()).escape()), dest);
                 break;
             default:
                 throw new AssertionError("This should never happen.");

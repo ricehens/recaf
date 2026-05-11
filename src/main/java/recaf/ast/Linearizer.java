@@ -158,6 +158,10 @@ public class Linearizer {
         ASTType type = sc.exprType(loc);
 
         if (type instanceof ASTArrayType || type instanceof ASTRecordType) {
+            if (sc.exprType(expr) instanceof ASTPrimitiveType pr
+                    && pr.type() == Type.STRING) {
+throw new UnsupportedOperationException("TODO str lit copy"); // TODO
+            }
             symbolTable.addExternalMethod(MEMCPY);
             cfg.offer(new CFGMethodCallInstruction(ctx, null, MEMCPY,
                     List.of(reduce(locate(loc)), reduce(locate((ASTLocation) expr)),
@@ -389,7 +393,7 @@ public class Linearizer {
                     }
                 }
                 if (WRITELN.equals(mc.id().text())) {
-                    CFGAddress newline = makeStringLiteral("\\n");
+                    CFGAddress newline = makeStringLiteral("\n");
                     cfg.offer(new CFGMethodCallInstruction(ctx, null, PRINTF, List.of(newline)));
                 }
             }
