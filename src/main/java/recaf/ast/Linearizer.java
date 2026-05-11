@@ -478,17 +478,17 @@ public class Linearizer {
                         loopAddr.set(cfg.newBlock().address());
                         cfg.offer(new CFGMethodCallInstruction(ctx, chr, GETCHAR, List.of()));
                         cfg.offer(new CFGBinaryInstruction(ctx, check, BinaryOperator.LT, dummy, makeIntLiteral(size)));
-                        cfg.offer(new CFGBranchInstruction(ctx, check, incrementAddr, cond1Addr));
-                        incrementAddr.set(cfg.newBlock().address());
-                        cfg.offer(new CFGBinaryInstruction(ctx, dummy, BinaryOperator.PLUS, dummy, makeIntLiteral(1)));
-                        cfg.offer(new CFGWriteInstruction(ctx, arr, 4, dummy, chr));
-                        cfg.offer(new CFGJumpInstruction(ctx, cond1Addr));
+                        cfg.offer(new CFGBranchInstruction(ctx, check, cond1Addr, exitAddr));
                         cond1Addr.set(cfg.newBlock().address());
                         cfg.offer(new CFGBinaryInstruction(ctx, cmp, BinaryOperator.EQ, chr, makeIntLiteral(10)));
                         cfg.offer(new CFGBranchInstruction(ctx, cmp, exitAddr, cond2Addr));
                         cond2Addr.set(cfg.newBlock().address());
                         cfg.offer(new CFGBinaryInstruction(ctx, cmp, BinaryOperator.EQ, chr, makeIntLiteral(-1)));
-                        cfg.offer(new CFGBranchInstruction(ctx, cmp, exitAddr, loopAddr));
+                        cfg.offer(new CFGBranchInstruction(ctx, cmp, exitAddr, incrementAddr));
+                        incrementAddr.set(cfg.newBlock().address());
+                        cfg.offer(new CFGBinaryInstruction(ctx, dummy, BinaryOperator.PLUS, dummy, makeIntLiteral(1)));
+                        cfg.offer(new CFGWriteInstruction(ctx, arr, 4, dummy, chr));
+                        cfg.offer(new CFGJumpInstruction(ctx, loopAddr));
                         exitAddr.set(cfg.newBlock().address());
                         cfg.offer(new CFGWriteInstruction(ctx, arr, 4, makeIntLiteral(0), dummy));
 

@@ -28,6 +28,11 @@ begin
     ReadLn(s^.arr)
 end;
 
+procedure WriteStr(s: String);
+begin
+    WriteLn(s^.arr)
+end;
+
 var s1, s2: String;
 begin
     New(s1);
@@ -35,6 +40,8 @@ begin
     ReadStr(s1);
     ReadStr(s2);
     WriteLn(Len(s1), ' ', Len(s2), ' ', Equal(s1, s2));
+    WriteStr(s1);
+    WriteStr(s2);
     Dispose(s2);
     Dispose(s1)
 end.
