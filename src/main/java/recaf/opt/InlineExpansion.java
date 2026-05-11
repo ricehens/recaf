@@ -174,6 +174,16 @@ public class InlineExpansion implements Transformation {
             newNames.put(global, global);
         }
 
+        // register stack slots for inlined records
+        for (CFGAddress localVar : callee.getLocalVars()) {
+            if (ctx.getType(localVar) != Type.RECORD) continue;
+            CFGAddress newLocal = newNames.computeIfAbsent(localVar,
+                    _ -> ctx.getSymbolTable().newNode(localVar));
+            if (!method.getLocalVars().contains(newLocal)) {
+                method.getLocalVars().add(CFGAddress.clone(newLocal));
+            }
+        }
+
         // create destination phi instruction
         CFGPhiInstruction sink = null;
         if (callee.getType() != Type.VOID && !ctx.isGlobalVar(call.address())) {
@@ -210,15 +220,17 @@ public class InlineExpansion implements Transformation {
                     duplicateInstruction.address().set(newNames.computeIfAbsent(instruction.address(),
                             _ -> ctx.getSymbolTable().newNode(instruction.address())));
                 for (CFGAddress operand : duplicateInstruction.operands()) {
-                    operand.set(newNames.computeIfAbsent(operand,
-                            _ -> ctx.getSymbolTable().newNode(operand)));
+                    CFGAddress old = CFGAddress.clone(operand);
+                    operand.set(newNames.computeIfAbsent(old,
+                            _ -> ctx.getSymbolTable().newNode(old)));
                 }
                 // replace local array argument
                 if (duplicateInstruction instanceof CFGMethodCallInstruction methodCall) {
                     for (CFGAddress arg : methodCall.args()) {
                         if (ctx.getSymbolTable().getVar(arg).isArray()) {
-                            arg.set(newNames.computeIfAbsent(arg,
-                                    _ -> ctx.getSymbolTable().newNode(arg)));
+                            CFGAddress old = CFGAddress.clone(arg);
+                            arg.set(newNames.computeIfAbsent(old,
+                                    _ -> ctx.getSymbolTable().newNode(old)));
                         }
                     }
                 }
@@ -226,13 +238,15 @@ public class InlineExpansion implements Transformation {
                 // direct record bases are not included in operands() and still need remapping
                 if (duplicateInstruction instanceof CFGReadInstruction read) {
                     if (ctx.getType(read.recordAddress()) == Type.RECORD) {
-                        read.recordAddress().set(newNames.computeIfAbsent(read.recordAddress(),
-                                k -> ctx.getSymbolTable().newNode(read.recordAddress())));
+                        CFGAddress old = CFGAddress.clone(read.recordAddress());
+                        read.recordAddress().set(newNames.computeIfAbsent(old,
+                                k -> ctx.getSymbolTable().newNode(old)));
                     }
                 } else if (duplicateInstruction instanceof CFGWriteInstruction write) {
                     if (ctx.getType(write.recordAddress()) == Type.RECORD) {
-                        write.recordAddress().set(newNames.computeIfAbsent(write.recordAddress(),
-                                k -> ctx.getSymbolTable().newNode(write.recordAddress())));
+                        CFGAddress old = CFGAddress.clone(write.recordAddress());
+                        write.recordAddress().set(newNames.computeIfAbsent(old,
+                                k -> ctx.getSymbolTable().newNode(old)));
                     }
                 }
 
