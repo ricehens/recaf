@@ -30,7 +30,11 @@ end;
 
 var s1, s2: String;
 begin
+    New(s1);
+    New(s2);
     ReadStr(s1);
     ReadStr(s2);
-    WriteLn(Len(s1), ' ', Len(s2), ' ', Equal(s1, s2))
+    WriteLn(Len(s1), ' ', Len(s2), ' ', Equal(s1, s2));
+    Dispose(s2);
+    Dispose(s1)
 end.
