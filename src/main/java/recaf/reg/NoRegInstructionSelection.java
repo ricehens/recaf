@@ -1,5 +1,6 @@
-package recaf.asm;
+package recaf.reg;
 
+import recaf.asm.*;
 import recaf.cfg.*;
 import recaf.general.*;
 import recaf.utils.MagicUtils;
@@ -13,11 +14,11 @@ import java.util.Set;
  * Naively converts a CFG to assembly code via plain macro expansion,
  * without any register allocation
  */
-public class CFGtoASM implements CFGVisitor {
+public class NoRegInstructionSelection implements CFGVisitor {
 
     private final AssemblyStringBuilder asm;
 
-    public CFGtoASM(AssemblyStringBuilder asm) {
+    public NoRegInstructionSelection(AssemblyStringBuilder asm) {
         this.asm = asm;
     }
 

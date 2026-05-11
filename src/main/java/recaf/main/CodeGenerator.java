@@ -2,7 +2,7 @@ package recaf.main;
 
 import recaf.asm.AssemblyBuilder;
 import recaf.asm.AssemblyStringBuilder;
-import recaf.asm.CFGtoASM;
+import recaf.reg.NoRegInstructionSelection;
 import recaf.cfg.CFGProgram;
 import recaf.opt.Deglobalization;
 import recaf.opt.InlineExpansion;
@@ -82,7 +82,7 @@ public class CodeGenerator {
         } else {
             AssemblyStringBuilder ab = new AssemblyStringBuilder(cfg.ctx());
             ab.DEBUG = debug;
-            CFGtoASM visitor = new CFGtoASM(ab);
+            NoRegInstructionSelection visitor = new NoRegInstructionSelection(ab);
             cfg.accept(visitor);
             ab.printCode(out);
         }
