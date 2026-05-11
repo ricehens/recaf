@@ -105,11 +105,13 @@ public class InstructionSelection implements CFGVisitor {
         ASMLocation arrayLoc;
 
         asm.emit(ASMOperator.MOVSLQ, indexLoc, ASMRegister.RAX);
-        if (cfg.ctx().getType(cfg.recordAddress()) == Type.POINTER) {
+
+        var type = cfg.ctx().getType(cfg.recordAddress());
+        if (type == Type.RECORD) {
+            arrayLoc = asm.getMemoryLocationArray(cfg.recordAddress(), cfg.width());
+        } else {
             asm.emit(ASMOperator.MOVQ, new ASMVirtualRegister(cfg.recordAddress()), ASMRegister.RCX);
             arrayLoc = new ASMStackAddressArray(0, ASMRegister.RCX, ASMRegister.RAX, cfg.width());
-        } else {
-            arrayLoc = asm.getMemoryLocationArray(cfg.recordAddress(), cfg.width());
         }
         switch (cfg.width()) {
             case 4:
@@ -133,7 +135,11 @@ public class InstructionSelection implements CFGVisitor {
         ASMLocation arrayLoc;
 
         asm.emit(ASMOperator.MOVSLQ, indexLoc, ASMRegister.RAX);
-        if (cfg.ctx().getType(cfg.recordAddress()) == Type.POINTER) {
+
+        var type = cfg.ctx().getType(cfg.recordAddress());
+        if (type == Type.RECORD) {
+            arrayLoc = asm.getMemoryLocationArray(cfg.recordAddress(), cfg.width());
+        } else {
             switch (cfg.width()) {
                 case 4 -> asm.emit(ASMOperator.MOVL, valueLoc, ASMRegister.R11D);
                 case 8 -> asm.emit(ASMOperator.MOVQ, valueLoc, ASMRegister.R11);
@@ -142,8 +148,6 @@ public class InstructionSelection implements CFGVisitor {
             }
             asm.emit(ASMOperator.MOVQ, new ASMVirtualRegister(cfg.recordAddress()), ASMRegister.RCX);
             arrayLoc = new ASMStackAddressArray(0, ASMRegister.RCX, ASMRegister.RAX, cfg.width());
-        } else {
-            arrayLoc = asm.getMemoryLocationArray(cfg.recordAddress(), cfg.width());
         }
         switch (cfg.width()) {
             case 4:

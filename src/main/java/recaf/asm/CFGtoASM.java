@@ -124,11 +124,12 @@ public class CFGtoASM implements CFGVisitor {
 
         asm.emit(ASMOperator.MOVL, indexLoc, ASMRegister.EAX);
         asm.emit(ASMOperator.CLTQ);
-        if (cfg.ctx().getType(cfg.recordAddress()) == Type.POINTER) {
+        var type = cfg.ctx().getType(cfg.recordAddress());
+        if (type == Type.RECORD) {
+            arrayLoc = asm.getMemoryLocationArray(cfg.recordAddress(), cfg.width());
+        } else {
             asm.emit(ASMOperator.MOVQ, asm.getMemoryLocation(cfg.recordAddress()), ASMRegister.RCX);
             arrayLoc = new ASMStackAddressArray(0, ASMRegister.RCX, ASMRegister.RAX, cfg.width());
-        } else {
-            arrayLoc = asm.getMemoryLocationArray(cfg.recordAddress(), cfg.width());
         }
         switch (cfg.width()) {
             case 4:
@@ -158,11 +159,13 @@ public class CFGtoASM implements CFGVisitor {
 
         asm.emit(ASMOperator.MOVL, indexLoc, ASMRegister.EAX);
         asm.emit(ASMOperator.CLTQ);
-        if (cfg.ctx().getType(cfg.recordAddress()) == Type.POINTER) {
+
+        var type = cfg.ctx().getType(cfg.recordAddress());
+        if (type == Type.RECORD) {
+            arrayLoc = asm.getMemoryLocationArray(cfg.recordAddress(), cfg.width());
+        } else {
             asm.emit(ASMOperator.MOVQ, asm.getMemoryLocation(cfg.recordAddress()), ASMRegister.RCX);
             arrayLoc = new ASMStackAddressArray(0, ASMRegister.RCX, ASMRegister.RAX, cfg.width());
-        } else {
-            arrayLoc = asm.getMemoryLocationArray(cfg.recordAddress(), cfg.width());
         }
         switch (cfg.width()) {
             case 4:
