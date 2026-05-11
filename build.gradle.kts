@@ -59,18 +59,32 @@ tasks.register<Javadoc>("generateJavadoc") {
     }
 }
 
+val buildStdLib by tasks.registering(Exec::class) {
+    inputs.file("stdlib/system.c")
+    outputs.file("stdlib/libsystem.a")
+
+    commandLine("bash", "-c", "gcc -c stdlib/system.c -o stdlib/system.o && ar rcs stdlib/libsystem.a stdlib/system.o")
+}
+
 // jar
 tasks.named<Jar>("jar") {
-  manifest {
-    attributes["Main-Class"] = application.mainClass.get()
-  }
+    dependsOn(buildStdLib)
 
-  duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-  from({
-    configurations
-      .runtimeClasspath
-      .get()
-      .filter { it.name.endsWith("jar") }
-      .map { zipTree(it) }
-  })
+    from("stdlib") {
+        include("libsystem.a")
+        into("stdlib")
+    }
+
+    manifest {
+        attributes["Main-Class"] = application.mainClass.get()
+    }
+
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from({
+        configurations
+            .runtimeClasspath
+            .get()
+            .filter { it.name.endsWith("jar") }
+            .map { zipTree(it) }
+    })
 }

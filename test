@@ -17,7 +17,7 @@ PROJECT_ROOT = Path.cwd()
 TESTS_DIR = PROJECT_ROOT / "tests"
 OUT_DIR = TESTS_DIR / "out"
 EXTERNAL_OUT_DIR = OUT_DIR / "external"
-RUN_SH = PROJECT_ROOT / "run.sh"
+RUN_SH = PROJECT_ROOT / "recaf"
 
 def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
@@ -27,7 +27,7 @@ def parse_args() -> argparse.Namespace:
         prog="test",
         add_help=False,
         formatter_class=argparse.RawTextHelpFormatter,
-        description="Compile and run tests using ./run.sh, compare outputs, and summarize results."
+        description="Compile and run tests using ./recaf, compare outputs, and summarize results."
     )
     # Manual help to match spec
     parser.add_argument("-h", "--help", action="store_true",

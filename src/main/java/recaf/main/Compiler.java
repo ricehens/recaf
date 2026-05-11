@@ -145,6 +145,10 @@ public class Compiler {
                     "gcc", "-O0", "-no-pie", "-s", temp.getPath(),
                     "-o", outfile == null ? infile.substring(0, infile.length() - 4) : outfile
             ));
+
+            Path stdlib = extractBundledLibrary("/stdlib/libsystem.a", "libsystem.a");
+            cmd.add(stdlib.toString());
+
             for (String lib : libraries) {
                 File file = new File(lib);
                 if (!file.exists())
@@ -156,7 +160,9 @@ public class Compiler {
                     errorHandler.error("recafc", -1, -1, "library " + lib + " is not a static library");
                 cmd.add("-l" + name.substring(3, name.length() - 2));
             }
+
             cmd.add("-lm");
+
             bye();
             ProcessBuilder pb = new ProcessBuilder(cmd.toArray(new String[0]));
             pb.inheritIO();
@@ -171,6 +177,20 @@ public class Compiler {
         } catch (InterruptedException e) {
             errorHandler.error("recafc", -1, -1, "error linking");
             bye();
+        }
+    }
+
+    private Path extractBundledLibrary(String resourcePath, String filename) throws IOException {
+        try (InputStream in = Compiler.class.getResourceAsStream(resourcePath)) {
+            if (in == null)
+                throw new FileNotFoundException("missing bundled library " + resourcePath);
+
+            Path dir = Files.createTempDirectory("recaf-stdlib");
+            Path out = dir.resolve(filename);
+            Files.copy(in, out);
+            out.toFile().deleteOnExit();
+            dir.toFile().deleteOnExit();
+            return out;
         }
     }
 
