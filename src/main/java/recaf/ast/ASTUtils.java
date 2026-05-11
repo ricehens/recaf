@@ -23,7 +23,6 @@ public class ASTUtils {
     static final String WRITELN = "writeln";
     static final String READ = "read";
     static final String READLN = "readln";
-    static final String EOF = "eof";
     static final String BREAK = "break";
     static final String CONTINUE = "continue";
     static final String EXIT = "exit";
