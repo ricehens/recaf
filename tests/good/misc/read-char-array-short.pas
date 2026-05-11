@@ -1,6 +1,6 @@
 program StrLitCopy;
 
-var a: array[0..14] of integer;
+var a: array[0..20] of integer;
 
 begin
     ReadLn(a);

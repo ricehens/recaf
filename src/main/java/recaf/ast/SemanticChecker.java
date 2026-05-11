@@ -566,14 +566,28 @@ public class SemanticChecker {
                                 + "string literal, or integer array");
                 }
             }
-            case READ, READLN -> {
+            case READ -> {
                 for (ASTExpression arg : ast.args()) {
                     ASTExpression dispatch = dispatch(arg);
                     if (!(dispatch instanceof ASTLocation))
-                        arg.ctx().error(key(ast.id()) + " expects locations as arguments");
+                        arg.ctx().error("read expects locations as arguments");
                     ASTType type = exprType(dispatch);
-                    if (!isNumeric(type) && !isCharArray(type))
-                        arg.ctx().error(key(ast.id()) + " expects arguments of type integer, int64, or integer array");
+                    if (!isNumeric(type))
+                        arg.ctx().error("read expects arguments of type integer or int64");
+                }
+            }
+            case READLN -> {
+                for (ASTExpression arg : ast.args()) {
+                    ASTExpression dispatch = dispatch(arg);
+                    if (!(dispatch instanceof ASTLocation))
+                        arg.ctx().error("readln expects locations as arguments");
+                    ASTType type = exprType(dispatch);
+                    if (!isNumeric(type)) {
+                        if (isCharArray(type)) {
+                            if (ast.args().size() != 1)
+                                arg.ctx().error("readln on integer array expects exactly one argument");
+                        } else arg.ctx().error("readln expects arguments of type integer, int64, or integer array");
+                    }
                 }
             }
             case NEW, DISPOSE -> {

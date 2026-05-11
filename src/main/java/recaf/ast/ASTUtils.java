@@ -10,11 +10,12 @@ public class ASTUtils {
     static final String PRINTF = "printf";
     static final String SCANF = "scanf";
     static final String GETCHAR = "getchar";
+    static final String PUTCHAR = "putchar";
     static final String MEMCPY = "memcpy";
     static final String MALLOC = "malloc";
     static final String FREE = "free";
     static final Set<String> LIBC_RESERVED = Set.of(
-            PRINTF, SCANF, GETCHAR, MEMCPY, MALLOC, FREE
+            PRINTF, SCANF, GETCHAR, PUTCHAR, MEMCPY, MALLOC, FREE
     );
 
     static final String MAIN = "main";

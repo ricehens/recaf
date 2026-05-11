@@ -1,5 +1,6 @@
 package recaf.cfg;
 
+import recaf.general.Type;
 import recaf.utils.ParallelCopyGroup;
 
 import java.util.List;
@@ -27,6 +28,7 @@ public class CFGCopyInstruction implements ParallelCopyGroup.DirectedEdge<CFGAdd
         this.ctx = ctx;
         this.address = CFGAddress.clone(address);
         this.operand = CFGAddress.clone(operand);
+if (ctx.getType(address) == Type.RECORD) throw new RuntimeException();
     }
 
     @Override
