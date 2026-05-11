@@ -563,7 +563,7 @@ public class SemanticChecker {
                     if (!(type instanceof ASTPrimitiveType) && !isCharArray(type))
                         arg.ctx().error(key(ast.id())
                                 + " expects arguments of type integer, int64, boolean, "
-                                + "string literal, or integer array");
+                                + "string literal, or 1D integer array");
                 }
             }
             case READ -> {
@@ -586,7 +586,7 @@ public class SemanticChecker {
                         if (isCharArray(type)) {
                             if (ast.args().size() != 1)
                                 arg.ctx().error("readln on integer array expects exactly one argument");
-                        } else arg.ctx().error("readln expects arguments of type integer, int64, or integer array");
+                        } else arg.ctx().error("readln expects arguments of type integer, int64, or 1D integer array");
                     }
                 }
             }
