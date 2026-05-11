@@ -225,12 +225,12 @@ public class InlineExpansion implements Transformation {
 
                 // direct record bases are not included in operands() and still need remapping
                 if (duplicateInstruction instanceof CFGReadInstruction read) {
-                    if (ctx.getType(read.recordAddress()) != Type.POINTER) {
+                    if (ctx.getType(read.recordAddress()) == Type.RECORD) {
                         read.recordAddress().set(newNames.computeIfAbsent(read.recordAddress(),
                                 k -> ctx.getSymbolTable().newNode(read.recordAddress())));
                     }
                 } else if (duplicateInstruction instanceof CFGWriteInstruction write) {
-                    if (ctx.getType(write.recordAddress()) != Type.POINTER) {
+                    if (ctx.getType(write.recordAddress()) == Type.RECORD) {
                         write.recordAddress().set(newNames.computeIfAbsent(write.recordAddress(),
                                 k -> ctx.getSymbolTable().newNode(write.recordAddress())));
                     }

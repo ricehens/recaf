@@ -47,7 +47,7 @@ public class CFGWriteInstruction implements CFGInstruction {
 
     @Override
     public List<CFGAddress> operands() {
-        return ctx.getType(recordAddress) == Type.POINTER
+        return ctx.getType(recordAddress) != Type.RECORD
                 ? List.of(recordAddress, indexAddress, valueAddress)
                 : List.of(indexAddress, valueAddress);
     }
