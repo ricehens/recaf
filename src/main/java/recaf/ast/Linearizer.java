@@ -31,9 +31,9 @@ public class Linearizer {
 
     private CFGAddress breakAddress;
     private CFGAddress continueAddress;
-
     private CFGAddress localIntBuffer;
     private CFGAddress localLongBuffer;
+    private CFGAddress eofFlag;
 
     public Linearizer() {
         symbolTable = new CFGSymbolTable();
@@ -50,6 +50,10 @@ public class Linearizer {
 
     public CFGProgram linearize(ASTProgram prog) {
         sc = prog.ctx().getSemanticChecker();
+
+        CFGVariable eof = new CFGVariable(symbolTable, ".eof", Type.INT);
+        eofFlag = eof.getAddress();
+        ctx.addGlobalVar(eofFlag);
 
         for (ASTDeclaration decl : prog.decls()) {
             switch (decl) {
@@ -442,7 +446,7 @@ public class Linearizer {
                             localIntBuffer = new CFGVariable(symbolTable, "@intbuf",
                                     Type.RECORD, 4).getAddress();
                         CFGAddress fmt = makeStringLiteral("%d");
-                        cfg.offer(new CFGMethodCallInstruction(ctx, null, SCANF,
+                        cfg.offer(new CFGMethodCallInstruction(ctx, eofFlag, SCANF,
                                 List.of(fmt, localIntBuffer)));
                         cfg.offer(new CFGReadInstruction(ctx, tmp, localIntBuffer, 4, makeIntLiteral(0)));
                         write(loc, tmp);
@@ -452,7 +456,7 @@ public class Linearizer {
                             localLongBuffer = new CFGVariable(symbolTable, "@longbuf",
                                     Type.RECORD, 8).getAddress();
                         CFGAddress fmt = makeStringLiteral("%lld");
-                        cfg.offer(new CFGMethodCallInstruction(ctx, null, SCANF,
+                        cfg.offer(new CFGMethodCallInstruction(ctx, eofFlag, SCANF,
                                 List.of(fmt, localLongBuffer)));
                         cfg.offer(new CFGReadInstruction(ctx, tmp, localLongBuffer, 8, makeIntLiteral(0)));
                         write(loc, tmp);
@@ -464,7 +468,6 @@ public class Linearizer {
                         int size = extractInt(at.ranges().getFirst().upper()) - extractInt(at.ranges().getFirst().lower());
 
                         CFGAddress dummy = ctx.newAddress(Type.INT);
-                        CFGAddress chr = ctx.newAddress(Type.INT);
                         CFGAddress check = ctx.newAddress(Type.BOOL);
                         CFGAddress cmp = ctx.newAddress(Type.BOOL);
                         cfg.offer(new CFGLiteralInstruction(ctx, dummy, new IntLiteral(0)));
@@ -476,18 +479,18 @@ public class Linearizer {
                         CFGAddress exitAddr = new CFGAddress();
 
                         loopAddr.set(cfg.newBlock().address());
-                        cfg.offer(new CFGMethodCallInstruction(ctx, chr, GETCHAR, List.of()));
+                        cfg.offer(new CFGMethodCallInstruction(ctx, eofFlag, GETCHAR, List.of()));
                         cfg.offer(new CFGBinaryInstruction(ctx, check, BinaryOperator.LT, dummy, makeIntLiteral(size)));
                         cfg.offer(new CFGBranchInstruction(ctx, check, cond1Addr, exitAddr));
                         cond1Addr.set(cfg.newBlock().address());
-                        cfg.offer(new CFGBinaryInstruction(ctx, cmp, BinaryOperator.EQ, chr, makeIntLiteral(10)));
+                        cfg.offer(new CFGBinaryInstruction(ctx, cmp, BinaryOperator.EQ, eofFlag, makeIntLiteral(10)));
                         cfg.offer(new CFGBranchInstruction(ctx, cmp, exitAddr, cond2Addr));
                         cond2Addr.set(cfg.newBlock().address());
-                        cfg.offer(new CFGBinaryInstruction(ctx, cmp, BinaryOperator.EQ, chr, makeIntLiteral(-1)));
+                        cfg.offer(new CFGBinaryInstruction(ctx, cmp, BinaryOperator.EQ, eofFlag, makeIntLiteral(-1)));
                         cfg.offer(new CFGBranchInstruction(ctx, cmp, exitAddr, incrementAddr));
                         incrementAddr.set(cfg.newBlock().address());
                         cfg.offer(new CFGBinaryInstruction(ctx, dummy, BinaryOperator.PLUS, dummy, makeIntLiteral(1)));
-                        cfg.offer(new CFGWriteInstruction(ctx, arr, 4, dummy, chr));
+                        cfg.offer(new CFGWriteInstruction(ctx, arr, 4, dummy, eofFlag));
                         cfg.offer(new CFGJumpInstruction(ctx, loopAddr));
                         exitAddr.set(cfg.newBlock().address());
                         cfg.offer(new CFGWriteInstruction(ctx, arr, 4, makeIntLiteral(0), dummy));
@@ -497,7 +500,6 @@ public class Linearizer {
                 }
                 if (!newlineConsumed && READLN.equals(mc.id().text())) {
                     symbolTable.addExternalMethod(GETCHAR);
-                    CFGAddress chr = ctx.newAddress(Type.INT);
                     CFGAddress cmp = ctx.newAddress(Type.BOOL);
 
                     // getchar until newline
@@ -506,15 +508,20 @@ public class Linearizer {
                     CFGAddress exitAddr = new CFGAddress();
 
                     loopAddr.set(cfg.newBlock().address());
-                    cfg.offer(new CFGMethodCallInstruction(ctx, chr, GETCHAR, List.of()));
-                    cfg.offer(new CFGBinaryInstruction(ctx, cmp, BinaryOperator.EQ, chr, makeIntLiteral(10)));
+                    cfg.offer(new CFGMethodCallInstruction(ctx, eofFlag, GETCHAR, List.of()));
+                    cfg.offer(new CFGBinaryInstruction(ctx, cmp, BinaryOperator.EQ, eofFlag, makeIntLiteral(10)));
                     cfg.offer(new CFGBranchInstruction(ctx, cmp, exitAddr, condAddr));
                     condAddr.set(cfg.newBlock().address());
-                    cfg.offer(new CFGBinaryInstruction(ctx, cmp, BinaryOperator.EQ, chr, makeIntLiteral(-1)));
+                    cfg.offer(new CFGBinaryInstruction(ctx, cmp, BinaryOperator.EQ, eofFlag, makeIntLiteral(-1)));
                     cfg.offer(new CFGBranchInstruction(ctx, cmp, exitAddr, loopAddr));
                     exitAddr.set(cfg.newBlock().address());
                 }
             }
+
+            // behaves differently from standard pascal
+            // only returns true after an attempt to read past eof
+            case EOF ->
+                cfg.offer(new CFGBinaryInstruction(ctx, dest, BinaryOperator.EQ, eofFlag, makeIntLiteral(-1)));
 
             default -> {
                 Optional<ASTType> returnType = methods.get(mc.id().text());
