@@ -1,329 +1,167 @@
 #!/usr/bin/env python3
 
-import argparse
-import os
-import sys
+import difflib
+import hashlib
+import shlex
 import subprocess
+import sys
 from pathlib import Path
-from typing import List, Tuple
 
-GREEN = "\033[92m"
-RED = "\033[91m"
-YELLOW = "\033[93m"
+COMPILER = "./recaf"
+TMP = Path("/tmp/recaf-test")
+VALUE_ARGS = {"-l", "--library", "-t", "--target"}
+GREEN = "\033[32m"
+RED = "\033[31m"
 BOLD = "\033[1m"
+DIM = "\033[2m"
+CYAN = "\033[36m"
 RESET = "\033[0m"
 
-PROJECT_ROOT = Path.cwd()
-TESTS_DIR = PROJECT_ROOT / "tests"
-OUT_DIR = TESTS_DIR / "out"
-EXTERNAL_OUT_DIR = OUT_DIR / "external"
-RUN_SH = PROJECT_ROOT / "recaf"
 
-def eprint(*args, **kwargs):
-    print(*args, file=sys.stderr, **kwargs)
+def color(text, ansi):
+    return f"{ansi}{text}{RESET}"
 
-def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
-        prog="test",
-        add_help=False,
-        formatter_class=argparse.RawTextHelpFormatter,
-        description="Compile and run tests using ./recaf, compare outputs, and summarize results."
-    )
-    # Manual help to match spec
-    parser.add_argument("-h", "--help", action="store_true",
-                        help="display help string")
-    parser.add_argument("-O0", dest="opt", action="store_const", const="-O0",
-                        help="pass the optimization flag to the compiler")
-    parser.add_argument("-O1", dest="opt", action="store_const", const="-O1",
-                        help="pass the optimization flag to the compiler")
-    parser.add_argument("-O2", dest="opt", action="store_const", const="-O2",
-                        help="pass the optimization flag to the compiler")
-    parser.add_argument("-O3", dest="opt", action="store_const", const="-O3",
-                        help="pass the optimization flag to the compiler")
-    parser.add_argument("-l", dest="lflags", action="append", default=[],
-                        metavar="<arg>", help="pass this argument too to the compiler (repeatable)")
-    parser.add_argument("--bad", action="store_true",
-                        help="expect compilation to fail for each discovered test case")
-    parser.add_argument("path", nargs="?", help="[directory|file] to test (exactly one)")
-    args, unknown = parser.parse_known_args()
 
-    if args.help:
-        print(
-f"""Usage:
-  ./test [options] [directory|file]
+def die(message, code=2):
+    print(message, file=sys.stderr)
+    sys.exit(code)
 
-Valid arguments:
-  -h, --help           display help string
-  -O0, -O1, -O2, -O3   pass the optimization flag to the compiler
-  -l <arg>             pass this argument too to the compiler (repeatable)
-  --bad                expect compilation failure for each discovered .pas test
-  [directory|file]     specify a file to test or a directory to descend into (recursively)
 
-Behavior:
-  • Normal mode (default):
-    Finds all .pas files (recursively if a directory) and compiles them with a SINGLE ./run.sh call,
-    using --and to chain multiple compilations.
-  • Bad mode (--bad):
-    Compiles each .pas file independently and expects each compilation to fail.
-    A test passes if compilation exits nonzero; it fails if compilation succeeds.
-  • Normal-mode output placement:
-      - If input is under tests/, output goes under tests/out/ preserving subdirs, with NO extension.
-        E.g. tests/short-programs/fib.pas  →  tests/out/short-programs/fib
-      - If input is outside tests/, output goes under tests/out/external/ with NO subdirs.
-        E.g. /tmp/a.pas → tests/out/external/a
-  • After compiling, each produced executable is run. If a .in file exists, it is piped to stdin.
-    Output is compared to the corresponding .out file (must exist).
-  • Nonzero compiler exit terminates with nonzero status. Any failing test also returns nonzero.
-"""
-        )
-        sys.exit(0)
+def usage():
+    print("Usage: ./test [recaf args] <file|dir>...")
+    print("Directories are searched recursively for .pas files.")
+    sys.exit(0)
 
-    if unknown:
-        eprint(f"{YELLOW}Warning:{RESET} ignoring unknown args: {' '.join(unknown)}")
 
-    if not args.path:
-        eprint(f"{RED}Error:{RESET} exactly one file or directory must be provided.")
-        sys.exit(2)
+def split_args(argv):
+    compiler_args, roots = [], []
+    i = 0
+    while i < len(argv):
+        arg = argv[i]
+        path = Path(arg)
+        if arg in {"-h", "--help"}:
+            usage()
+        if arg in {"-o", "--output"}:
+            die("./test controls -o/--output so executables stay in /tmp/recaf-test")
+        if path.exists():
+            roots.append(path)
+        else:
+            compiler_args.append(arg)
+            if arg in VALUE_ARGS:
+                i += 1
+                if i >= len(argv):
+                    die(f"missing value after {arg}")
+                compiler_args.append(argv[i])
+        i += 1
+    return compiler_args, roots
 
-    p = Path(args.path)
-    if not p.exists():
-        eprint(f"{RED}Error:{RESET} path not found: {args.path}")
-        sys.exit(2)
 
-    if not RUN_SH.exists():
-        eprint(f"{RED}Error:{RESET} ./run.sh not found in current directory: {PROJECT_ROOT}")
-        sys.exit(2)
+def sources(roots):
+    found = []
+    for path in roots:
+        if path.is_dir():
+            found += sorted(path.rglob("*.pas"))
+        elif path.is_file():
+            found.append(path)
+    return found
 
-    return args
 
-def find_pas_files(root: Path) -> List[Path]:
-    if root.is_file():
-        return [root] if root.suffix == ".pas" else []
-    return sorted(root.rglob("*.pas"))
+def exe_for(src):
+    digest = hashlib.sha1(str(src.resolve()).encode()).hexdigest()[:8]
+    name = "".join(c if c.isalnum() or c in "-_" else "_" for c in src.stem)
+    return TMP / f"recaf-{name}-{digest}"
 
-def under_tests(path: Path) -> bool:
+
+def run(cmd, stdin=None):
     try:
-        path.relative_to(TESTS_DIR)
-        return True
-    except ValueError:
+        return subprocess.run(cmd, stdin=stdin, capture_output=True, text=True)
+    except FileNotFoundError:
+        die(color(f"could not run {cmd[0]}", RED))
+
+
+def compile_all(srcs, exes, args):
+    TMP.mkdir(parents=True, exist_ok=True)
+    cmd = [COMPILER]
+    for i, src in enumerate(srcs):
+        if i:
+            cmd.append("--and")
+        cmd += [str(src), "-o", str(exes[src]), *args]
+
+    print(color(shlex.join(cmd), DIM), flush=True)
+    proc = run(cmd)
+    if proc.returncode:
+        print(color("FAIL", RED) + ": compilation failed")
+        print(proc.stdout, end="")
+        print(proc.stderr, end="", file=sys.stderr)
+        return False
+    return True
+
+
+def print_diff(src, expected, actual):
+    diff = difflib.unified_diff(
+        expected.splitlines(),
+        actual.splitlines(),
+        fromfile=str(src.with_suffix(".out")),
+        tofile="actual",
+        lineterm="",
+    )
+    for line in diff:
+        if line.startswith(("+", "-")) and not line.startswith(("+++", "---")):
+            print(color(line, GREEN if line.startswith("+") else RED))
+        elif line.startswith("@@"):
+            print(color(line, CYAN))
+        else:
+            print(line)
+
+
+def test(src, exe):
+    expected = src.with_suffix(".out")
+    if not expected.exists():
+        print(f"{color('FAIL', RED)} {src}: missing {expected}")
         return False
 
-def out_path_for_input(infile: Path) -> Path:
-    """
-    Rule:
-      - If under tests/, mirror subdirectory under tests/out/, drop extension.
-      - Else output to tests/out/external/<basename_without_ext>
-    """
-    stem = infile.stem
-    if under_tests(infile):
-        rel = infile.relative_to(TESTS_DIR)  # e.g. a/1.pas
-        rel_no_ext = rel.with_suffix("")     # a/1
-        return OUT_DIR / rel_no_ext
-    else:
-        return EXTERNAL_OUT_DIR / stem
+    input_file = src.with_suffix(".in")
+    with (input_file.open() if input_file.exists() else open("/dev/null")) as stdin:
+        proc = run([str(exe)], stdin=stdin)
 
-def expected_io_files(infile: Path) -> Tuple[Path, Path]:
-    """
-    Determine .in and .out locations:
-      - If under tests/, expect alongside .pas within tests/ (e.g., tests/a/2.in and tests/a/2.out).
-      - Else (external), expect siblings next to input (e.g., /tmp/a.in and /tmp/a.out).
-    """
-    base = infile.with_suffix("")
-    if under_tests(infile):
-        return (base.with_suffix(".in"), base.with_suffix(".out"))
-    else:
-        return (base.with_suffix(".in"), base.with_suffix(".out"))
+    if proc.returncode:
+        print(f"{color('FAIL', RED)} {src}: exited {proc.returncode}")
+        print(proc.stderr, end="", file=sys.stderr)
+        return False
 
-def build_compiler_command(files: List[Path], opt: str, lflags: List[str]) -> List[str]:
-    """
-    Build a single ./run.sh invocation chaining all compilations with --and.
-    For each file:
-      ./run.sh <in> -o <out> [opt] [-l arg]... --and ...
-    """
-    cmd: List[str] = [str(RUN_SH)]
-    first = True
-    for infile in files:
-        out = out_path_for_input(infile)
-        # Ensure parent dir exists
-        out.parent.mkdir(parents=True, exist_ok=True)
-        if not first:
-            cmd.append("--and")
-        first = False
-        cmd.extend([str(infile), "-o", str(out)])
-        if opt:
-            cmd.append(opt)
-        for lf in lflags:
-            cmd.extend(["-l", lf])
-    return cmd
+    expected_text = expected.read_text()
+    if proc.stdout.rstrip() != expected_text.rstrip():
+        print(f"{color('FAIL', RED)} {src}: output differs")
+        print_diff(src, expected_text.rstrip(), proc.stdout.rstrip())
+        return False
 
-def build_single_compiler_command(infile: Path, opt: str, lflags: List[str]) -> List[str]:
-    out = out_path_for_input(infile)
-    out.parent.mkdir(parents=True, exist_ok=True)
-    cmd: List[str] = [str(RUN_SH), str(infile), "-o", str(out)]
-    if opt:
-        cmd.append(opt)
-    for lf in lflags:
-        cmd.extend(["-l", lf])
-    return cmd
+    print(f"{color('PASS', GREEN)} {src}")
+    return True
 
-def effective_lflags(files: List[Path], lflags: List[str]) -> List[str]:
-    flags = list(lflags)
-    needs_float_lib = any(f.name == "correlation.pas" and f.parent.name == "benchmark" for f in files)
-    if needs_float_lib and "stdlib/libfloat.a" not in flags:
-        print(f"{YELLOW}Note:{RESET} adding -l stdlib/libfloat.a for correlation benchmark")
-        flags.append("stdlib/libfloat.a")
-    return flags
-
-def run_executable(exe: Path, stdin_path: Path) -> Tuple[int, str, str]:
-    """
-    Run the produced executable, optionally redirecting stdin from stdin_path if it exists.
-    Returns (exit_code, stdout, stderr)
-    """
-    if not exe.exists():
-        return (127, "", f"Executable not found: {exe}")
-    stdin_f = None
-    try:
-        if stdin_path.exists():
-            stdin_f = open(stdin_path, "rb")
-        proc = subprocess.run(
-            [str(exe)],
-            stdin=stdin_f,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True
-        )
-        return (proc.returncode, proc.stdout, proc.stderr)
-    finally:
-        if stdin_f is not None:
-            stdin_f.close()
-
-def compare_output(actual: str, expected_path: Path) -> Tuple[bool, str]:
-    """
-    Compare exact output to expected file content. If expected missing, signal error.
-    Returns (match, expected_content_or_error_message)
-    """
-    if not expected_path.exists():
-        return (False, f"Missing expected file: {expected_path}")
-    expected = expected_path.read_text()
-    return (actual.rstrip() == expected.rstrip(), expected)
 
 def main():
-    args = parse_args()
-    root = Path(args.path).resolve()
-    pas_files = find_pas_files(root)
+    compiler_args, roots = split_args(sys.argv[1:])
+    if not roots:
+        die("no input files or directories")
 
-    if not pas_files:
-        eprint(f"{YELLOW}No .pas files found{RESET} under: {root}")
-        sys.exit(0)
+    srcs = sources(roots)
+    if not srcs:
+        die("no source files found", 0)
 
-    if args.bad:
-        lflags = effective_lflags(pas_files, args.lflags)
-        print(f"{BOLD}Compiling {len(pas_files)} file(s) in --bad mode (expect failure):{RESET}")
-        total = 0
-        passed = 0
-        failed_any = False
-
-        for infile in pas_files:
-            total += 1
-            cmd = build_single_compiler_command(infile, args.opt, lflags)
-            print(" ", " ".join(cmd))
-            try:
-                comp = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-            except FileNotFoundError:
-                eprint(f"{RED}Error:{RESET} cannot execute ./run.sh")
-                sys.exit(2)
-
-            if comp.returncode == 0:
-                failed_any = True
-                print(f"{RED}✗ FAIL{RESET} {infile}  {YELLOW}(unexpected compile success){RESET}")
-            else:
-                passed += 1
-                print(f"{GREEN}✓ PASS{RESET} {infile}  {YELLOW}(compile failed as expected){RESET}")
-
-        print(f"\n{BOLD}Summary:{RESET} {GREEN}{passed}{RESET}/{total} passed, {RED}{total - passed}{RESET} failed")
-        if failed_any:
-            sys.exit(1)
-        sys.exit(0)
-
-    # Build and run single compiler invocation
-    lflags = effective_lflags(pas_files, args.lflags)
-    compile_cmd = build_compiler_command(pas_files, args.opt, lflags)
-
-    print(f"{BOLD}Compiling {len(pas_files)} file(s) with one invocation:{RESET}")
-    print(" ", " ".join(compile_cmd))
-
-    try:
-        comp = subprocess.run(compile_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-    except FileNotFoundError:
-        eprint(f"{RED}Error:{RESET} cannot execute ./run.sh")
-        sys.exit(2)
-
-    if comp.returncode != 0:
-        eprint(f"{RED}Compilation failed{RESET} (exit {comp.returncode}). Output:")
-        if comp.stdout:
-            print(comp.stdout)
-        if comp.stderr:
-            eprint(comp.stderr)
-        sys.exit(comp.returncode)
-
-    # Execute each test and compare
-    total = 0
-    passed = 0
-    failed_any = False
-    results = []
-
-    print(f"\n{BOLD}Running tests...{RESET}")
-
-    for infile in pas_files:
-        total += 1
-        exe = out_path_for_input(infile)
-        inp, outp = expected_io_files(infile)
-
-        rc, stdout, stderr = run_executable(exe, inp)
-        test_name = str(infile)
-        if rc != 0:
-            failed_any = True
-            results.append((False, test_name, f"Program exited with code {rc}. Stderr:\n{stderr.strip()}"))
-            print(f"{RED}✗ FAIL{RESET} {test_name}  {YELLOW}(nonzero exit {rc}){RESET}")
-            continue
-
-        ok, expected_or_err = compare_output(stdout, outp)
-        if not ok:
-            failed_any = True
-            if expected_or_err.startswith("Missing expected file:"):
-                # Required by spec: terminate with nonzero if expected output missing.
-                print(f"{RED}✗ FAIL{RESET} {test_name}  {YELLOW}(missing .out){RESET}")
-                eprint(f"{RED}Error:{RESET} {expected_or_err}")
-                # Still list it and break after summary with nonzero exit
-                results.append((False, test_name, expected_or_err))
-            else:
-                # Show unified-ish diff style snippet
-                print(f"{RED}✗ FAIL{RESET} {test_name}")
-                results.append((False, test_name, "Output mismatch"))
-                # Optionally show a quick preview of mismatch (first differing lines)
-                # Keep concise
-                exp = expected_or_err.splitlines()
-                act = stdout.splitlines()
-                max_lines = max(len(exp), len(act))
-                preview = []
-                for i in range(min(5, max_lines)):
-                    e_line = exp[i] if i < len(exp) else ""
-                    a_line = act[i] if i < len(act) else ""
-                    if e_line != a_line:
-                        preview.append(f"  line {i+1}:\n    expected: {e_line!r}\n    actual  : {a_line!r}")
-                if preview:
-                    print("\n".join(preview))
-        else:
-            passed += 1
-            print(f"{GREEN}✓ PASS{RESET} {test_name}")
-
-    # Summary
-    print(f"\n{BOLD}Summary:{RESET} {GREEN}{passed}{RESET}/{total} passed, {RED}{total - passed}{RESET} failed")
-
-    # Exit codes per spec
-    if failed_any:
+    exes = {src: exe_for(src) for src in srcs}
+    if not compile_all(srcs, exes, compiler_args):
         sys.exit(1)
-    sys.exit(0)
+
+    passed = 0
+    for src in srcs:
+        if test(src, exes[src]):
+            passed += 1
+
+    total = len(srcs)
+    summary = f"{passed}/{total} passed"
+    print(color(summary, GREEN if passed == total else RED + BOLD))
+    sys.exit(0 if passed == total else 1)
+
 
 if __name__ == "__main__":
     main()
