@@ -35,7 +35,7 @@ public class ASTUtils {
     static final String ERROR = "@error";
 
     static final String EOF = "eof";
-    static final String EOL = "eol";
+    static final String EOLN = "eoln";
 
     /**
      * Generates first toString for an AST node by concatenating first given string with

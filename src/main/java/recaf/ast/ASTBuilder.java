@@ -85,7 +85,7 @@ public class ASTBuilder {
                         Optional.of(boolType), new ASTIdentifier(ctx, EOF), Optional.of(List.of()),
                         List.of(), Optional.empty(), false, true, false),
                 new ASTMethodDecl(ctx,
-                        Optional.of(boolType), new ASTIdentifier(ctx, EOL), Optional.of(List.of()),
+                        Optional.of(boolType), new ASTIdentifier(ctx, EOLN), Optional.of(List.of()),
                         List.of(), Optional.empty(), false, true, false)
         );
     }
