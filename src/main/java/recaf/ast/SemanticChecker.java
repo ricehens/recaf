@@ -277,8 +277,16 @@ public class SemanticChecker {
     private boolean equalTypes(ASTType t1, ASTType t2) {
         ASTType r1 = resolveType(t1);
         ASTType r2 = resolveType(t2);
+
         ASTType unk = primitiveType(Type.UNKNOWN);
-        return r1 == r2 || r1 == unk || r2 == unk;
+        if (r1 == unk || r2 == unk) return true;
+
+        ASTType nil = primitiveType(Type.POINTER);
+        if (r1 == nil && r2 instanceof ASTPointerType
+                || r2 == nil && r1 instanceof ASTPointerType)
+            return true;
+
+        return r1 == r2;
     }
 
     private boolean equalTypesStrict(ASTType t1, ASTType t2) {
@@ -798,6 +806,7 @@ public class SemanticChecker {
             case LONG -> globalTypes.get(INT64);
             case BOOL -> globalTypes.get(BOOLEAN);
             case STRING -> globalTypes.get(STRING);
+            case POINTER -> globalTypes.get(NIL_TYPE);
             case UNKNOWN -> globalTypes.get(ERROR);
             default -> throw new AssertionError("This should never happen.");
         };

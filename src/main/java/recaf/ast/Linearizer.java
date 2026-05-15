@@ -534,7 +534,8 @@ public class Linearizer {
     }
 
     private void linearize(CFGAddress dest, ASTLiteral lit) {
-        cfg.offer(new CFGLiteralInstruction(ctx, dest, lit.literal()));
+        cfg.offer(new CFGLiteralInstruction(ctx, dest, lit.literal() instanceof NilLiteral
+                ? new LongLiteral(0) : lit.literal()));
     }
 
     private void linearize(CFGAddress dest, ASTUnaryExpression unary) {

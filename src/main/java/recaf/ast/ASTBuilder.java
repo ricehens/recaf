@@ -38,6 +38,7 @@ public class ASTBuilder {
         ASTPrimitiveType longType = new ASTPrimitiveType(ctx, Type.LONG);
         ASTPrimitiveType boolType = new ASTPrimitiveType(ctx, Type.BOOL);
         ASTPrimitiveType strType = new ASTPrimitiveType(ctx, Type.STRING);
+        ASTPrimitiveType ptrType = new ASTPrimitiveType(ctx, Type.POINTER);
         ASTPrimitiveType unkType = new ASTPrimitiveType(ctx, Type.UNKNOWN);
         return Stream.of(
                 new ASTMethodDecl(ctx,
@@ -45,10 +46,12 @@ public class ASTBuilder {
                         List.of(), Optional.empty(), true, false, false),
                 new ASTConstDecl(ctx, new ASTIdentifier(ctx, TRUE), new ASTLiteral(ctx, new BoolLiteral(true))),
                 new ASTConstDecl(ctx, new ASTIdentifier(ctx, FALSE), new ASTLiteral(ctx, new BoolLiteral(false))),
+                new ASTConstDecl(ctx, new ASTIdentifier(ctx, NIL), new ASTLiteral(ctx, new NilLiteral())),
                 new ASTTypeDecl(ctx, new ASTIdentifier(ctx, INTEGER), intType),
                 new ASTTypeDecl(ctx, new ASTIdentifier(ctx, INT64), longType),
                 new ASTTypeDecl(ctx, new ASTIdentifier(ctx, BOOLEAN), boolType),
                 new ASTTypeDecl(ctx, new ASTIdentifier(ctx, STRING), strType),
+                new ASTTypeDecl(ctx, new ASTIdentifier(ctx, NIL_TYPE), ptrType),
                 new ASTTypeDecl(ctx, new ASTIdentifier(ctx, ERROR), unkType),
                 new ASTMethodDecl(ctx,
                         Optional.empty(), new ASTIdentifier(ctx, WRITE), Optional.empty(),
