@@ -43,6 +43,8 @@ public class ASTBuilder {
                 new ASTMethodDecl(ctx,
                         Optional.empty(), new ASTIdentifier(ctx, MAIN), Optional.of(List.of()),
                         List.of(), Optional.empty(), true, false, false),
+                new ASTConstDecl(ctx, new ASTIdentifier(ctx, TRUE), new ASTLiteral(ctx, new BoolLiteral(true))),
+                new ASTConstDecl(ctx, new ASTIdentifier(ctx, FALSE), new ASTLiteral(ctx, new BoolLiteral(false))),
                 new ASTTypeDecl(ctx, new ASTIdentifier(ctx, INTEGER), intType),
                 new ASTTypeDecl(ctx, new ASTIdentifier(ctx, INT64), longType),
                 new ASTTypeDecl(ctx, new ASTIdentifier(ctx, BOOLEAN), boolType),
@@ -377,9 +379,6 @@ public class ASTBuilder {
     }
 
     private ASTLiteral visit(RecafParser.LiteralContext cst) {
-        if (cst.BOOL_LITERAL() != null)
-            return new ASTLiteral(ctx(cst),
-                    new BoolLiteral(cst.BOOL_LITERAL().getText().equalsIgnoreCase("true")));
         if (cst.INT_LITERAL() != null) {
             ASTContext ctx = ctx(cst);
             return new ASTLiteral(ctx,

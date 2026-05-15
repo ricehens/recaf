@@ -2,7 +2,6 @@ lexer grammar RecafLexer;
 options { caseInsensitive = true; }
 
 // Literals
-BOOL_LITERAL: 'true' | 'false';
 STRING_LITERAL: (STRING_SEGMENT | HASH_ESCAPE)+;
 INT_LITERAL: DEC_LITERAL | HEX_LITERAL;
 fragment DEC_LITERAL: [0-9]+;

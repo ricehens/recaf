@@ -34,9 +34,11 @@ public class ASTUtils {
     static final String CHAR = "char";
     static final String STRING = "@string";
     static final String ERROR = "@error";
-
     static final String EOF = "eof";
     static final String EOLN = "eoln";
+    static final String TRUE = "true";
+    static final String FALSE = "false";
+    static final String NIL = "nil";
 
     /**
      * Generates first toString for an AST node by concatenating first given string with

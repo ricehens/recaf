@@ -77,7 +77,7 @@ mul_op: TIMES | DIV | MOD | AND;
 add_op: PLUS | MINUS | OR;
 rel_op: EQUALS | NEQ | LT | GT | LEQ | GEQ;
 
-literal: INT_LITERAL | BOOL_LITERAL | STRING_LITERAL;
+literal: INT_LITERAL | STRING_LITERAL;
 
 if_else: IF expr THEN statement (ELSE statement)?;
 for_loop: FOR ID ASSIGN expr (TO | DOWNTO) expr DO statement;
