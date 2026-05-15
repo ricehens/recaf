@@ -92,37 +92,7 @@ end;
 const MAX_LEN = 255;
 type
     PBuffer = ^TBuffer;
-    TBuffer = record
-        Buf: array[0..MAX_LEN] of Integer;
-        Len: Integer;
-    end;
-
-function getchar: Integer; external;
-function ReadInput: PBuffer;
-var i, c: Integer;
-begin
-    New(ReadInput);
-    for i := 0 to MAX_LEN do begin
-        c := getchar;
-        if c = 10 then begin
-            ReadInput^.Len := i;
-            Exit
-        end;
-        if c = -1 then begin
-            ReadInput^.Len := -1;
-            Exit
-        end;
-        ReadInput^.Buf[i] := c
-    end;
-    ReadInput^.Len := MAX_LEN + 1
-end;
-
-procedure PrintBuffer(b: PBuffer);
-var i: Integer;
-begin
-    for i := 0 to b^.Len - 1 do Write(b^.Buf[i], ' ');
-    WriteLn
-end;
+    TBuffer = Array[0..MAX_LEN] of Integer;
 
 (* lexer *)
 type
@@ -144,22 +114,22 @@ function Lex(s: PBuffer; idx: Integer): PTokenList;
 var c, v: Integer;
 begin
     Lex := Null;
-    while (idx < s^.len) and (s^.Buf[idx] = 32) do idx := idx + 1;
-    if idx < s^.len then begin
+    while (idx <= s^[0]) and (s^[idx] = Char(' ')) do idx := idx + 1;
+    if idx <= s^[0] then begin
         New(Lex);
         Lex^.Token.Value := idx;
-        c := s^.Buf[idx];
-        if c = 43 then Lex^.Token.Kind := TokenPlus
-        else if c = 45 then Lex^.Token.Kind := TokenMinus
-        else if c = 42 then Lex^.Token.Kind := TokenTimes
-        else if c = 47 then Lex^.Token.Kind := TokenSlash
-        else if c = 40 then Lex^.Token.Kind := TokenLParen
-        else if c = 41 then Lex^.Token.Kind := TokenRParen
-        else if (c >= 48) and (c <= 57) then begin
+        c := s^[idx];
+        if c = Char('+') then Lex^.Token.Kind := TokenPlus
+        else if c = Char('-') then Lex^.Token.Kind := TokenMinus
+        else if c = Char('*') then Lex^.Token.Kind := TokenTimes
+        else if c = Char('/') then Lex^.Token.Kind := TokenSlash
+        else if c = Char('(') then Lex^.Token.Kind := TokenLParen
+        else if c = Char(')') then Lex^.Token.Kind := TokenRParen
+        else if (c >= Char('0')) and (c <= Char('9')) then begin
             Lex^.Token.Kind := TokenLit;
             v := 0;
-            while (idx < s^.len) and (s^.Buf[idx] >= 48) and (s^.Buf[idx] <= 57) do begin
-                v := v * 10 + s^.Buf[idx] - 48;
+            while (idx <= s^[0]) and (s^[idx] >= Char('0')) and (s^[idx] <= Char('9')) do begin
+                v := v * 10 + s^[idx] - Char('0');
                 idx := idx + 1
             end;
             Lex^.Token.Value := v;
@@ -342,15 +312,16 @@ var Buf: PBuffer;
 begin
     while True do begin
         Write('calc> ');
-        Buf := ReadInput;
-        if Buf^.Len = -1 then begin
+        if Eof then begin
             WriteLn;
-            Dispose(Buf);
-            Exit
+            Break
         end;
-        { PrintBuffer(Buf); }
 
-        Tokens := Lex(Buf, 0);
+        New(Buf);
+        ReadLn(Buf^);
+        if Buf^[0] = 0 then Continue;
+
+        Tokens := Lex(Buf, 1);
         Dispose(Buf);
         { PrintTokens(Tokens); }
 

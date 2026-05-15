@@ -516,7 +516,6 @@ public class SemanticChecker {
 
         if (MAIN.equals(key(id)))
             ast.ctx().error("cannot call main routine");
-        if (md.internal()) checkNativeCall(ast);
 
         if (md.params().isPresent() && md.params().get().size() != ast.args().size()) {
             ast.ctx().error("expected " + md.params().get().size()
@@ -549,6 +548,7 @@ public class SemanticChecker {
         }
 
         ASTMethodCall ret = new ASTMethodCall(ast.ctx(), id, args);
+        if (md.internal()) checkNativeCall(ret);
         if (md.returnType().isPresent())
             exprTypes.put(ret, resolveType(md.returnType().get()));
         return ret;
@@ -558,8 +558,7 @@ public class SemanticChecker {
         switch (key(ast.id())) {
             case WRITE, WRITELN -> {
                 for (ASTExpression arg : ast.args()) {
-                    // descend into expression twice but whatever
-                    ASTType type = exprType(dispatch(arg));
+                    ASTType type = exprType(arg);
                     if (!(type instanceof ASTPrimitiveType) && !isCharArray(type))
                         arg.ctx().error(key(ast.id())
                                 + " expects arguments of type integer, int64, boolean, "
@@ -568,20 +567,18 @@ public class SemanticChecker {
             }
             case READ -> {
                 for (ASTExpression arg : ast.args()) {
-                    ASTExpression dispatch = dispatch(arg);
-                    if (!(dispatch instanceof ASTLocation))
+                    if (!(arg instanceof ASTLocation))
                         arg.ctx().error("read expects locations as arguments");
-                    ASTType type = exprType(dispatch);
+                    ASTType type = exprType(arg);
                     if (!isNumeric(type))
                         arg.ctx().error("read expects arguments of type integer or int64");
                 }
             }
             case READLN -> {
                 for (ASTExpression arg : ast.args()) {
-                    ASTExpression dispatch = dispatch(arg);
-                    if (!(dispatch instanceof ASTLocation))
+                    if (!(arg instanceof ASTLocation))
                         arg.ctx().error("readln expects locations as arguments");
-                    ASTType type = exprType(dispatch);
+                    ASTType type = exprType(arg);
                     if (!isNumeric(type)) {
                         if (isCharArray(type)) {
                             if (ast.args().size() != 1)
@@ -594,7 +591,7 @@ public class SemanticChecker {
                 if (ast.args().size() != 1)
                     ast.ctx().error(key(ast.id()) + " expects exactly one argument");
                 else {
-                    ASTExpression ptr = dispatch(ast.args().getFirst());
+                    ASTExpression ptr = ast.args().getFirst();
                     if (NEW.equals(key(ast.id())) && !(ptr instanceof ASTLocation))
                         ast.args().getFirst().ctx().error(key(ast.id()) + " expects location as argument");
                     if (!(exprType(ptr) instanceof ASTPointerType))
@@ -604,9 +601,20 @@ public class SemanticChecker {
             case INTEGER, INT64 -> {
                 if (ast.args().size() != 1)
                     ast.ctx().error(key(ast.id()) + " expects exactly one argument");
-                else {
-                    if (!isNumeric(exprType(dispatch(ast.args().getFirst()))))
+                else if (!isNumeric(exprType(ast.args().getFirst())))
                         ast.ctx().error(key(ast.id()) + " expects argument of type integer or int64");
+            }
+            case CHAR -> {
+                if (ast.args().size() != 1)
+                    ast.ctx().error("char expects exactly one argument");
+                else {
+                    ASTExpression arg = ast.args().getFirst();
+                    if (!equalTypes(exprType(arg), primitiveType(Type.STRING))
+                            || !(arg instanceof ASTLiteral lit)
+                            || !(lit.literal() instanceof StringLiteral(String str)))
+                        arg.ctx().error("char expects argument of type string");
+                    else if (str.length() != 1)
+                        arg.ctx().error("char expects string of length 1 as argument");
                 }
             }
             case BREAK, CONTINUE -> {

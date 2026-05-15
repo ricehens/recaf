@@ -31,6 +31,7 @@ public class ASTUtils {
     static final String INTEGER = "integer";
     static final String INT64 = "int64";
     static final String BOOLEAN = "boolean";
+    static final String CHAR = "char";
     static final String STRING = "@string";
     static final String ERROR = "@error";
 

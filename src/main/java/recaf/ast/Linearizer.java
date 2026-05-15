@@ -347,6 +347,10 @@ public class Linearizer {
                     cfg.offer(new CFGCastInstruction(ctx, dest, Type.INT, linearize(mc.args().getFirst())));
             case INT64 ->
                     cfg.offer(new CFGCastInstruction(ctx, dest, Type.LONG, linearize(mc.args().getFirst())));
+            case CHAR -> {
+                char c = ((StringLiteral) ((ASTLiteral) mc.args().getFirst()).literal()).value().charAt(0);
+                cfg.offer(new CFGLiteralInstruction(ctx, dest, new IntLiteral(c)));
+            }
 
             case NEW -> {
                 symbolTable.addExternalMethod(MALLOC);
