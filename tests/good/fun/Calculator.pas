@@ -107,13 +107,11 @@ type
         Token: TToken;
         Next: PTokenList;
     end;
-var
-    Null: PTokenList;
 
 function Lex(s: PBuffer; idx: Integer): PTokenList;
 var c, v: Integer;
 begin
-    Lex := Null;
+    Lex := Nil;
     while (idx <= s^[0]) and (s^[idx] = Char(' ')) do idx := idx + 1;
     if idx <= s^[0] then begin
         New(Lex);
@@ -140,13 +138,13 @@ begin
         end;
 
         Lex^.Next := Lex(s, idx + 1);
-        if (Lex^.Next <> Null) and (Lex^.Next^.Token.Kind = TokenError) then Lex^.Token := Lex^.Next^.Token
+        if (Lex^.Next <> Nil) and (Lex^.Next^.Token.Kind = TokenError) then Lex^.Token := Lex^.Next^.Token
     end
 end;
 
 procedure PrintTokens(tokens: PTokenList);
 begin
-    while tokens <> Null do begin
+    while tokens <> Nil do begin
         if tokens^.Token.Kind = TokenLit then Write(tokens^.Token.Value)
         else if tokens^.Token.Kind = TokenPlus then Write('+')
         else if tokens^.Token.Kind = TokenMinus then Write('-')
@@ -166,7 +164,7 @@ end;
 
 procedure DisposeTokens(tokens: PTokenList);
 begin
-    if tokens <> Null then begin
+    if tokens <> Nil then begin
         DisposeTokens(tokens^.Next);
         Dispose(tokens)
     end
@@ -193,7 +191,7 @@ function ErrorToken(state: PParserState): PExpr;
 begin
     New(ErrorToken);
     ErrorToken^.Kind := ExprError;
-    if state^.tokens = Null then ErrorToken^.Value := -1
+    if state^.tokens = Nil then ErrorToken^.Value := -1
     else begin
         ErrorToken^.Value := state^.tokens^.Token.Value;
         NextToken(state)
@@ -207,7 +205,7 @@ begin
     state^.tokens := tokens;
     Parse := ParseAddSub(state);
 
-    if state^.tokens <> Null then begin
+    if state^.tokens <> Nil then begin
         DisposeExpr(Parse);
         Parse := ErrorToken(state)
     end;
@@ -216,7 +214,7 @@ end;
 
 function GetTokenKind(state: PParserState): TokenKind;
 begin
-    if state^.tokens = Null then GetTokenKind := TokenError
+    if state^.tokens = Nil then GetTokenKind := TokenError
     else GetTokenKind := state^.tokens^.Token.Kind
 end;
 

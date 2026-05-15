@@ -1,7 +1,7 @@
-program NilAssignBad
+program NilAssignBad;
 
 type
-    PInteger: ^Integer;
+    PInteger = ^Integer;
 
 var x: Integer;
 begin
