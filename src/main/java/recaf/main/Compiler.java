@@ -86,7 +86,7 @@ public class Compiler {
                 temp = File.createTempFile("recaf", ".s");
                 out = new PrintStream(new FileOutputStream(temp));
             } catch (IOException e) {
-                errorHandler.error("recafc", -1, -1, "temporary file could not be created");
+                errorHandler.error("recaf", -1, -1, "temporary file could not be created");
             }
 
             return;
@@ -100,20 +100,20 @@ public class Compiler {
         try {
             out = new PrintStream(Files.newOutputStream(Path.of(outfile))); ;
         } catch (IOException e) {
-            errorHandler.error("recafc", -1, -1, "output file " + outfile + " could not be opened");
+            errorHandler.error("recaf", -1, -1, "output file " + outfile + " could not be opened");
             bye();
         }
     }
 
     private CommonTokenStream tokenize() {
         if (!infile.endsWith(".pas")) {
-            errorHandler.error("recafc", -1, -1, "file format for " + infile + " not recognized");
+            errorHandler.error("recaf", -1, -1, "file format for " + infile + " not recognized");
         }
 
         try (InputStream is = Files.newInputStream(Path.of(infile))) {
             return new Tokenizer(is).tokenize();
         } catch (IOException e) {
-            errorHandler.error("recafc", -1, -1, "file " + infile + " could not be opened");
+            errorHandler.error("recaf", -1, -1, "file " + infile + " could not be opened");
             return null;
         }
     }
@@ -137,7 +137,7 @@ public class Compiler {
 
     private void makeExecutable() {
         if (!System.getProperty("os.arch").equals("x86_64") && !System.getProperty("os.arch").equals("amd64")) {
-            errorHandler.error("recafc", -1, -1, "cannot make executable on non-x86_64 architecture");
+            errorHandler.error("recaf", -1, -1, "cannot make executable on non-x86_64 architecture");
             bye();
         }
         try {
@@ -146,18 +146,20 @@ public class Compiler {
                     "-o", outfile == null ? infile.substring(0, infile.length() - 4) : outfile
             ));
 
-            Path stdlib = extractBundledLibrary("/stdlib/libsystem.a", "libsystem.a");
-            cmd.add(stdlib.toString());
+            for (String library : List.of("libsystem.a", "libfloat.a", "libcrt.a")) {
+                Path stdlib = extractBundledLibrary("/stdlib/" + library, library);
+                cmd.add(stdlib.toString());
+            }
 
             for (String lib : libraries) {
                 File file = new File(lib);
                 if (!file.exists())
-                    errorHandler.error("recafc", -1, -1, "library " + lib + " does not exist");
+                    errorHandler.error("recaf", -1, -1, "library " + lib + " does not exist");
                 if (file.getParent() != null)
                     cmd.add("-L" + file.getParent());
                 String name = file.getName();
                 if (!name.startsWith("lib") || !name.endsWith(".a"))
-                    errorHandler.error("recafc", -1, -1, "library " + lib + " is not a static library");
+                    errorHandler.error("recaf", -1, -1, "library " + lib + " is not a static library");
                 cmd.add("-l" + name.substring(3, name.length() - 2));
             }
 
@@ -169,13 +171,14 @@ public class Compiler {
             Process p = pb.start();
             int exitCode = p.waitFor();
             if (exitCode != 0) {
-                errorHandler.error("recafc", -1, -1, "gcc failed with exit code " + exitCode);
+                errorHandler.error("recaf", -1, -1, "gcc failed with exit code " + exitCode);
             }
         } catch (IOException e) {
-            errorHandler.error("recafc", -1, -1, "error making executable");
+            errorHandler.error("recaf", -1, -1, "error making executable");
+            e.printStackTrace();
             bye();
         } catch (InterruptedException e) {
-            errorHandler.error("recafc", -1, -1, "error linking");
+            errorHandler.error("recaf", -1, -1, "error linking");
             bye();
         }
     }

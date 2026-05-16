@@ -59,19 +59,10 @@ tasks.register<Javadoc>("generateJavadoc") {
     }
 }
 
-val buildStdLib by tasks.registering(Exec::class) {
-    inputs.file("stdlib/system.c")
-    outputs.file("stdlib/libsystem.a")
-
-    commandLine("bash", "-c", "gcc -c stdlib/system.c -o stdlib/system.o && ar rcs stdlib/libsystem.a stdlib/system.o")
-}
-
 // jar
 tasks.named<Jar>("jar") {
-    dependsOn(buildStdLib)
-
     from("stdlib") {
-        include("libsystem.a")
+        include("libsystem.a", "libfloat.a", "libcrt.a")
         into("stdlib")
     }
 
