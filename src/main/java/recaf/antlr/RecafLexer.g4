@@ -38,6 +38,7 @@ MOD: 'mod';
 AND: 'and';
 OR: 'or';
 NOT: 'not';
+USES: 'uses';
 
 // Identifiers
 ID: ALPHA (ALPHA_NUM)*;

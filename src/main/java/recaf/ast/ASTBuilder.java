@@ -13,7 +13,8 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-import static recaf.ast.ASTUtils.*;
+import static recaf.ast.ASTUtils.MAIN;
+import static recaf.ast.ASTUtils.SYSTEM;
 
 public class ASTBuilder {
 
@@ -28,73 +29,16 @@ public class ASTBuilder {
         return new ASTProgram(ctx,
                 visitIdentifier(cst.program_decl().ID()),
                 Stream.concat(
-                        Stream.concat(registerInternals(ctx),
-                                cst.declaration().stream().flatMap(this::visit)),
-                        Stream.of(visit(cst.main_block()))).toList());
+                        Stream.concat(Stream.of(new ASTUsesDecl(ctx, new ASTIdentifier(ctx, SYSTEM))),
+                                cst.uses_decl() == null ? Stream.of() : visit(cst.uses_decl())),
+                                Stream.concat(cst.declaration().stream().flatMap(this::visit),
+                        Stream.of(visit(cst.main_block()))))
+                                        .toList());
     }
 
-    private Stream<ASTDeclaration> registerInternals(ASTContext ctx) {
-        ASTPrimitiveType intType = new ASTPrimitiveType(ctx, Type.INT);
-        ASTPrimitiveType longType = new ASTPrimitiveType(ctx, Type.LONG);
-        ASTPrimitiveType boolType = new ASTPrimitiveType(ctx, Type.BOOL);
-        ASTPrimitiveType strType = new ASTPrimitiveType(ctx, Type.STRING);
-        ASTPrimitiveType ptrType = new ASTPrimitiveType(ctx, Type.POINTER);
-        ASTPrimitiveType unkType = new ASTPrimitiveType(ctx, Type.UNKNOWN);
-        return Stream.of(
-                new ASTMethodDecl(ctx,
-                        Optional.empty(), new ASTIdentifier(ctx, MAIN), Optional.of(List.of()),
-                        List.of(), Optional.empty(), true, false, false),
-                new ASTConstDecl(ctx, new ASTIdentifier(ctx, TRUE), new ASTLiteral(ctx, new BoolLiteral(true))),
-                new ASTConstDecl(ctx, new ASTIdentifier(ctx, FALSE), new ASTLiteral(ctx, new BoolLiteral(false))),
-                new ASTConstDecl(ctx, new ASTIdentifier(ctx, NIL), new ASTLiteral(ctx, new NilLiteral())),
-                new ASTTypeDecl(ctx, new ASTIdentifier(ctx, INTEGER), intType),
-                new ASTTypeDecl(ctx, new ASTIdentifier(ctx, INT64), longType),
-                new ASTTypeDecl(ctx, new ASTIdentifier(ctx, BOOLEAN), boolType),
-                new ASTTypeDecl(ctx, new ASTIdentifier(ctx, STRING), strType),
-                new ASTTypeDecl(ctx, new ASTIdentifier(ctx, NIL_TYPE), ptrType),
-                new ASTTypeDecl(ctx, new ASTIdentifier(ctx, ERROR), unkType),
-                new ASTMethodDecl(ctx,
-                        Optional.empty(), new ASTIdentifier(ctx, WRITE), Optional.empty(),
-                        List.of(), Optional.empty(), false, false, true),
-                new ASTMethodDecl(ctx,
-                        Optional.empty(), new ASTIdentifier(ctx, WRITELN), Optional.empty(),
-                        List.of(), Optional.empty(), false, false, true),
-                new ASTMethodDecl(ctx,
-                        Optional.empty(), new ASTIdentifier(ctx, READ), Optional.empty(),
-                        List.of(), Optional.empty(), false, false, true),
-                new ASTMethodDecl(ctx,
-                        Optional.empty(), new ASTIdentifier(ctx, READLN), Optional.empty(),
-                        List.of(), Optional.empty(), false, false, true),
-                new ASTMethodDecl(ctx,
-                        Optional.empty(), new ASTIdentifier(ctx, BREAK), Optional.of(List.of()),
-                        List.of(), Optional.empty(), false, false, true),
-                new ASTMethodDecl(ctx,
-                        Optional.empty(), new ASTIdentifier(ctx, CONTINUE), Optional.of(List.of()),
-                        List.of(), Optional.empty(), false, false, true),
-                new ASTMethodDecl(ctx,
-                        Optional.empty(), new ASTIdentifier(ctx, EXIT), Optional.of(List.of()),
-                        List.of(), Optional.empty(), false, false, true),
-                new ASTMethodDecl(ctx,
-                        Optional.empty(), new ASTIdentifier(ctx, NEW), Optional.empty(),
-                        List.of(), Optional.empty(), false, false, true),
-                new ASTMethodDecl(ctx,
-                        Optional.empty(), new ASTIdentifier(ctx, DISPOSE), Optional.empty(),
-                        List.of(), Optional.empty(), false, false, true),
-                new ASTMethodDecl(ctx,
-                        Optional.of(intType), new ASTIdentifier(ctx, INTEGER), Optional.empty(),
-                        List.of(), Optional.empty(), false, false, true),
-                new ASTMethodDecl(ctx,
-                        Optional.of(longType), new ASTIdentifier(ctx, INT64), Optional.empty(),
-                        List.of(), Optional.empty(), false, false, true),
-                new ASTMethodDecl(ctx,
-                        Optional.of(intType), new ASTIdentifier(ctx, CHAR), Optional.empty(),
-                        List.of(), Optional.empty(), false, false, true),
-                new ASTMethodDecl(ctx,
-                        Optional.of(boolType), new ASTIdentifier(ctx, EOF), Optional.of(List.of()),
-                        List.of(), Optional.empty(), false, true, false),
-                new ASTMethodDecl(ctx,
-                        Optional.of(boolType), new ASTIdentifier(ctx, EOLN), Optional.of(List.of()),
-                        List.of(), Optional.empty(), false, true, false)
+    private Stream<ASTDeclaration> visit(RecafParser.Uses_declContext cst) {
+        return cst.id_list().ID().stream().map(
+                id -> new ASTUsesDecl(new ASTContext(inv, id), visitIdentifier(id))
         );
     }
 

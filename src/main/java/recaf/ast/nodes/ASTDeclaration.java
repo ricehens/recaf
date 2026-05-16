@@ -1,4 +1,4 @@
 package recaf.ast.nodes;
 
-public interface ASTDeclaration {
+public interface ASTDeclaration extends AST {
 }

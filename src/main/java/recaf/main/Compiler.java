@@ -146,7 +146,7 @@ public class Compiler {
                     "-o", outfile == null ? infile.substring(0, infile.length() - 4) : outfile
             ));
 
-            for (String library : List.of("libsystem.a", "libfloat.a", "libcrt.a")) {
+            for (String library : List.of("libsystem.a", "libfloat64.a")) {
                 Path stdlib = extractBundledLibrary("/stdlib/" + library, library);
                 cmd.add(stdlib.toString());
             }

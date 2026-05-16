@@ -62,7 +62,7 @@ tasks.register<Javadoc>("generateJavadoc") {
 // jar
 tasks.named<Jar>("jar") {
     from("stdlib") {
-        include("libsystem.a", "libfloat.a", "libcrt.a")
+        include("libsystem.a", "libfloat64.a")
         into("stdlib")
     }
 

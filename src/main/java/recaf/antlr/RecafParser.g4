@@ -1,7 +1,7 @@
 parser grammar RecafParser;
 options { tokenVocab = RecafLexer; }
 
-program: program_decl declaration* main_block EOF;
+program: program_decl uses_decl? declaration* main_block EOF;
 
 program_decl: PROGRAM ID SEMICOLON;
 declaration: type_section
@@ -9,6 +9,8 @@ declaration: type_section
            | var_section
            | function_decl
            | procedure_decl;
+
+uses_decl: USES id_list SEMICOLON;
 
 type_section: TYPE type_decl SEMICOLON (type_decl SEMICOLON)*;
 type_decl: ID EQUALS type_ref;

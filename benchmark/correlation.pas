@@ -1,5 +1,4 @@
 program Correlation;
-
 {
     Computes the correlation matrix for M variables with N observations each.
     INPUT:
@@ -10,11 +9,8 @@ program Correlation;
     correlation matrix, expressed as M lines each containing
     M space-separated floating point numbers to two decimal places.
 }
-function fl_I2f(x); external;
-function fl_Mul(x, y); external;
-function fl_Div(x, y); external;
-function fl_Sqrt(x); external;
-procedure fl_PrintPrecision(x, digits); external;
+
+uses Float64;
 
 var
     A: array[0..999, 0..999] of integer;
@@ -60,10 +56,10 @@ begin
         begin
             for j := 0 to M - 1 do
             begin
-                fl_PrintPrecision(
-                    fl_Div(
-                        fl_I2f(Cov[i, j]),
-                        fl_Sqrt(fl_Mul(fl_I2f(Variance[i]), fl_I2f(Variance[j])))
+                FPrintPrecision(
+                    FDiv(
+                        FFromInt(Cov[i, j]),
+                        FSqrt(FMul(FFromInt(Variance[i]), FFromInt(Variance[j])))
                     ),
                     2
                 );

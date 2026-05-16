@@ -52,7 +52,7 @@ public class SemanticChecker {
         globalMisc.add(declareId(id));
 
         ASTProgram ret = new ASTProgram(ast.ctx(), id,
-                ast.decls().stream().map(this::dispatch).toList());
+                ast.decls().stream().flatMap(this::dispatch).toList());
 
         for (ASTMethodDecl md : methods.values())
             if (md.forward())
@@ -67,18 +67,130 @@ public class SemanticChecker {
         return new ASTIdentifier(ast.ctx(), key(ast));
     }
 
-    private ASTDeclaration dispatch(ASTDeclaration ast) {
+    private Stream<ASTDeclaration> dispatch(ASTDeclaration ast) {
         return switch (ast) {
-            case ASTTypeDecl td -> check(td);
+            case ASTUsesDecl ud -> check(ud).flatMap(this::dispatch);
+            case ASTTypeDecl td -> Stream.of(check(td));
             case ASTVarDecl vd -> {
                 ASTVarDecl ret = check(vd);
                 registerVar(ret.id(), ret.type());
-                yield ret;
+                yield Stream.of(ret);
             }
-            case ASTConstDecl cd -> check(cd);
-            case ASTMethodDecl md -> check(md);
+            case ASTConstDecl cd -> {
+                check(cd);
+                yield Stream.of();
+            }
+            case ASTMethodDecl md -> Stream.of(check(md));
             default -> throw new AssertionError("This should never happen.");
         };
+    }
+
+    private Stream<ASTDeclaration> check(ASTUsesDecl ast) {
+        ASTIdentifier id = check(ast.id());
+        globalMisc.add(declareId(id));
+
+        ASTContext ctx = ast.ctx();
+        return switch (id.text()) {
+            case SYSTEM -> {
+                ASTPrimitiveType intType = new ASTPrimitiveType(ctx, Type.INT);
+                ASTPrimitiveType longType = new ASTPrimitiveType(ctx, Type.LONG);
+                ASTPrimitiveType boolType = new ASTPrimitiveType(ctx, Type.BOOL);
+                ASTPrimitiveType strType = new ASTPrimitiveType(ctx, Type.STRING);
+                ASTPrimitiveType ptrType = new ASTPrimitiveType(ctx, Type.POINTER);
+                ASTPrimitiveType unkType = new ASTPrimitiveType(ctx, Type.UNKNOWN);
+                yield Stream.of(
+                        new ASTMethodDecl(ctx,
+                                Optional.empty(), new ASTIdentifier(ctx, MAIN), Optional.of(List.of()),
+                                List.of(), Optional.empty(), true, false, false),
+                        new ASTConstDecl(ctx, new ASTIdentifier(ctx, TRUE), new ASTLiteral(ctx, new BoolLiteral(true))),
+                        new ASTConstDecl(ctx, new ASTIdentifier(ctx, FALSE), new ASTLiteral(ctx, new BoolLiteral(false))),
+                        new ASTConstDecl(ctx, new ASTIdentifier(ctx, NIL), new ASTLiteral(ctx, new NilLiteral())),
+                        new ASTTypeDecl(ctx, new ASTIdentifier(ctx, INTEGER), intType),
+                        new ASTTypeDecl(ctx, new ASTIdentifier(ctx, INT64), longType),
+                        new ASTTypeDecl(ctx, new ASTIdentifier(ctx, BOOLEAN), boolType),
+                        new ASTTypeDecl(ctx, new ASTIdentifier(ctx, STRING), strType),
+                        new ASTTypeDecl(ctx, new ASTIdentifier(ctx, NIL_TYPE), ptrType),
+                        new ASTTypeDecl(ctx, new ASTIdentifier(ctx, ERROR), unkType),
+                        makeInternal(ctx, null, WRITE, null),
+                        makeInternal(ctx, null, WRITELN, null),
+                        makeInternal(ctx, null, READ, null),
+                        makeInternal(ctx, null, READLN, null),
+                        makeInternal(ctx, null, BREAK, List.of()),
+                        makeInternal(ctx, null, CONTINUE, List.of()),
+                        makeInternal(ctx, null, EXIT, List.of()),
+                        makeInternal(ctx, null, NEW, null),
+                        makeInternal(ctx, null, DISPOSE, null),
+                        makeInternal(ctx, intType, INTEGER, null),
+                        makeInternal(ctx, longType, INT64, null),
+                        makeInternal(ctx, intType, CHAR, null),
+                        makeExternal(ctx, boolType, "Eof"),
+                        makeExternal(ctx, boolType, "Eoln"),
+                        makeExternal(ctx, null, "Randomize"),
+                        makeExternal(ctx, intType, "Random", intType)
+                );
+            }
+
+            case FLOAT64 -> {
+                ASTType boolType = primitiveType(Type.BOOL);
+                ASTType intType = primitiveType(Type.INT);
+                ASTType longType = primitiveType(Type.LONG);
+                yield Stream.of(
+                        makeExternal(ctx, longType, "FFromInt", longType),
+                        makeExternal(ctx, longType, "FToInt", longType),
+                        makeExternal(ctx, longType, "FAdd", longType, longType),
+                        makeExternal(ctx, longType, "FSub", longType, longType),
+                        makeExternal(ctx, longType, "FMul", longType, longType),
+                        makeExternal(ctx, longType, "FDiv", longType, longType),
+                        makeExternal(ctx, boolType, "FGt", longType, longType),
+                        makeExternal(ctx, boolType, "FLt", longType, longType),
+                        makeExternal(ctx, boolType, "FGeq", longType, longType),
+                        makeExternal(ctx, boolType, "FLeq", longType, longType),
+                        makeExternal(ctx, longType, "FPow", longType, longType),
+                        makeExternal(ctx, longType, "FSqrt", longType),
+                        makeExternal(ctx, longType, "FAbs", longType),
+                        makeExternal(ctx, longType, "FExp", longType),
+                        makeExternal(ctx, longType, "FLog", longType),
+                        makeExternal(ctx, longType, "FLog10", longType),
+                        makeExternal(ctx, longType, "FMax", longType, longType),
+                        makeExternal(ctx, longType, "FMin", longType, longType),
+                        makeExternal(ctx, longType, "FFloor", longType),
+                        makeExternal(ctx, longType, "FCeil", longType),
+                        makeExternal(ctx, longType, "FRound", longType),
+                        makeExternal(ctx, longType, "FPi"),
+                        makeExternal(ctx, longType, "FEuler"),
+                        makeExternal(ctx, longType, "FSin", longType),
+                        makeExternal(ctx, longType, "FCos", longType),
+                        makeExternal(ctx, longType, "FTan", longType),
+                        makeExternal(ctx, longType, "FAsin", longType),
+                        makeExternal(ctx, longType, "FAcos", longType),
+                        makeExternal(ctx, longType, "FAtan", longType),
+                        makeExternal(ctx, longType, "FAtan2", longType, longType),
+                        makeExternal(ctx, null, "FPrint", longType),
+                        makeExternal(ctx, null, "FPrintPrecision", longType, intType)
+                );
+            }
+
+            default -> {
+                ctx.error("Module " + id.text() + " not found");
+                yield Stream.of();
+            }
+        };
+    }
+
+    private ASTMethodDecl makeInternal(ASTContext ctx, ASTType returnType,
+                                       String name, List<ASTVarDecl> params) {
+        return new ASTMethodDecl(ctx, Optional.ofNullable(returnType), new ASTIdentifier(ctx, name),
+                Optional.ofNullable(params),
+                List.of(), Optional.empty(), false, false, true);
+    }
+
+    private ASTMethodDecl makeExternal(ASTContext ctx, ASTType returnType, String name, ASTType... params) {
+        List<ASTVarDecl> args = new ArrayList<>();
+        for (int i = 0 ; i < params.length; i++)
+            args.add(new ASTVarDecl(ctx, params[i], new ASTIdentifier(ctx, "_" + i)));
+        return new ASTMethodDecl(ctx,
+                Optional.ofNullable(returnType), new ASTIdentifier(ctx, name), Optional.of(args),
+                List.of(), Optional.empty(), false, true, false);
     }
 
     private ASTTypeDecl check(ASTTypeDecl ast) {
@@ -182,14 +294,13 @@ public class SemanticChecker {
         return new ASTVarDecl(ast.ctx(), type, id);
     }
 
-    private ASTConstDecl check(ASTConstDecl ast) {
+    private void check(ASTConstDecl ast) {
         ASTIdentifier id = check(ast.id());
         Literal lit = evalConstant(ast.expr());
         if (lit == null)
             ast.ctx().error("constant must be compile-time evaluable");
         ASTLiteral astLit = new ASTLiteral(ast.expr().ctx(), lit);
         registerConst(id, astLit);
-        return new ASTConstDecl(ast.ctx(), id, astLit);
     }
 
     private ASTMethodDecl check(ASTMethodDecl ast) {
@@ -261,7 +372,7 @@ public class SemanticChecker {
 
         List<ASTDeclaration> decls = Stream.concat(
                 rv.stream(),
-                ast.decls().stream().map(this::dispatch)
+                ast.decls().stream().flatMap(this::dispatch)
         ).toList();
         flushPromises();
         Optional<ASTBlock> block = ast.block().map(this::check);
