@@ -4,10 +4,11 @@ plugins {
     id("java")
     id("application")
     id("antlr") 
+    id("org.graalvm.buildtools.native") version "1.1.0"
 }
 
 group = "recaf"
-version = "0.1.0-SNAPSHOT"
+version = "1.0.0"
 
 java {
     toolchain {
@@ -49,16 +50,6 @@ tasks.named<AntlrTask>("generateGrammarSource") {
     )
 }
 
-// Javadoc
-tasks.register<Javadoc>("generateJavadoc") {
-    source = sourceSets.main.get().allJava
-    destinationDir = file("build/docs/javadoc")
-    classpath = sourceSets.main.get().compileClasspath
-    options {
-        (this as StandardJavadocDocletOptions).addStringOption("Xdoclint:none", "-quiet")
-    }
-}
-
 // jar
 tasks.named<Jar>("jar") {
     from("stdlib") {
@@ -78,4 +69,23 @@ tasks.named<Jar>("jar") {
             .filter { it.name.endsWith("jar") }
             .map { zipTree(it) }
     })
+}
+
+// nativeCompile
+graalvmNative {
+    binaries {
+        named("main") {
+            imageName.set("recaf")
+            mainClass.set("recaf.Main")
+            sharedLibrary.set(false)
+
+            buildArgs.addAll(
+                listOf(
+                    "--static-nolibc",
+                    "--no-fallback",
+                    "-H:IncludeResources=stdlib/.*"
+                )
+            )
+        }
+    }
 }
