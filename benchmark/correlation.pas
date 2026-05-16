@@ -13,10 +13,10 @@ program Correlation;
 uses Float64;
 
 var
-    A: array[0..999, 0..999] of integer;
-    EV: array[0..999] of integer;
-    Variance: array[0..999] of integer;
-    Cov: array[0..999, 0..999] of integer;
+    A: Array[0..999, 0..999];
+    EV: Array[0..999];
+    Variance: Array[0..999];
+    Cov: Array[0..999, 0..999];
 
 var M, N, i, j, k;
 begin

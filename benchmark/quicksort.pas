@@ -5,7 +5,6 @@ program Quicksort;
     followed by the elements of the Array, 
     all whitespace-separated
 }
-procedure scanf(...); external;
 
 const MAX_SIZE = 10000000;
 var

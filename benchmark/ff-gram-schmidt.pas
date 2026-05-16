@@ -18,7 +18,7 @@ const p = 1009; (* characteristic *)
 var
     n, (* num of vectors *)
     d; (* dimension *)
-    Mat: Array[0..999, 0..999] of integer;
+    Mat: Array[0..999, 0..999];
 
 (* compute a^e mod p *)
 function Pow(a, e);

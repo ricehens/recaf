@@ -6,8 +6,6 @@ program StrassenMatMul;
     for the first matrix (row-major order), 
     then N^2 entries for the second matrix.
 }
-procedure scanf(...); external;
-procedure printf(...); external;
 
 const
     A = 0;
@@ -38,8 +36,8 @@ begin
     for i := 0 to n - 1 do
     begin
         for j := 0 to n - 2 do
-            printf('%d ', M[C, C_x + i, C_y + j]);
-        printf('%d'#10, M[C, C_x + i, C_y + n - 1])
+            Write(M[C, C_x + i, C_y + j], ' ');
+        WriteLn(M[C, C_x + i, C_y + n - 1])
     end
 end;
 
