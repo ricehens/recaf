@@ -46,3 +46,7 @@ tests/out
 tests/secret
 public-tests/
 derby/
+
+### stdlib build ###
+stdlib/*.o
+stdlib/*.a
