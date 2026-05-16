@@ -34,8 +34,8 @@ public class ASTUtils {
     static final String CHAR = "char";
     static final String STRING = "@string";
     static final String ERROR = "@error";
-    static final String EOF = "eof";
-    static final String EOLN = "eoln";
+    static final String EOF = "Eof";
+    static final String EOLN = "Eoln";
     static final String TRUE = "true";
     static final String FALSE = "false";
     static final String NIL = "nil";
