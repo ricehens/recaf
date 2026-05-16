@@ -25,20 +25,6 @@ int Eoln(void) {
     return c == '\n' || c == '\r' || c == EOF;
 }
 
-static uint32_t rng_state = 2463534242u;
-
-static uint32_t next_random_u32(void) {
-    uint32_t x = rng_state;
-
-    x ^= x << 13;
-    x ^= x >> 17;
-    x ^= x << 5;
-
-    rng_state = x;
-
-    return x;
-}
-
 void Randomize(void) {
     struct timeval tv;
     gettimeofday(&tv, NULL);
@@ -54,11 +40,7 @@ void Randomize(void) {
         seed = 2463534242u;
     }
 
-    rng_state = seed;
-
-    for (int i = 0; i < 8; i++) {
-        next_random_u32();
-    }
+    srandom(seed);
 }
 
 int Random(int range) {
@@ -66,5 +48,5 @@ int Random(int range) {
         return 0;
     }
 
-    return (int)(next_random_u32() % (uint32_t)range);
+    return (int) (random() % range);
 }
