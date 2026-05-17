@@ -7,7 +7,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-COMPILER = "./recaf"
+COMPILER = "./run.sh"
 TMP = Path("/tmp/recaf-test")
 VALUE_ARGS = {"-l", "--library", "-t", "--target"}
 GREEN = "\033[32m"
