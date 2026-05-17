@@ -33,7 +33,7 @@ application {
 sourceSets {
     main {
         antlr {
-            setSrcDirs(listOf("src/main/java/recaf/antlr"))
+            setSrcDirs(listOf("src/main/antlr"))
         }
         java {
             srcDirs("src/main/java", "src/main/gen")
