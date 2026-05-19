@@ -915,7 +915,7 @@ public class RegisterAllocation {
                 while (true) {
                     ASMInstruction next = prologue.getInstructions().next(lastPrepInst);
                     if (next == null) break;
-                    if (next.dest() != ASMRegister.RBP && next.dest() != ASMRegister.RSP)
+                    if (next.dest() != ASMRegister.RSP)
                         break;
                     lastPrepInst = next;
                 }
