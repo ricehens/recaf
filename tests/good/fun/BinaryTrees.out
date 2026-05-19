@@ -1,0 +1,7 @@
+iter=500 depth=14 nodes=32767 sum=-1252715345
+iter=1000 depth=14 nodes=32767 sum=1610596019
+iter=1500 depth=14 nodes=32767 sum=178940087
+iter=2000 depth=14 nodes=32767 sum=-1252715845
+PASS
+alloc_count=30718000
+free_count=30718000

@@ -98,7 +98,7 @@ public class Deglobalization implements Transformation {
         }
 
         // insert load
-        if (globalsUsed.get(method).contains(globalVar))
+        if (globalsUsed.get(method).contains(globalVar) || globalsDefined.get(method).contains(globalVar))
             method.getBlocks().peekFirst().getInstructions().offerFirst(
                     new CFGCopyInstruction(ctx, localVar, globalVar)
             );
