@@ -1,7 +1,7 @@
 program StrassenMatMul;
 
 {
-    INPUT: the dimension N (a power of 2 and <= 1024),
+    INPUT: the dimension N (a power of 2 and <= 128),
     followed by N^2 entries
     for the first matrix (row-major order), 
     then N^2 entries for the second matrix.
@@ -11,7 +11,7 @@ type
     PMatrix = ^TMatrix;
     TMatrix = record
         dim: Integer;
-        arr: array[0..1023, 0..1023] of Integer;
+        arr: array[0..127, 0..127] of Integer;
     end;
 
 function ReadMatrix(dim: Integer): PMatrix;
