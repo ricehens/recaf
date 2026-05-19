@@ -15,12 +15,9 @@ procedure MatMult;
 var i, j, k: Integer;
 begin
     for i := 0 to N - 1 do
-        for j := 0 to N - 1 do
-        begin
-            c[i, j] := 0;
-            for k := 0 to N - 1 do
+        for k := 0 to N - 1 do
+            for j := 0 to N - 1 do
                 c[i, j] := c[i, j] + a[i, k] * b[k, j]
-        end
 end;
 
 procedure PrintMatrix;

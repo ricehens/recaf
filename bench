@@ -1,0 +1,149 @@
+#!/usr/bin/env python3
+
+import hashlib
+import os
+import shlex
+import subprocess
+import sys
+from pathlib import Path
+
+GREEN = "\033[32m"
+RED = "\033[31m"
+BOLD = "\033[1m"
+DIM = "\033[2m"
+CYAN = "\033[36m"
+YELLOW = "\033[33m"
+RESET = "\033[0m"
+
+COMPILERS = {"recaf", "fpc", "gcc", "clang"}
+TMP = Path("/tmp")
+
+
+def color(text, ansi):
+    return f"{ansi}{text}{RESET}"
+
+
+def die(message, code=2):
+    print(message, file=sys.stderr)
+    sys.exit(code)
+
+
+def usage():
+    print("Usage: ./bench <recaf|fpc|gcc|clang> <file> <opts...>")
+    sys.exit(0)
+
+
+def exe_for(src, compiler, opts):
+    key = "\0".join([str(src.resolve()), compiler, *opts])
+    digest = hashlib.sha1(key.encode()).hexdigest()[:8]
+    name = "".join(c if c.isalnum() or c in "-_" else "_" for c in src.stem)
+    return TMP / f"bench-{name}-{compiler}-{digest}"
+
+
+def out_for(src, compiler, opts):
+    return exe_for(src, compiler, opts).with_suffix(".out")
+
+
+def compile_cmd(compiler, src, exe, opts):
+    if compiler == "recaf":
+        return ["./run.sh", str(src), "-o", str(exe), *opts]
+    if compiler == "fpc":
+        return ["fpc", str(src), f"-o{exe}", *opts]
+    cmd = [compiler, str(src), "-o", str(exe), *opts]
+    if "-lm" not in opts:
+        cmd.append("-lm")
+    return cmd
+
+
+def run(cmd, **kwargs):
+    try:
+        return subprocess.run(cmd, **kwargs)
+    except FileNotFoundError:
+        die(color(f"could not run {cmd[0]}", RED))
+
+
+def print_cmd(cmd, stdin=None, stdout=None):
+    rendered = shlex.join([str(part) for part in cmd])
+    if stdin is not None:
+        rendered += f" < {shlex.quote(str(stdin))}"
+    if stdout is not None:
+        rendered += f" > {shlex.quote(str(stdout))}"
+    print(color(rendered, DIM), flush=True)
+
+
+def time_command():
+    if Path("/usr/bin/time").exists():
+        return ["/usr/bin/time", "-p"]
+    return ["time", "-p"]
+
+
+def print_time(stderr):
+    times = {}
+    other = []
+    for line in stderr.splitlines():
+        pieces = line.split()
+        if len(pieces) == 2 and pieces[0] in {"real", "user", "sys"}:
+            times[pieces[0]] = pieces[1]
+        elif line:
+            other.append(line)
+
+    for line in other:
+        print(line, file=sys.stderr)
+
+    if times:
+        summary = "  ".join(f"{name} {times[name]}s" for name in ("real", "user", "sys") if name in times)
+        print(color("time: ", CYAN) + summary)
+    else:
+        print(color("time output was not recognized", YELLOW), file=sys.stderr)
+
+
+def main():
+    if len(sys.argv) == 2 and sys.argv[1] in {"-h", "--help"}:
+        usage()
+    if len(sys.argv) < 3:
+        usage()
+
+    compiler = sys.argv[1]
+    if compiler not in COMPILERS:
+        die(f"unknown compiler: {compiler}")
+
+    src = Path(sys.argv[2])
+    opts = sys.argv[3:]
+    if not src.exists():
+        die(f"missing input file: {src}")
+
+    infile = src.with_suffix(".in")
+    expected = src.with_suffix(".out")
+    if not expected.exists():
+        die(f"missing expected output: {expected}")
+
+    exe = exe_for(src, compiler, opts)
+    actual = out_for(src, compiler, opts)
+    compile = compile_cmd(compiler, src, exe, opts)
+
+    print_cmd(compile)
+    proc = run(compile, capture_output=True, text=True)
+    if proc.returncode:
+        if proc.stdout:
+            print(proc.stdout, end="")
+        if proc.stderr:
+            print(proc.stderr, end="", file=sys.stderr)
+        die(color("compile failed", RED), proc.returncode)
+
+    stdin_path = infile if infile.exists() else Path(os.devnull)
+    timed = [*time_command(), str(exe)]
+    print_cmd(timed, stdin=stdin_path, stdout=actual)
+
+    with stdin_path.open("rb") as stdin, actual.open("wb") as stdout:
+        proc = run(timed, stdin=stdin, stdout=stdout, stderr=subprocess.PIPE, text=True)
+
+    print_time(proc.stderr)
+    if proc.returncode:
+        die(color(f"program exited with status {proc.returncode}", RED), proc.returncode)
+
+    if actual.read_bytes().rstrip() != expected.read_bytes().rstrip():
+        die(color(f"incorrect output: {actual} differs from {expected}", RED), 1)
+
+
+if __name__ == "__main__":
+    main()
