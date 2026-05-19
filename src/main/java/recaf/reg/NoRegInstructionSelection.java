@@ -212,20 +212,20 @@ public class NoRegInstructionSelection implements CFGVisitor {
         var right = cfg.right();
 
         // Load operands
-        ASMRegister leftOperand = type == Type.LONG ? ASMRegister.RAX
+        ASMRegister leftOperand = type == Type.LONG || type == Type.POINTER ? ASMRegister.RAX
                 : type == Type.BOOL ? ASMRegister.AL : ASMRegister.EAX;
-        ASMRegister rightOperand = type == Type.LONG ? ASMRegister.RDX
+        ASMRegister rightOperand = type == Type.LONG || type == Type.POINTER ? ASMRegister.RDX
                 : type == Type.BOOL ? ASMRegister.DL : ASMRegister.EDX;
         /*
         ASMRegister rightOperand = type == Type.LONG ? ASMRegister.RSI
                 : type == Type.BOOL ? ASMRegister.SIL : ASMRegister.ESI;
          */
 
-        ASMRegister tempOperand = type == Type.LONG ? ASMRegister.RCX
+        ASMRegister tempOperand = type == Type.LONG || type == Type.POINTER ? ASMRegister.RCX
                 : type == Type.BOOL ? ASMRegister.CL : ASMRegister.ECX;
         ASMOperator opcode1 = switch (cfg.ctx().getType(cfg.left())) {
             case INT -> ASMOperator.MOVL;
-            case LONG -> ASMOperator.MOVQ;
+            case LONG, POINTER -> ASMOperator.MOVQ;
             case BOOL -> ASMOperator.MOVB;
             default -> throw new AssertionError("This should never happen.");
         };
@@ -244,7 +244,7 @@ public class NoRegInstructionSelection implements CFGVisitor {
             case MINUS -> (type == Type.LONG ? ASMOperator.SUBQ : ASMOperator.SUBL);
             case TIMES -> (type == Type.LONG ? ASMOperator.IMULQ : ASMOperator.IMULL);
             case DIVIDES, MOD -> (type == Type.LONG ? ASMOperator.IDIVQ : ASMOperator.IDIVL);
-            case LT, GT, LEQ, GEQ, EQ, NEQ -> (type == Type.LONG ? ASMOperator.CMPQ : type == Type.BOOL ? ASMOperator.CMPB : ASMOperator.CMPL);
+            case LT, GT, LEQ, GEQ, EQ, NEQ -> (type == Type.LONG || type == Type.POINTER ? ASMOperator.CMPQ : type == Type.BOOL ? ASMOperator.CMPB : ASMOperator.CMPL);
             default -> throw new AssertionError("This should never happen.");
         };
         NumUtils pf = new NumUtils(right);

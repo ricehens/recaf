@@ -285,7 +285,9 @@ public class InstructionSelection implements CFGVisitor {
                 rightLoc = rightOperand;
             }
             if (cfg.operator().getType() == BinaryOperator.BinOpType.REL_OP || cfg.operator().getType() == BinaryOperator.BinOpType.EQ_OP) {
-                asm.emit(type == Type.LONG ? ASMOperator.CMPQ : type == Type.BOOL ? ASMOperator.CMPB : ASMOperator.CMPL,
+                asm.emit(type == Type.LONG || type == Type.POINTER
+                                ? ASMOperator.CMPQ
+                                : type == Type.BOOL ? ASMOperator.CMPB : ASMOperator.CMPL,
                         rightLoc, leftLoc);
                 ASMOperator nextOpcode = switch (cfg.operator()) {
                     case LT -> ASMOperator.SETL;
