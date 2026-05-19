@@ -55,7 +55,7 @@ public class InstructionSelection implements CFGVisitor {
                 case INT:
                     asm.emit(ASMOperator.MOVL, asm.getMemoryLocation(param), new ASMVirtualRegister(param));
                     break;
-                case LONG, POINTER:
+                case LONG:
                     asm.emit(ASMOperator.MOVQ, asm.getMemoryLocation(param), new ASMVirtualRegister(param));
                     break;
                 case BOOL:
@@ -76,7 +76,7 @@ public class InstructionSelection implements CFGVisitor {
                 case INT:
                     asm.emit(ASMOperator.MOVL, ASMRegister.getMethodArg(Type.INT, i), new ASMVirtualRegister(param));
                     break;
-                case LONG, POINTER:
+                case LONG:
                     asm.emit(ASMOperator.MOVQ, ASMRegister.getMethodArg(Type.LONG, i), new ASMVirtualRegister(param));
                     break;
                 case BOOL:
@@ -152,17 +152,17 @@ public class InstructionSelection implements CFGVisitor {
         switch (cfg.width()) {
             case 4:
                 asm.emit(ASMOperator.MOVL,
-                        cfg.ctx().getType(cfg.recordAddress()) == Type.POINTER ? ASMRegister.R11D : valueLoc,
+                        type == Type.LONG ? ASMRegister.R11D : valueLoc,
                         arrayLoc);
                 break;
             case 8:
                 asm.emit(ASMOperator.MOVQ,
-                        cfg.ctx().getType(cfg.recordAddress()) == Type.POINTER ? ASMRegister.R11 : valueLoc,
+                        type == Type.LONG ? ASMRegister.R11 : valueLoc,
                         arrayLoc);
                 break;
             case 1:
                 asm.emit(ASMOperator.MOVB,
-                        cfg.ctx().getType(cfg.recordAddress()) == Type.POINTER ? ASMRegister.R11B : valueLoc,
+                        type == Type.LONG ? ASMRegister.R11B : valueLoc,
                         arrayLoc);
                 break;
             default:
@@ -285,7 +285,7 @@ public class InstructionSelection implements CFGVisitor {
                 rightLoc = rightOperand;
             }
             if (cfg.operator().getType() == BinaryOperator.BinOpType.REL_OP || cfg.operator().getType() == BinaryOperator.BinOpType.EQ_OP) {
-                asm.emit(type == Type.LONG || type == Type.POINTER
+                asm.emit(type == Type.LONG
                                 ? ASMOperator.CMPQ
                                 : type == Type.BOOL ? ASMOperator.CMPB : ASMOperator.CMPL,
                         rightLoc, leftLoc);
@@ -321,13 +321,13 @@ public class InstructionSelection implements CFGVisitor {
         var rightLoc = new ASMVirtualRegister(cfg.right());
 
         if (cfg.ctx().getType(cfg.left()) == Type.RECORD) {
-            var leftAddr = new ASMVirtualRegister(cfg.ctx().getSymbolTable().addVar(Type.POINTER));
+            var leftAddr = new ASMVirtualRegister(cfg.ctx().getSymbolTable().addVar(Type.LONG));
             asm.emit(ASMOperator.LEAQ, asm.getMemoryLocation(cfg.left()), leftAddr);
             leftLoc = leftAddr;
         }
 
         if (cfg.ctx().getType(cfg.right()) == Type.RECORD) {
-            var rightAddr = new ASMVirtualRegister(cfg.ctx().getSymbolTable().addVar(Type.POINTER));
+            var rightAddr = new ASMVirtualRegister(cfg.ctx().getSymbolTable().addVar(Type.LONG));
             asm.emit(ASMOperator.LEAQ, asm.getMemoryLocation(cfg.right()), rightAddr);
             rightLoc = rightAddr;
         }
@@ -343,7 +343,7 @@ public class InstructionSelection implements CFGVisitor {
                             : (type == Type.LONG ? ASMRegister.RAX : ASMRegister.EAX),
                     dest);
         } else if (cfg.operator().getType() == BinaryOperator.BinOpType.REL_OP || cfg.operator().getType() == BinaryOperator.BinOpType.EQ_OP) {
-            asm.emit(type == Type.LONG || type == Type.POINTER
+            asm.emit(type == Type.LONG
                             ? ASMOperator.CMPQ
                             : type == Type.BOOL ? ASMOperator.CMPB : ASMOperator.CMPL,
                     rightLoc, leftLoc);
@@ -393,9 +393,9 @@ public class InstructionSelection implements CFGVisitor {
             asm.emit(ASMOperator.LEAQ, asm.getMemoryLocation(cfg.operand()), dest);
             return;
         }
-        ASMOperator op = (startingType == Type.LONG || startingType == Type.POINTER)
-                ? (cfg.type() == Type.LONG || cfg.type() == Type.POINTER ? ASMOperator.MOVQ : ASMOperator.MOVL)
-                : (cfg.type() == Type.LONG || cfg.type() == Type.POINTER ? ASMOperator.MOVSLQ : ASMOperator.MOVL);
+        ASMOperator op = startingType == Type.LONG
+                ? (cfg.type() == Type.LONG ? ASMOperator.MOVQ : ASMOperator.MOVL)
+                : (cfg.type() == Type.LONG ? ASMOperator.MOVSLQ : ASMOperator.MOVL);
 
         asm.emit(op, operandLoc, dest);
     }
@@ -409,7 +409,7 @@ public class InstructionSelection implements CFGVisitor {
             case INT:
                 asm.emit(ASMOperator.MOVL, srcLoc, dest);
                 break;
-            case LONG, POINTER:
+            case LONG:
                 asm.emit(ASMOperator.MOVQ, srcLoc, dest);
                 break;
             case BOOL:
@@ -514,7 +514,6 @@ public class InstructionSelection implements CFGVisitor {
                     break;
                 case INT:
                 case LONG:
-                case POINTER:
                 case STRING:
                     asm.emit(ASMOperator.PUSHQ, new ASMVirtualRegister(param), new ASMInstructionContext(pushed));
                     pushed += 8;
@@ -539,7 +538,7 @@ public class InstructionSelection implements CFGVisitor {
                 case INT:
                     asm.emit(ASMOperator.MOVL, ASMRegister.EAX, new ASMVirtualRegister(cfg.address()));
                     break;
-                case LONG, POINTER:
+                case LONG:
                     asm.emit(ASMOperator.MOVQ, ASMRegister.RAX, new ASMVirtualRegister(cfg.address()));
                     break;
                 case BOOL:
@@ -557,7 +556,7 @@ public class InstructionSelection implements CFGVisitor {
                 case INT:
                     asm.emit(ASMOperator.MOVL, retLoc, ASMRegister.EAX);
                     break;
-                case LONG, POINTER:
+                case LONG:
                     asm.emit(ASMOperator.MOVQ, retLoc, ASMRegister.RAX);
                     break;
                 case BOOL:

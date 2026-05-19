@@ -105,7 +105,7 @@ public class AssemblyStringBuilder {
             return;
         int size = sizeof(address);
         size += (4 - (size % 4)) % 4; // ensure 4-byte aligned
-        if (cfg.getType(address) == Type.LONG || cfg.getType(address) == Type.RECORD || cfg.getType(address) == Type.POINTER)
+        if (cfg.getType(address) == Type.LONG || cfg.getType(address) == Type.RECORD)
             size += (8 - (size % 8)) % 8; // ensure longs 8-byte aligned
         currentStackOffset -= size;
         localVarLocations.put(address, currentStackOffset);
@@ -134,7 +134,7 @@ public class AssemblyStringBuilder {
         return switch (type) {
             // case INT -> 4;
             case BOOL -> 1;
-            case LONG, STRING, POINTER -> 8;
+            case LONG, STRING -> 8;
             default -> 4;
         };
     }

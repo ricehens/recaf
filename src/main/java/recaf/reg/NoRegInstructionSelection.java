@@ -72,7 +72,7 @@ public class NoRegInstructionSelection implements CFGVisitor {
                 case INT:
                     asm.emit(ASMOperator.MOVL, ASMRegister.getMethodArg(Type.INT, i), asm.getMemoryLocation(cfg.getParams().get(i)));
                     break;
-                case LONG, POINTER:
+                case LONG:
                     asm.emit(ASMOperator.MOVQ, ASMRegister.getMethodArg(Type.LONG, i), asm.getMemoryLocation(cfg.getParams().get(i)));
                     break;
                 case BOOL:
@@ -170,7 +170,7 @@ public class NoRegInstructionSelection implements CFGVisitor {
         }
         switch (cfg.width()) {
             case 4:
-                if (cfg.ctx().getType(cfg.recordAddress()) == Type.POINTER) {
+                if (cfg.ctx().getType(cfg.recordAddress()) == Type.LONG) {
                     asm.emit(ASMOperator.MOVL, valueLoc, ASMRegister.R11D);
                     asm.emit(ASMOperator.MOVL, ASMRegister.R11D, arrayLoc);
                 } else {
@@ -179,7 +179,7 @@ public class NoRegInstructionSelection implements CFGVisitor {
                 }
                 break;
             case 8:
-                if (cfg.ctx().getType(cfg.recordAddress()) == Type.POINTER) {
+                if (cfg.ctx().getType(cfg.recordAddress()) == Type.LONG) {
                     asm.emit(ASMOperator.MOVQ, valueLoc, ASMRegister.R11);
                     asm.emit(ASMOperator.MOVQ, ASMRegister.R11, arrayLoc);
                 } else {
@@ -188,7 +188,7 @@ public class NoRegInstructionSelection implements CFGVisitor {
                 }
                 break;
             case 1:
-                if (cfg.ctx().getType(cfg.recordAddress()) == Type.POINTER) {
+                if (cfg.ctx().getType(cfg.recordAddress()) == Type.LONG) {
                     asm.emit(ASMOperator.MOVZBL, valueLoc, ASMRegister.R11D);
                     asm.emit(ASMOperator.MOVB, ASMRegister.R11B, arrayLoc);
                 } else {
@@ -212,20 +212,20 @@ public class NoRegInstructionSelection implements CFGVisitor {
         var right = cfg.right();
 
         // Load operands
-        ASMRegister leftOperand = type == Type.LONG || type == Type.POINTER ? ASMRegister.RAX
+        ASMRegister leftOperand = type == Type.LONG ? ASMRegister.RAX
                 : type == Type.BOOL ? ASMRegister.AL : ASMRegister.EAX;
-        ASMRegister rightOperand = type == Type.LONG || type == Type.POINTER ? ASMRegister.RDX
+        ASMRegister rightOperand = type == Type.LONG ? ASMRegister.RDX
                 : type == Type.BOOL ? ASMRegister.DL : ASMRegister.EDX;
         /*
         ASMRegister rightOperand = type == Type.LONG ? ASMRegister.RSI
                 : type == Type.BOOL ? ASMRegister.SIL : ASMRegister.ESI;
          */
 
-        ASMRegister tempOperand = type == Type.LONG || type == Type.POINTER ? ASMRegister.RCX
+        ASMRegister tempOperand = type == Type.LONG ? ASMRegister.RCX
                 : type == Type.BOOL ? ASMRegister.CL : ASMRegister.ECX;
         ASMOperator opcode1 = switch (cfg.ctx().getType(cfg.left())) {
             case INT -> ASMOperator.MOVL;
-            case LONG, POINTER -> ASMOperator.MOVQ;
+            case LONG -> ASMOperator.MOVQ;
             case BOOL -> ASMOperator.MOVB;
             default -> throw new AssertionError("This should never happen.");
         };
@@ -244,7 +244,7 @@ public class NoRegInstructionSelection implements CFGVisitor {
             case MINUS -> (type == Type.LONG ? ASMOperator.SUBQ : ASMOperator.SUBL);
             case TIMES -> (type == Type.LONG ? ASMOperator.IMULQ : ASMOperator.IMULL);
             case DIVIDES, MOD -> (type == Type.LONG ? ASMOperator.IDIVQ : ASMOperator.IDIVL);
-            case LT, GT, LEQ, GEQ, EQ, NEQ -> (type == Type.LONG || type == Type.POINTER ? ASMOperator.CMPQ : type == Type.BOOL ? ASMOperator.CMPB : ASMOperator.CMPL);
+            case LT, GT, LEQ, GEQ, EQ, NEQ -> (type == Type.LONG ? ASMOperator.CMPQ : type == Type.BOOL ? ASMOperator.CMPB : ASMOperator.CMPL);
             default -> throw new AssertionError("This should never happen.");
         };
         NumUtils pf = new NumUtils(right);
@@ -400,11 +400,11 @@ public class NoRegInstructionSelection implements CFGVisitor {
         }
 
         // Load operands
-        ASMRegister leftOperand = type == Type.LONG || type == Type.POINTER ? ASMRegister.RAX
+        ASMRegister leftOperand = type == Type.LONG ? ASMRegister.RAX
                 : type == Type.BOOL ? ASMRegister.AL : ASMRegister.EAX;
         ASMOperator opcode1 = switch (cfg.ctx().getType(cfg.left())) {
             case INT -> ASMOperator.MOVL;
-            case LONG, POINTER -> ASMOperator.MOVQ;
+            case LONG -> ASMOperator.MOVQ;
             case BOOL -> ASMOperator.MOVB;
             default -> throw new AssertionError("This should never happen.");
         };
@@ -422,7 +422,7 @@ public class NoRegInstructionSelection implements CFGVisitor {
             case MINUS -> (type == Type.LONG ? ASMOperator.SUBQ : ASMOperator.SUBL);
             case TIMES -> (type == Type.LONG ? ASMOperator.IMULQ : ASMOperator.IMULL);
             case DIVIDES, MOD -> (type == Type.LONG ? ASMOperator.IDIVQ : ASMOperator.IDIVL);
-            case LT, GT, LEQ, GEQ, EQ, NEQ -> (type == Type.LONG || type == Type.POINTER ? ASMOperator.CMPQ
+            case LT, GT, LEQ, GEQ, EQ, NEQ -> (type == Type.LONG ? ASMOperator.CMPQ
                     : type == Type.BOOL ? ASMOperator.CMPB : ASMOperator.CMPL);
             default -> throw new AssertionError("This should never happen.");
         };
@@ -478,11 +478,11 @@ public class NoRegInstructionSelection implements CFGVisitor {
 
         Type startingType = cfg.ctx().getType(cfg.operand());
         if (startingType == Type.RECORD) asm.emit(ASMOperator.LEAQ, operandLoc, ASMRegister.RAX);
-        else asm.emit(startingType == Type.LONG || startingType == Type.POINTER ? ASMOperator.MOVQ : ASMOperator.MOVSLQ,
+        else asm.emit(startingType == Type.LONG ? ASMOperator.MOVQ : ASMOperator.MOVSLQ,
                 operandLoc, ASMRegister.RAX);
 
-        asm.emit(cfg.type() == Type.LONG || cfg.type() == Type.POINTER ? ASMOperator.MOVQ : ASMOperator.MOVL,
-                cfg.type() == Type.LONG || cfg.type() == Type.POINTER ? ASMRegister.RAX : ASMRegister.EAX,
+        asm.emit(cfg.type() == Type.LONG ? ASMOperator.MOVQ : ASMOperator.MOVL,
+                cfg.type() == Type.LONG ? ASMRegister.RAX : ASMRegister.EAX,
                 dest);
     }
 
@@ -498,7 +498,7 @@ public class NoRegInstructionSelection implements CFGVisitor {
                 asm.emit(ASMOperator.MOVL, srcLoc, ASMRegister.EAX);
                 asm.emit(ASMOperator.MOVL, ASMRegister.EAX, dest);
                 break;
-            case LONG, POINTER:
+            case LONG:
                 asm.emit(ASMOperator.MOVQ, srcLoc, ASMRegister.RAX);
                 asm.emit(ASMOperator.MOVQ, ASMRegister.RAX, dest);
                 break;
@@ -627,7 +627,7 @@ public class NoRegInstructionSelection implements CFGVisitor {
                 case INT:
                     asm.emit(ASMOperator.MOVL, ASMRegister.EAX, asm.getMemoryLocation(cfg.address()));
                     break;
-                case LONG, POINTER:
+                case LONG:
                     asm.emit(ASMOperator.MOVQ, ASMRegister.RAX, asm.getMemoryLocation(cfg.address()));
                     break;
                 case BOOL:
@@ -647,7 +647,7 @@ public class NoRegInstructionSelection implements CFGVisitor {
                 case INT:
                     asm.emit(ASMOperator.MOVL, retLoc, ASMRegister.EAX);
                     break;
-                case LONG, POINTER:
+                case LONG:
                     asm.emit(ASMOperator.MOVQ, retLoc, ASMRegister.RAX);
                     break;
                 case BOOL:

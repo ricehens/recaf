@@ -16,14 +16,14 @@ public class SemanticChecker {
     private final Set<String> globalMisc;
     private final Map<String, ASTType> globalTypes;
     private final Map<String, ASTType> globalVariables;
-    private final Map<String, ASTLiteral> globalConstants;
+    private final Map<String, ASTExpression> globalConstants;
     private final Set<ASTBaseType> promisedTypes;
     private final Map<ASTType, ASTType> checkedTypes;
 
     private boolean local;
     private Map<String, ASTType> localTypes;
     private Map<String, ASTType> localVariables;
-    private Map<String, ASTLiteral> localConstants;
+    private Map<String, ASTExpression> localConstants;
 
     private int loopDepth;
 
@@ -96,21 +96,21 @@ public class SemanticChecker {
                 ASTPrimitiveType longType = new ASTPrimitiveType(ctx, Type.LONG);
                 ASTPrimitiveType boolType = new ASTPrimitiveType(ctx, Type.BOOL);
                 ASTPrimitiveType strType = new ASTPrimitiveType(ctx, Type.STRING);
-                ASTPrimitiveType ptrType = new ASTPrimitiveType(ctx, Type.POINTER);
+                ASTNilType nilType = new ASTNilType(ctx);
                 ASTPrimitiveType unkType = new ASTPrimitiveType(ctx, Type.UNKNOWN);
                 yield Stream.of(
                         new ASTMethodDecl(ctx,
                                 Optional.empty(), new ASTIdentifier(ctx, MAIN), Optional.of(List.of()),
                                 List.of(), Optional.empty(), true, false, false),
-                        new ASTConstDecl(ctx, new ASTIdentifier(ctx, TRUE), new ASTLiteral(ctx, new BoolLiteral(true))),
-                        new ASTConstDecl(ctx, new ASTIdentifier(ctx, FALSE), new ASTLiteral(ctx, new BoolLiteral(false))),
-                        new ASTConstDecl(ctx, new ASTIdentifier(ctx, NIL), new ASTLiteral(ctx, new NilLiteral())),
                         new ASTTypeDecl(ctx, new ASTIdentifier(ctx, INTEGER), intType),
                         new ASTTypeDecl(ctx, new ASTIdentifier(ctx, INT64), longType),
                         new ASTTypeDecl(ctx, new ASTIdentifier(ctx, BOOLEAN), boolType),
                         new ASTTypeDecl(ctx, new ASTIdentifier(ctx, STRING), strType),
-                        new ASTTypeDecl(ctx, new ASTIdentifier(ctx, NIL_TYPE), ptrType),
+                        new ASTTypeDecl(ctx, new ASTIdentifier(ctx, NIL_TYPE), nilType),
                         new ASTTypeDecl(ctx, new ASTIdentifier(ctx, ERROR), unkType),
+                        new ASTConstDecl(ctx, new ASTIdentifier(ctx, TRUE), new ASTLiteral(ctx, new BoolLiteral(true))),
+                        new ASTConstDecl(ctx, new ASTIdentifier(ctx, FALSE), new ASTLiteral(ctx, new BoolLiteral(false))),
+                        new ASTConstDecl(ctx, new ASTIdentifier(ctx, NIL), new ASTNil(ctx)),
                         makeInternal(ctx, null, WRITE, null),
                         makeInternal(ctx, null, WRITELN, null),
                         makeInternal(ctx, null, READ, null),
@@ -211,6 +211,7 @@ public class SemanticChecker {
             case ASTPointerType pt -> check(pt);
             case ASTRecordType rt -> check(rt);
             case ASTPrimitiveType pr -> check(pr);
+            case ASTNilType nt -> nt;
             default -> throw new AssertionError("This should never happen.");
         };
 
@@ -296,10 +297,16 @@ public class SemanticChecker {
 
     private void check(ASTConstDecl ast) {
         ASTIdentifier id = check(ast.id());
-        Literal lit = evalConstant(ast.expr());
+        ASTExpression expr = dispatch(ast.expr());
+        if (expr instanceof ASTNil nil) {
+            registerConst(id, nil);
+            return;
+        }
+
+        Literal lit = evalConstant(expr);
         if (lit == null)
             ast.ctx().error("constant must be compile-time evaluable");
-        ASTLiteral astLit = new ASTLiteral(ast.expr().ctx(), lit);
+        ASTLiteral astLit = check(new ASTLiteral(expr.ctx(), lit));
         registerConst(id, astLit);
     }
 
@@ -392,9 +399,8 @@ public class SemanticChecker {
         ASTType unk = primitiveType(Type.UNKNOWN);
         if (r1 == unk || r2 == unk) return true;
 
-        ASTType nil = primitiveType(Type.POINTER);
-        if (r1 == nil && r2 instanceof ASTPointerType
-                || r2 == nil && r1 instanceof ASTPointerType)
+        if (r1 instanceof ASTNilType && r2 instanceof ASTPointerType
+                || r2 instanceof ASTNilType && r1 instanceof ASTPointerType)
             return true;
 
         return r1 == r2;
@@ -492,7 +498,7 @@ public class SemanticChecker {
             }
 
             if (localConstants.containsKey(key))
-                return check(new ASTLiteral(loc.ctx(), localConstants.get(key).literal()));
+                return localConstants.get(key);
         }
 
         if (globalVariables.containsKey(key)) {
@@ -502,7 +508,7 @@ public class SemanticChecker {
         }
 
         if (globalConstants.containsKey(key))
-            return check(new ASTLiteral(loc.ctx(), globalConstants.get(key).literal()));
+            return globalConstants.get(key);
 
         loc.ctx().error("cannot find location " + key);
         return loc;
@@ -824,6 +830,7 @@ public class SemanticChecker {
             case ASTLocation loc -> checkLocationExpression(loc);
             case ASTMethodCall mc -> check(mc);
             case ASTLiteral lit -> check(lit);
+            case ASTNil nil -> check(nil);
             case ASTUnaryExpression un -> check(un);
             case ASTBinaryExpression bin -> check(bin);
             default -> throw new AssertionError("This should never happen.");
@@ -832,6 +839,10 @@ public class SemanticChecker {
 
     private ASTLiteral check(ASTLiteral ast) {
         exprTypes.put(ast, primitiveType(ast.literal().type()));
+        return ast;
+    }
+
+    private ASTNil check(ASTNil ast) {
         return ast;
     }
 
@@ -917,7 +928,6 @@ public class SemanticChecker {
             case LONG -> globalTypes.get(INT64);
             case BOOL -> globalTypes.get(BOOLEAN);
             case STRING -> globalTypes.get(STRING);
-            case POINTER -> globalTypes.get(NIL_TYPE);
             case UNKNOWN -> globalTypes.get(ERROR);
             default -> throw new AssertionError("This should never happen.");
         };
@@ -951,7 +961,7 @@ public class SemanticChecker {
         (local ? localVariables : globalVariables).put(key, type);
     }
 
-    private void registerConst(ASTIdentifier id, ASTLiteral lit) {
+    private void registerConst(ASTIdentifier id, ASTExpression lit) {
         String key = declareId(id);
         (local ? localConstants : globalConstants).put(key, lit);
     }
@@ -968,15 +978,15 @@ public class SemanticChecker {
         if (local) {
             if (localVariables.containsKey(key)) return resolveType(localVariables.get(key));
             if (localConstants.containsKey(key))
-                return primitiveType(localConstants.get(key).literal().type());
+                return exprType(localConstants.get(key));
         }
         if (globalVariables.containsKey(key)) return resolveType(globalVariables.get(key));
         if (globalConstants.containsKey(key))
-            return primitiveType(globalConstants.get(key).literal().type());
+            return exprType(globalConstants.get(key));
         return null;
     }
 
-    private ASTLiteral getConst(ASTIdentifier id) {
+    private ASTExpression getConst(ASTIdentifier id) {
         String key = key(id);
         if (local) {
             if (localConstants.containsKey(key)) return localConstants.get(key);
@@ -1005,6 +1015,8 @@ public class SemanticChecker {
      * @return the type of the expression
      */
     ASTType exprType(ASTExpression expr) {
+        if (expr instanceof ASTNil)
+            return globalTypes.get(NIL_TYPE);
         return exprTypes.getOrDefault(expr, primitiveType(Type.UNKNOWN));
     }
 
@@ -1025,8 +1037,8 @@ public class SemanticChecker {
             case ASTLiteral lit -> lit.literal();
             case ASTLocation loc -> {
                 if (!loc.accesses().isEmpty()) yield null;
-                ASTLiteral lit = getConst(loc.id());
-                yield lit == null ? null : lit.literal();
+                ASTExpression lit = getConst(loc.id());
+                yield lit instanceof ASTLiteral astLit ? astLit.literal() : null;
             }
             case ASTUnaryExpression unary -> evalUnary(unary.op(), evalConstant(unary.expr()));
             case ASTBinaryExpression binary -> evalBinary(binary.op(),

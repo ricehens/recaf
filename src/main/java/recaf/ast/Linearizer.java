@@ -83,7 +83,7 @@ public class Linearizer {
             case ASTEnumType _ ->
                     new CFGVariable(symbolTable, vd.id().text(), Type.INT);
             case ASTPointerType _ ->
-                    new CFGVariable(symbolTable, vd.id().text(), Type.POINTER);
+                    new CFGVariable(symbolTable, vd.id().text(), Type.LONG);
             case ASTPrimitiveType pr ->
                 new CFGVariable(symbolTable, vd.id().text(), pr.type());
             // already reduced
@@ -311,6 +311,7 @@ public class Linearizer {
             case ASTLocation loc -> linearize(dest, loc);
             case ASTMethodCall mc -> linearize(dest, mc);
             case ASTLiteral lit -> linearize(dest, lit);
+            case ASTNil nil -> linearize(dest, nil);
             case ASTBinaryExpression be -> linearize(dest, be);
             case ASTUnaryExpression ue -> linearize(dest, ue);
             default -> throw new AssertionError("This should never happen.");
@@ -357,7 +358,7 @@ public class Linearizer {
                 ASTLocation loc = (ASTLocation) mc.args().getFirst();
                 ASTPointerType type = (ASTPointerType) sc.exprType(loc);
 
-                CFGAddress tmp = ctx.newAddress(Type.POINTER);
+                CFGAddress tmp = ctx.newAddress(Type.LONG);
                 CFGAddress size = makeIntLiteral(sizeof(type.type()));
                 cfg.offer(new CFGMethodCallInstruction(ctx, tmp, ALLOCATOR_NEW, List.of(size)));
 
@@ -536,8 +537,11 @@ public class Linearizer {
     }
 
     private void linearize(CFGAddress dest, ASTLiteral lit) {
-        cfg.offer(new CFGLiteralInstruction(ctx, dest, lit.literal() instanceof NilLiteral
-                ? new LongLiteral(0) : lit.literal()));
+        cfg.offer(new CFGLiteralInstruction(ctx, dest, lit.literal()));
+    }
+
+    private void linearize(CFGAddress dest, ASTNil nil) {
+        cfg.offer(new CFGLiteralInstruction(ctx, dest, new LongLiteral(0)));
     }
 
     private void linearize(CFGAddress dest, ASTUnaryExpression unary) {
@@ -638,7 +642,7 @@ public class Linearizer {
                     ASTPointerType pt = (ASTPointerType) type;
 
                     if (i > 0) {
-                        CFGAddress next = ctx.newAddress(Type.POINTER);
+                        CFGAddress next = ctx.newAddress(Type.LONG);
                         cfg.offer(new CFGReadInstruction(ctx, next, base, 8, offset));
                         base = next;
                     }
@@ -672,8 +676,9 @@ public class Linearizer {
     private Type reduceType(ASTType type) {
         return switch (type) {
             case ASTPrimitiveType pt -> pt.type();
+            case ASTNilType _ -> Type.LONG;
             case ASTEnumType _ -> Type.INT;
-            case ASTPointerType _ -> Type.POINTER;
+            case ASTPointerType _ -> Type.LONG;
             case ASTArrayType _, ASTRecordType _ -> Type.RECORD;
             default -> throw new AssertionError("This should never happen.");
         };

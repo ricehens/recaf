@@ -5,8 +5,13 @@ package recaf.general;
  */
 public enum Type {
 
-    INT("int"), LONG("long"), BOOL("bool"), VOID("void"), STRING("string"), UNKNOWN("unknown"),
-    RECORD("record"), POINTER("pointer");
+    INT("int"),
+    LONG("long"),
+    BOOL("bool"),
+    VOID("void"),
+    STRING("string"),
+    UNKNOWN("unknown"),
+    RECORD("record");
 
     private final String name;
 
@@ -41,7 +46,6 @@ public enum Type {
             case VOID -> "void";
             case STRING -> "str";
             case RECORD -> "rec";
-            case POINTER -> "ptr";
             default -> "unk";
         };
     }

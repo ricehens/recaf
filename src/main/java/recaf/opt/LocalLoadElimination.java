@@ -20,7 +20,7 @@ public class LocalLoadElimination extends SSATransformation {
             while (!workList.isEmpty()) {
                 CFGInstruction inst = workList.poll();
                 if (inst instanceof CFGReadInstruction read) {
-                    boolean pointerBase = ctx.getType(read.recordAddress()) == Type.POINTER;
+                    boolean pointerBase = ctx.getType(read.recordAddress()) != Type.RECORD;
                     CFGInstruction prev = block.getInstructions().prev(inst);
                     while (prev != null) {
                         if (prev instanceof CFGReadInstruction read2 && read2.recordAddress().equals(read.recordAddress())) {
