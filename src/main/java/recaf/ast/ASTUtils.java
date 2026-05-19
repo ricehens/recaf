@@ -12,10 +12,11 @@ public class ASTUtils {
     static final String GETCHAR = "getchar";
     static final String PUTCHAR = "putchar";
     static final String MEMCPY = "memcpy";
-    static final String MALLOC = "malloc";
-    static final String FREE = "free";
+    static final String ALLOCATOR_NEW = "recaf_alloc";
+    static final String ALLOCATOR_DISPOSE = "recaf_free";
     static final Set<String> LIBC_RESERVED = Set.of(
-            PRINTF, SCANF, GETCHAR, PUTCHAR, MEMCPY, MALLOC, FREE
+            PRINTF, SCANF, GETCHAR, PUTCHAR, MEMCPY, 
+            ALLOCATOR_NEW, ALLOCATOR_DISPOSE
     );
 
     static final String MAIN = "main";

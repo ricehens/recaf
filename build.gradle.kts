@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "recaf"
-version = "1.0.1"
+version = "1.1.0"
 
 java {
     toolchain {
@@ -50,10 +50,17 @@ tasks.named<AntlrTask>("generateGrammarSource") {
     )
 }
 
+val buildStdlib by tasks.registering(Exec::class) {
+    workingDir = file("stdlib")
+    commandLine("make")
+}
+
 // jar
 tasks.named<Jar>("jar") {
+    dependsOn(buildStdlib)
+
     from("stdlib") {
-        include("libsystem.a", "libfloat64.a")
+        include("lib*.a")
         into("stdlib")
     }
 
@@ -72,6 +79,10 @@ tasks.named<Jar>("jar") {
 }
 
 // nativeCompile
+tasks.named("nativeCompile") {
+    dependsOn(buildStdlib)
+}
+
 graalvmNative {
     binaries {
         named("main") {

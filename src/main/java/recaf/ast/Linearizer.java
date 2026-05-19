@@ -353,21 +353,23 @@ public class Linearizer {
             }
 
             case NEW -> {
-                symbolTable.addExternalMethod(MALLOC);
+                symbolTable.addExternalMethod(ALLOCATOR_NEW);
                 ASTLocation loc = (ASTLocation) mc.args().getFirst();
                 ASTPointerType type = (ASTPointerType) sc.exprType(loc);
 
                 CFGAddress tmp = ctx.newAddress(Type.POINTER);
                 CFGAddress size = makeIntLiteral(sizeof(type.type()));
-                cfg.offer(new CFGMethodCallInstruction(ctx, tmp, MALLOC, List.of(size)));
+                cfg.offer(new CFGMethodCallInstruction(ctx, tmp, ALLOCATOR_NEW, List.of(size)));
 
                 write(loc, tmp);
             }
 
             case DISPOSE -> {
-                symbolTable.addExternalMethod(FREE);
+                symbolTable.addExternalMethod(ALLOCATOR_DISPOSE);
+                ASTPointerType type = (ASTPointerType) sc.exprType(mc.args().getFirst());
                 CFGAddress ptr = linearize(mc.args().getFirst());
-                cfg.offer(new CFGMethodCallInstruction(ctx, null, FREE, List.of(ptr)));
+                CFGAddress size = makeIntLiteral(sizeof(type.type()));
+                cfg.offer(new CFGMethodCallInstruction(ctx, null, ALLOCATOR_DISPOSE, List.of(ptr, size)));
             }
 
             case WRITE, WRITELN -> {
