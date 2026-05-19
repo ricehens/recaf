@@ -10,17 +10,17 @@ program Sudoku;
 *)
 
 var
-    Board: Array[0..99, 0..99]; 
+    Board: Array[0..99, 0..99] of Int32;  
     RowUsed,   
     ColUsed,   
     BlockUsed  
         : Array[0..99, 0..100] of Boolean; 
     n, 
-    nn; 
+    nn: Int32; 
     Solved: Boolean;
 
-procedure SolveSudoku(r, c);
-var b, d;
+procedure SolveSudoku(r, c: Int32);
+var b, d: Int32;
 begin
     if r >= nn then begin
         Solved := True;
@@ -56,7 +56,7 @@ begin
 end;
 
 procedure PrintBoard;
-var i, j;
+var i, j: Int32;
 begin
     for i := 0 to nn - 1 do begin
         for j := 0 to nn - 2 do
@@ -65,8 +65,8 @@ begin
     end
 end;
 
-var i, j, d;
-    r, c, b;
+var i, j, d: Int32;
+    r, c, b: Int32;
 begin
     ReadLn(n);
     nn := n * n;

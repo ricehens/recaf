@@ -11,15 +11,15 @@ program Correlation;
     M space-separated floating point numbers to two decimal places.
 }
 
-uses Float64;
+var
+    A: Array[0..999, 0..999] of Int32;
+    EV: Array[0..999] of Int32;
+    Variance: Array[0..999] of Int32;
+    Cov: Array[0..999, 0..999] of Int32;
 
 var
-    A: Array[0..999, 0..999];
-    EV: Array[0..999];
-    Variance: Array[0..999];
-    Cov: Array[0..999, 0..999];
-
-var M, N, i, j, k;
+    M, N, i, j, k: Int32;
+    corr: Real;
 begin
     Read(M, N);
 
@@ -57,14 +57,8 @@ begin
         begin
             for j := 0 to M - 1 do
             begin
-                FPrintPrecision(
-                    FDiv(
-                        FFromInt(Cov[i, j]),
-                        FSqrt(FMul(FFromInt(Variance[i]), FFromInt(Variance[j])))
-                    ),
-                    2
-                );
-                Write(' ')
+                corr := Cov[i, j] / Sqrt(Variance[i] * Variance[j]);
+                Write(corr:0:2, ' ')
             end;
             WriteLn
         end

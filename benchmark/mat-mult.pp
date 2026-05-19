@@ -8,11 +8,11 @@ program MatrixMultiply;
 }
 
 var
-    N: Integer;
-    a, b, c: Array[0..1023, 0..1023] of Integer;
+    N: Int32;
+    a, b, c: Array[0..1023, 0..1023] of Int32;
 
 procedure MatMult;
-var i, j, k: Integer;
+var i, j, k: Int32;
 begin
     for i := 0 to N - 1 do
         for j := 0 to N - 1 do
@@ -24,7 +24,7 @@ begin
 end;
 
 procedure PrintMatrix;
-var i, j: Integer;
+var i, j: Int32;
 begin
     for i := 0 to N - 1 do
     begin
@@ -34,7 +34,7 @@ begin
     end
 end;
 
-var i, j: Integer;
+var i, j: Int32;
 begin
     ReadLn(N);
     if N <= 1024 then

@@ -17,13 +17,13 @@ program FiniteFieldGramSchmidt;
 
 const p = 1009; (* characteristic *)
 var
-    n, (* num of vectors *)
-    d; (* dimension *)
-    Mat: Array[0..999, 0..999];
+    n,        (* num of vectors *)
+    d: Int32; (* dimension *)
+    Mat: Array[0..999, 0..999] of Int32;
 
 (* compute a^e mod p *)
-function Pow(a, e);
-var b;
+function Pow(a, e: Int32): Int32;
+var b: Int32;
 begin
     if e = 0 then
         Pow := 1
@@ -37,8 +37,8 @@ begin
 end;
 
 (* compute dot product of ith and jth row, mod p *)
-function Dot(i, j);
-var k;
+function Dot(i, j: Int32): Int32;
+var k: Int32;
 begin
     dot := 0;
     for k := 0 to d - 1 do
@@ -46,16 +46,16 @@ begin
 end;
 
 (* adds ith row to jth row, mod p *)
-procedure Add(i, j);
-var k;
+procedure Add(i, j: Int32);
+var k: Int32;
 begin
     for k := 0 to d - 1 do
         Mat[j, k] := (Mat[j, k] + Mat[i, k]) mod p;
 end;
 
 (* swap ith and jth row *)
-procedure Swap(i, j);
-var k, t;
+procedure Swap(i, j: Int32);
+var k, t: Int32;
 begin
     for k := 0 to d - 1 do
     begin
@@ -70,15 +70,15 @@ end;
     of the jth vector on to the ith vector,
     mod p
 *)
-procedure Orthogonalize(i, j);
-var proj, k;
+procedure Orthogonalize(i, j: Int32);
+var proj, k: Int32;
 begin
     proj := (Dot(i, j) * Pow(Dot(i, i), p - 2)) mod p;
     for k := 0 to d - 1 do
         Mat[j, k] := (Mat[j, k] - ((proj * Mat[i, k]) mod p) + p) mod p;
 end;
 
-var k, i, j;
+var k, i, j: Int32;
 begin
     ReadLn(d, n);
 
