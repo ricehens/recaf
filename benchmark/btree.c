@@ -24,6 +24,14 @@ PNode make_tree(int32_t depth) {
     return make_tree_result;
 }
 
+void delete_tree(PNode node) {
+    if (node->left != NULL) {
+        delete_tree(node->left);
+        delete_tree(node->right);
+    }
+    free(node);
+}
+
 const int32_t min_depth = 4;
 const int32_t max_depth = 21;
 const int32_t init_iter = 0x200000;
@@ -35,7 +43,7 @@ int main(void) {
     stretch_depth = max_depth + 1;
     stretch_tree = make_tree(stretch_depth);
     check = checksum(stretch_tree);
-    stretch_tree = NULL;
+    delete_tree(stretch_tree);
 
     printf("stretch tree of depth %d\t check: %d\n", stretch_depth, check);
 
@@ -48,6 +56,7 @@ int main(void) {
         for (i = 1; i <= iter; i++) {
             current_tree = make_tree(depth);
             check = check + checksum(current_tree);
+            delete_tree(current_tree);
         }
         printf("%d\t trees of depth %d\t check: %d\n", iter, depth, check);
 
@@ -56,5 +65,6 @@ int main(void) {
     }
 
     printf("long lived tree of depth %d\t check: %d\n", max_depth, checksum(long_lived_tree));
+    delete_tree(long_lived_tree);
     return 0;
 }

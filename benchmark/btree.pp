@@ -24,6 +24,15 @@ begin
     end;
 end;
 
+procedure delete_tree(node: PNode);
+begin
+    if node^.left <> nil then begin
+        delete_tree(node^.left);
+        delete_tree(node^.right)
+    end;
+    Dispose(node)
+end;
+
 const
     min_depth = 4;
     max_depth = 21;
@@ -35,7 +44,7 @@ begin
     stretch_depth := max_depth + 1;
     stretch_tree := make_tree(stretch_depth);
     check := checksum(stretch_tree);
-    stretch_tree := nil;
+    delete_tree(stretch_tree);
 
     WriteLn('stretch tree of depth ', stretch_depth, #9' check: ', check);
 
@@ -48,6 +57,7 @@ begin
         for i := 1 to iter do begin
             current_tree := make_tree(depth);
             check := check + checksum(current_tree);
+            delete_tree(current_tree)
         end;
         WriteLn(iter, #9' trees of depth ', depth, #9' check: ', check);
 
@@ -56,4 +66,5 @@ begin
     end;
 
     WriteLn('long lived tree of depth ', max_depth, #9' check: ', checksum(long_lived_tree));
+    delete_tree(long_lived_tree)
 end.
