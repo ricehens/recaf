@@ -359,9 +359,9 @@ public class SemanticChecker {
         Optional<ASTVarDecl> rv = Optional.empty();
         if (returnType.isPresent()) {
             if (returnType.get() instanceof ASTArrayType)
-                returnType.get().ctx().error("functions may not return arrays");
+                ast.ctx().error("functions may not return arrays");
             if (returnType.get() instanceof ASTRecordType)
-                returnType.get().ctx().error("functions may not return records");
+                ast.ctx().error("functions may not return records");
             rv = Optional.of(check(new ASTVarDecl(ast.ctx(), returnType.get(), id)));
             registerVar(rv.get().id(), rv.get().type());
         }
