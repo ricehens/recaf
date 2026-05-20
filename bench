@@ -15,7 +15,15 @@ CYAN = "\033[36m"
 YELLOW = "\033[33m"
 RESET = "\033[0m"
 
-COMPILERS = {"recaf", "fpc", "gcc", "clang"}
+SOURCE_EXTENSIONS = {
+    "recaf": ".pas",
+    "fpc": ".pp",
+    "gcc": ".c",
+    "clang": ".c",
+    "java": ".java",
+}
+COMPILERS = set(SOURCE_EXTENSIONS)
+BENCHMARK = Path("benchmark")
 TMP = Path("/tmp")
 
 
@@ -29,7 +37,7 @@ def die(message, code=2):
 
 
 def usage():
-    print("Usage: ./bench <recaf|fpc|gcc|clang> <file> <opts...>")
+    print("Usage: ./bench <recaf|fpc|gcc|clang|java> <benchmark> <opts...>")
     sys.exit(0)
 
 
@@ -49,10 +57,19 @@ def compile_cmd(compiler, src, exe, opts):
         return ["./run.sh", str(src), "-o", str(exe), *opts]
     if compiler == "fpc":
         return ["fpc", str(src), f"-o{exe}", *opts]
+    if compiler == "java":
+        exe.mkdir(parents=True, exist_ok=True)
+        return ["javac", "-d", str(exe), str(src), *opts]
     cmd = [compiler, str(src), "-o", str(exe), *opts]
     if "-lm" not in opts:
         cmd.append("-lm")
     return cmd
+
+
+def run_cmd(compiler, exe):
+    if compiler == "java":
+        return ["java", "-cp", str(exe), "Main"]
+    return [str(exe)]
 
 
 def run(cmd, **kwargs):
@@ -107,13 +124,14 @@ def main():
     if compiler not in COMPILERS:
         die(f"unknown compiler: {compiler}")
 
-    src = Path(sys.argv[2])
+    benchmark = sys.argv[2]
     opts = sys.argv[3:]
+    src = BENCHMARK / f"{benchmark}{SOURCE_EXTENSIONS[compiler]}"
     if not src.exists():
         die(f"missing input file: {src}")
 
-    infile = src.with_suffix(".in")
-    expected = src.with_suffix(".out")
+    infile = BENCHMARK / f"{benchmark}.in"
+    expected = BENCHMARK / f"{benchmark}.out"
     if not expected.exists():
         die(f"missing expected output: {expected}")
 
@@ -131,7 +149,7 @@ def main():
         die(color("compile failed", RED), proc.returncode)
 
     stdin_path = infile if infile.exists() else Path(os.devnull)
-    timed = [*time_command(), str(exe)]
+    timed = [*time_command(), *run_cmd(compiler, exe)]
     print_cmd(timed, stdin=stdin_path, stdout=actual)
 
     with stdin_path.open("rb") as stdin, actual.open("wb") as stdout:
