@@ -3,7 +3,7 @@
 #include <stdlib.h>
 
 /*
-    INPUT: the dimension N (a power of 2 and <= 128),
+    INPUT: the dimension N (a power of 2 and <= 256),
     followed by N^2 entries
     for the first matrix (row-major order),
     then N^2 entries for the second matrix.
@@ -12,7 +12,7 @@
 typedef struct TMatrix *PMatrix;
 typedef struct TMatrix {
     int32_t dim;
-    int32_t arr[128][128];
+    int32_t arr[256][256];
 } TMatrix;
 
 PMatrix ReadMatrix(int32_t dim) {
