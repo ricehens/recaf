@@ -33,8 +33,8 @@ void delete_tree(PNode node) {
 }
 
 const int32_t min_depth = 4;
-const int32_t max_depth = 21;
-const int32_t init_iter = 0x200000;
+const int32_t max_depth = 18;
+const int32_t init_iter = 0x40000;
 
 int main(void) {
     int32_t stretch_depth, check, depth, iter, i;

@@ -35,8 +35,8 @@ end;
 
 const
     min_depth = 4;
-    max_depth = 21;
-    init_iter = $200000;
+    max_depth = 18;
+    init_iter = $40000;
 var
     stretch_depth, check, depth, iter, i: Int32;
     stretch_tree, long_lived_tree, current_tree: PNode;
