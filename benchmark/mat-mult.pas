@@ -9,7 +9,7 @@ program MatrixMultiply;
 
 var
     N: Integer;
-    a, b, c: Array[0..1023, 0..1023] of Integer;
+    a, b, c: Array[0..1023, 0..1023] of Int64;
 
 procedure MatMult;
 var i, j, k: Integer;

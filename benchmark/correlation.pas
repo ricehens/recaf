@@ -14,12 +14,12 @@ program Correlation;
 uses Float64;
 
 var
-    A: Array[0..999, 0..999];
-    EV: Array[0..999];
-    Variance: Array[0..999];
-    Cov: Array[0..999, 0..999];
+    A: Array[0..999, 0..999] of Int64;
+    EV: Array[0..999] of Int64;
+    Variance: Array[0..999] of Int64;
+    Cov: Array[0..999, 0..999] of Int64;
 
-var M, N, i, j, k;
+var M, N, i, j, k: Integer;
 begin
     Read(M, N);
 

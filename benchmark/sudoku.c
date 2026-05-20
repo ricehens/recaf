@@ -11,15 +11,15 @@
     For example, for a 16x16 puzzle use n = 4.
 */
 
-int32_t Board[100][100];
+int Board[100][100];
 bool RowUsed[100][101];
 bool ColUsed[100][101];
 bool BlockUsed[100][101];
-int32_t n, nn;
+int n, nn;
 bool Solved;
 
-void SolveSudoku(int32_t r, int32_t c) {
-    int32_t b, d;
+void SolveSudoku(int r, int c) {
+    int b, d;
     if (r >= nn) {
         Solved = true;
         return;
@@ -53,7 +53,7 @@ void SolveSudoku(int32_t r, int32_t c) {
 }
 
 void PrintBoard(void) {
-    int32_t i, j;
+    int i, j;
     for (i = 0; i <= nn - 1; i++) {
         for (j = 0; j <= nn - 2; j++)
             printf("%d ", Board[i][j]);
@@ -62,8 +62,8 @@ void PrintBoard(void) {
 }
 
 int main(void) {
-    int32_t i, j, d;
-    int32_t r, c, b;
+    int i, j, d;
+    int r, c, b;
     scanf("%d", &n);
     nn = n * n;
 

@@ -1,4 +1,3 @@
-#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -9,11 +8,11 @@
     then N^2 entries for the second matrix.
 */
 
-typedef int32_t TMatrix[512][512];
+typedef int TMatrix[512][512];
 typedef TMatrix *PMatrix;
 
-PMatrix ReadMatrix(int32_t dim) {
-    int32_t i, j;
+PMatrix ReadMatrix(int dim) {
+    int i, j;
     PMatrix ReadMatrix_result;
     ReadMatrix_result = malloc(sizeof(TMatrix));
     for (i = 0; i <= dim - 1; i++)
@@ -22,8 +21,8 @@ PMatrix ReadMatrix(int32_t dim) {
     return ReadMatrix_result;
 }
 
-void PrintMatrix(PMatrix M, int32_t dim) {
-    int32_t i, j;
+void PrintMatrix(PMatrix M, int dim) {
+    int i, j;
     for (i = 0; i <= dim - 1; i++) {
         for (j = 0; j <= dim - 2; j++)
             printf("%d ", (*M)[i][j]);
@@ -31,8 +30,8 @@ void PrintMatrix(PMatrix M, int32_t dim) {
     }
 }
 
-PMatrix Add(PMatrix A, PMatrix B, int32_t dim) {
-    int32_t i, j;
+PMatrix Add(PMatrix A, PMatrix B, int dim) {
+    int i, j;
     PMatrix Add_result;
     Add_result = malloc(sizeof(TMatrix));
     for (i = 0; i <= dim - 1; i++)
@@ -41,8 +40,8 @@ PMatrix Add(PMatrix A, PMatrix B, int32_t dim) {
     return Add_result;
 }
 
-PMatrix Sub(PMatrix A, PMatrix B, int32_t dim) {
-    int32_t i, j;
+PMatrix Sub(PMatrix A, PMatrix B, int dim) {
+    int i, j;
     PMatrix Sub_result;
     Sub_result = malloc(sizeof(TMatrix));
     for (i = 0; i <= dim - 1; i++)
@@ -51,8 +50,8 @@ PMatrix Sub(PMatrix A, PMatrix B, int32_t dim) {
     return Sub_result;
 }
 
-PMatrix Quadrant(PMatrix M, int32_t x, int32_t y, int32_t dim) {
-    int32_t N, i, j;
+PMatrix Quadrant(PMatrix M, int x, int y, int dim) {
+    int N, i, j;
     PMatrix Quadrant_result;
     Quadrant_result = malloc(sizeof(TMatrix));
     N = dim / 2;
@@ -62,8 +61,8 @@ PMatrix Quadrant(PMatrix M, int32_t x, int32_t y, int32_t dim) {
     return Quadrant_result;
 }
 
-PMatrix Merge(PMatrix Q11, PMatrix Q12, PMatrix Q21, PMatrix Q22, int32_t dim) {
-    int32_t i, j;
+PMatrix Merge(PMatrix Q11, PMatrix Q12, PMatrix Q21, PMatrix Q22, int dim) {
+    int i, j;
     PMatrix Merge_result;
     Merge_result = malloc(sizeof(TMatrix));
     for (i = 0; i <= dim - 1; i++)
@@ -76,8 +75,8 @@ PMatrix Merge(PMatrix Q11, PMatrix Q12, PMatrix Q21, PMatrix Q22, int32_t dim) {
     return Merge_result;
 }
 
-PMatrix Strassen(PMatrix A, PMatrix B, int32_t dim) {
-    int32_t i, j, k;
+PMatrix Strassen(PMatrix A, PMatrix B, int dim) {
+    int i, j, k;
     PMatrix A11, A12, A21, A22, B11, B12, B21, B22,
         M1, M2, M3, M4, M5, M6, M7,
         T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14,
@@ -162,7 +161,7 @@ PMatrix Strassen(PMatrix A, PMatrix B, int32_t dim) {
 }
 
 int main(void) {
-    int32_t N;
+    int N;
     PMatrix A, B, C;
     scanf("%d", &N);
     A = ReadMatrix(N);

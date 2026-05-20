@@ -1,18 +1,19 @@
 #include <stdio.h>
-#include <stdint.h>
 #include <stdlib.h>
+
+/* https://benchmarksgame-team.pages.debian.net/benchmarksgame/description/binarytrees.html#binarytrees */
 
 typedef struct TNode *PNode;
 typedef struct TNode {
     PNode left, right;
 } TNode;
 
-int32_t checksum(PNode node) {
+int checksum(PNode node) {
     if (node->left == NULL) return 1;
     else return 1 + checksum(node->left) + checksum(node->right);
 }
 
-PNode make_tree(int32_t depth) {
+PNode make_tree(int depth) {
     PNode make_tree_result = malloc(sizeof(TNode));
     if (depth == 0) {
         make_tree_result->left = NULL;
@@ -32,12 +33,12 @@ void delete_tree(PNode node) {
     free(node);
 }
 
-const int32_t min_depth = 4;
-const int32_t max_depth = 18;
-const int32_t init_iter = 0x40000;
+const int min_depth = 4;
+const int max_depth = 18;
+const int init_iter = 0x40000;
 
 int main(void) {
-    int32_t stretch_depth, check, depth, iter, i;
+    int stretch_depth, check, depth, iter, i;
     PNode stretch_tree, long_lived_tree, current_tree;
 
     stretch_depth = max_depth + 1;

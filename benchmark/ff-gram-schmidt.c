@@ -1,4 +1,3 @@
-#include <stdint.h>
 #include <stdio.h>
 
 /*
@@ -16,12 +15,12 @@
         (some might be all-zeros if original vectors are not spanning)
 */
 
-const int32_t p = 1009;
-int32_t n, d;
-int32_t Mat[1000][1000];
+const int p = 1009;
+int n, d;
+int Mat[1000][1000];
 
-int32_t Pow(int32_t a, int32_t e) {
-    int32_t b;
+int Pow(int a, int e) {
+    int b;
     if (e == 0)
         return 1;
     else if (e % 2 == 1)
@@ -32,22 +31,22 @@ int32_t Pow(int32_t a, int32_t e) {
     }
 }
 
-int32_t Dot(int32_t i, int32_t j) {
-    int32_t k;
-    int32_t dot = 0;
+int Dot(int i, int j) {
+    int k;
+    int dot = 0;
     for (k = 0; k <= d - 1; k++)
         dot = (dot + Mat[i][k] * Mat[j][k]) % p;
     return dot;
 }
 
-void Add(int32_t i, int32_t j) {
-    int32_t k;
+void Add(int i, int j) {
+    int k;
     for (k = 0; k <= d - 1; k++)
         Mat[j][k] = (Mat[j][k] + Mat[i][k]) % p;
 }
 
-void Swap(int32_t i, int32_t j) {
-    int32_t k, t;
+void Swap(int i, int j) {
+    int k, t;
     for (k = 0; k <= d - 1; k++) {
         t = Mat[i][k];
         Mat[i][k] = Mat[j][k];
@@ -55,15 +54,15 @@ void Swap(int32_t i, int32_t j) {
     }
 }
 
-void Orthogonalize(int32_t i, int32_t j) {
-    int32_t proj, k;
+void Orthogonalize(int i, int j) {
+    int proj, k;
     proj = (Dot(i, j) * Pow(Dot(i, i), p - 2)) % p;
     for (k = 0; k <= d - 1; k++)
         Mat[j][k] = (Mat[j][k] - ((proj * Mat[i][k]) % p) + p) % p;
 }
 
 int main(void) {
-    int32_t k, i, j;
+    int k, i, j;
     scanf("%d%d", &d, &n);
 
     for (k = 0; k <= n - 1; k++)

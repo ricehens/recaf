@@ -12,10 +12,10 @@ program Correlation;
 }
 
 var
-    A: Array[0..999, 0..999] of Int32;
-    EV: Array[0..999] of Int32;
-    Variance: Array[0..999] of Int32;
-    Cov: Array[0..999, 0..999] of Int32;
+    A: Array[0..999, 0..999] of Int64;
+    EV: Array[0..999] of Int64;
+    Variance: Array[0..999] of Int64;
+    Cov: Array[0..999, 0..999] of Int64;
 
 var
     M, N, i, j, k: Int32;

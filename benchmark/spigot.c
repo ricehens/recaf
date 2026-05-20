@@ -1,14 +1,13 @@
-#include <stdint.h>
 #include <stdio.h>
 
 /* https://www.cs.williams.edu/~heeringa/classes/cs135/s15/readings/spigot.pdf */
 
-const int32_t n = 10000;
-const int32_t len = 10 * n / 3;
+const int n = 10000;
+const int len = 10 * n / 3;
 
 int main(void) {
-    int32_t i, j, k, q, x, nines, predigit;
-    int32_t a[len + 1];
+    int i, j, k, q, x, nines, predigit;
+    int a[len + 1];
 
     for (j = 1; j <= len; j++) a[j] = 2;
     nines = 0; predigit = 0;

@@ -1,4 +1,3 @@
-#include <stdint.h>
 #include <stdio.h>
 
 /*
@@ -7,19 +6,19 @@
     all whitespace-separated
 */
 
-const int32_t MAX_SIZE = 10000000;
-int32_t a[10000001];
-int32_t N;
+const int MAX_SIZE = 10000000;
+int a[10000001];
+int N;
 
-void Swap(int32_t i, int32_t j) {
-    int32_t t;
+void Swap(int i, int j) {
+    int t;
     t = a[i];
     a[i] = a[j];
     a[j] = t;
 }
 
-int32_t Partition(int32_t lo, int32_t hi) {
-    int32_t pivot, i, j;
+int Partition(int lo, int hi) {
+    int pivot, i, j;
     pivot = a[lo];
     i = lo - 1;
     j = hi + 1;
@@ -42,8 +41,8 @@ int32_t Partition(int32_t lo, int32_t hi) {
     }
 }
 
-void QuicksortRange(int32_t lo, int32_t hi) {
-    int32_t p;
+void QuicksortRange(int lo, int hi) {
+    int p;
     if (lo < hi) {
         p = Partition(lo, hi);
         QuicksortRange(lo, p);
@@ -52,7 +51,7 @@ void QuicksortRange(int32_t lo, int32_t hi) {
 }
 
 void PrintArray(void) {
-    int32_t i;
+    int i;
     printf("[");
     for (i = 1; i <= N - 1; i++)
         printf("%d, ", a[i]);
@@ -60,7 +59,7 @@ void PrintArray(void) {
 }
 
 int main(void) {
-    int32_t i;
+    int i;
     scanf("%d", &N);
     if (N > MAX_SIZE) return 0;
 

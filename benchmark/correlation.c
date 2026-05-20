@@ -1,5 +1,4 @@
 #include <math.h>
-#include <stdint.h>
 #include <stdio.h>
 
 /*
@@ -13,12 +12,12 @@
     M space-separated floating point numbers to two decimal places.
 */
 
-int32_t A[1000][1000];
-int32_t EV[1000];
-int32_t Variance[1000];
-int32_t Cov[1000][1000];
+long long A[1000][1000];
+long long EV[1000];
+long long Variance[1000];
+long long Cov[1000][1000];
 
-int32_t M, N, i, j, k;
+int M, N, i, j, k;
 double corr;
 
 int main(void) {
@@ -29,7 +28,7 @@ int main(void) {
     else {
         for (i = 0; i <= M - 1; i++)
             for (j = 0; j <= N - 1; j++)
-                scanf("%d", &A[i][j]);
+                scanf("%lld", &A[i][j]);
 
         for (i = 0; i <= M - 1; i++) {
             EV[i] = 0;
