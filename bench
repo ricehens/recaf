@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import hashlib
+import json
 import os
 import shlex
 import subprocess
@@ -20,9 +21,14 @@ SOURCE_EXTENSIONS = {
     "fpc": ".pp",
     "gcc": ".c",
     "clang": ".c",
-    "java": ".java",
 }
-COMPILERS = set(SOURCE_EXTENSIONS)
+COMPILERS = tuple(SOURCE_EXTENSIONS)
+OPT_LEVELS = {
+    "recaf": [(f"-O{level}", [f"-O{level}"]) for level in range(4)],
+    "fpc": [("-O0", ["-O-"]), *[(f"-O{level}", [f"-O{level}"]) for level in range(1, 5)]],
+    "gcc": [(f"-O{level}", [f"-O{level}"]) for level in range(4)],
+    "clang": [(f"-O{level}", [f"-O{level}"]) for level in range(4)],
+}
 BENCHMARK = Path("benchmark")
 TMP = Path("/tmp")
 
@@ -37,15 +43,20 @@ def die(message, code=2):
 
 
 def usage():
-    print("Usage: ./bench <recaf|fpc|gcc|clang|java> <benchmark> <opts...>")
+    print("""Usage:
+  ./bench <recaf|fpc|gcc|clang> <benchmark> <opts...>
+  ./bench all <benchmark>""")
     sys.exit(0)
+
+
+def safe_name(name):
+    return "".join(c if c.isalnum() or c in "-_" else "_" for c in name)
 
 
 def exe_for(src, compiler, opts):
     key = "\0".join([str(src.resolve()), compiler, *opts])
     digest = hashlib.sha1(key.encode()).hexdigest()[:8]
-    name = "".join(c if c.isalnum() or c in "-_" else "_" for c in src.stem)
-    return TMP / f"bench-{name}-{compiler}-{digest}"
+    return TMP / f"bench-{safe_name(src.stem)}-{compiler}-{digest}"
 
 
 def out_for(src, compiler, opts):
@@ -57,19 +68,10 @@ def compile_cmd(compiler, src, exe, opts):
         return ["./run.sh", str(src), "-o", str(exe), *opts]
     if compiler == "fpc":
         return ["fpc", str(src), f"-o{exe}", *opts]
-    if compiler == "java":
-        exe.mkdir(parents=True, exist_ok=True)
-        return ["javac", "-d", str(exe), str(src), *opts]
     cmd = [compiler, str(src), "-o", str(exe), *opts]
     if "-lm" not in opts:
         cmd.append("-lm")
     return cmd
-
-
-def run_cmd(compiler, exe):
-    if compiler == "java":
-        return ["java", "-cp", str(exe), "Main"]
-    return [str(exe)]
 
 
 def run(cmd, **kwargs):
@@ -114,29 +116,22 @@ def print_time(stderr):
         print(color("time output was not recognized", YELLOW), file=sys.stderr)
 
 
-def main():
-    if len(sys.argv) == 2 and sys.argv[1] in {"-h", "--help"}:
-        usage()
-    if len(sys.argv) < 3:
-        usage()
-
-    compiler = sys.argv[1]
-    if compiler not in COMPILERS:
-        die(f"unknown compiler: {compiler}")
-
-    benchmark = sys.argv[2]
-    opts = sys.argv[3:]
+def paths_for(compiler, benchmark):
     src = BENCHMARK / f"{benchmark}{SOURCE_EXTENSIONS[compiler]}"
     if not src.exists():
         die(f"missing input file: {src}")
 
-    infile = BENCHMARK / f"{benchmark}.in"
     expected = BENCHMARK / f"{benchmark}.out"
     if not expected.exists():
         die(f"missing expected output: {expected}")
 
+    infile = BENCHMARK / f"{benchmark}.in"
+    stdin_path = infile if infile.exists() else Path(os.devnull)
+    return src, stdin_path, expected
+
+
+def compile_benchmark(compiler, src, opts):
     exe = exe_for(src, compiler, opts)
-    actual = out_for(src, compiler, opts)
     compile = compile_cmd(compiler, src, exe, opts)
 
     print_cmd(compile)
@@ -148,8 +143,19 @@ def main():
             print(proc.stderr, end="", file=sys.stderr)
         die(color("compile failed", RED), proc.returncode)
 
-    stdin_path = infile if infile.exists() else Path(os.devnull)
-    timed = [*time_command(), *run_cmd(compiler, exe)]
+    return exe
+
+
+def check_output(actual, expected):
+    if actual.read_bytes().rstrip() != expected.read_bytes().rstrip():
+        die(color(f"incorrect output: {actual} differs from {expected}", RED), 1)
+
+
+def run_once(compiler, benchmark, opts):
+    src, stdin_path, expected = paths_for(compiler, benchmark)
+    exe = compile_benchmark(compiler, src, opts)
+    actual = out_for(src, compiler, opts)
+    timed = [*time_command(), str(exe)]
     print_cmd(timed, stdin=stdin_path, stdout=actual)
 
     with stdin_path.open("rb") as stdin, actual.open("wb") as stdout:
@@ -159,8 +165,92 @@ def main():
     if proc.returncode:
         die(color(f"program exited with status {proc.returncode}", RED), proc.returncode)
 
-    if actual.read_bytes().rstrip() != expected.read_bytes().rstrip():
-        die(color(f"incorrect output: {actual} differs from {expected}", RED), 1)
+    check_output(actual, expected)
+
+
+def run_hyperfine(name, exe, stdin_path, actual):
+    report = TMP / f"bench-{safe_name(name)}.json"
+    cmd = [
+        "hyperfine",
+        "-w", "1",
+        "-r", "5",
+        "--input", str(stdin_path),
+        "--output", str(actual),
+        "--export-json", str(report),
+        "--command-name", name,
+        str(exe),
+    ]
+    print_cmd(cmd)
+    proc = run(cmd)
+    if proc.returncode:
+        die(color(f"hyperfine failed for {name}", RED), proc.returncode)
+
+    try:
+        with report.open() as f:
+            return json.load(f)["results"][0]["mean"]
+    except (OSError, KeyError, IndexError, json.JSONDecodeError) as e:
+        die(color(f"could not read hyperfine result for {name}: {e}", RED), 1)
+
+
+def format_duration(seconds):
+    if seconds < 0.001:
+        return f"{seconds * 1_000_000:.2f} us"
+    if seconds < 1:
+        return f"{seconds * 1_000:.2f} ms"
+    return f"{seconds:.3f} s"
+
+
+def print_summary(results):
+    compiler_width = max(len("Compiler"), *(len(row["compiler"]) for row in results))
+    opt_width = max(len("Opt"), *(len(row["opt"]) for row in results))
+    mean_width = max(len("Mean"), *(len(format_duration(row["mean"])) for row in results))
+
+    print()
+    print(color("hyperfine summary", BOLD))
+    print(f"{'Compiler':<{compiler_width}}  {'Opt':<{opt_width}}  {'Mean':>{mean_width}}")
+    print(f"{'-' * compiler_width}  {'-' * opt_width}  {'-' * mean_width}")
+    for row in results:
+        print(f"{row['compiler']:<{compiler_width}}  {row['opt']:<{opt_width}}  {format_duration(row['mean']):>{mean_width}}")
+
+
+def run_all(benchmark):
+    results = []
+    actual = TMP / f"bench-{safe_name(benchmark)}-all.out"
+
+    for compiler in COMPILERS:
+        src, stdin_path, expected = paths_for(compiler, benchmark)
+        for opt_name, opt_args in OPT_LEVELS[compiler]:
+            name = f"{compiler} {opt_name}"
+            print()
+            print(color(name, BOLD))
+            exe = compile_benchmark(compiler, src, opt_args)
+            mean = run_hyperfine(name, exe, stdin_path, actual)
+            check_output(actual, expected)
+            results.append({"compiler": compiler, "opt": opt_name, "mean": mean})
+
+    print_summary(results)
+
+
+def main():
+    if len(sys.argv) == 2 and sys.argv[1] in {"-h", "--help"}:
+        usage()
+    if len(sys.argv) < 3:
+        usage()
+
+    compiler = sys.argv[1]
+    benchmark = sys.argv[2]
+    opts = sys.argv[3:]
+
+    if compiler == "all":
+        if opts:
+            die("all supplies the optimization options; do not pass extra compiler options")
+        run_all(benchmark)
+        return
+
+    if compiler not in COMPILERS:
+        die(f"unknown compiler: {compiler}")
+
+    run_once(compiler, benchmark, opts)
 
 
 if __name__ == "__main__":

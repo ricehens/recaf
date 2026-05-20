@@ -6,8 +6,8 @@
     all whitespace-separated
 */
 
-const int MAX_SIZE = 10000000;
-int a[10000001];
+#define MAX_SIZE 10000000
+int a[MAX_SIZE + 1];
 int N;
 
 void Swap(int i, int j) {
