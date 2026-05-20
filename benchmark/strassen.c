@@ -83,7 +83,7 @@ PMatrix Strassen(PMatrix A, PMatrix B, int32_t dim) {
         T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14,
         C11, C12, C21, C22, Strassen_result;
 
-    if (dim <= 4) {
+    if (dim <= 8) {
         Strassen_result = malloc(sizeof(TMatrix));
 
         for (i = 0; i <= dim - 1; i++)

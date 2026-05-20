@@ -79,7 +79,7 @@ var i, j, k: Integer;
     T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14,
     C11, C12, C21, C22: PMatrix;
 begin
-    if dim <= 4 then begin
+    if dim <= 8 then begin
         New(Strassen);
         for i := 0 to dim - 1 do
             for j := 0 to dim - 1 do begin
