@@ -133,8 +133,16 @@ public class SSAData {
         for (CFGAddress variable : newInstruction.operands()) {
             uses.computeIfAbsent(variable, k -> new HashSet<>());
             uses.get(variable).add(newInstruction);
+            if (isDeclaredLocal(variable))
+                localVars.add(variable);
         }
         blocks.put(newInstruction, block);
+    }
+
+    private boolean isDeclaredLocal(CFGAddress variable) {
+        if (variable == null || method.ctx().isGlobalVar(variable))
+            return false;
+        return method.getParams().contains(variable) || method.getLocalVars().contains(variable);
     }
 
     /**
@@ -154,7 +162,7 @@ public class SSAData {
                 for (CFGAddress operand : use.operands()) {
                     CFGInstruction def = definitions.get(operand);
                     if (def == null) {
-                        if (!method.ctx().isGlobalVar(operand) && !method.getParams().contains(operand)) {
+                        if (!method.ctx().isGlobalVar(operand) && !isDeclaredLocal(operand)) {
                             System.err.println(method);
                             throw new SSAValidationException("Use of undefined variable " + operand);
                         }
@@ -191,7 +199,7 @@ public class SSAData {
                     CFGAddress operand = phi.getSources().get(sourceBlock);
                     CFGInstruction def = definitions.get(operand);
                     if (def == null) {
-                        if (!method.ctx().isGlobalVar(operand) && !method.getParams().contains(operand)) {
+                        if (!method.ctx().isGlobalVar(operand) && !isDeclaredLocal(operand)) {
                             System.err.println(method);
                             throw new SSAValidationException("Use of undefined variable " + operand);
                         }

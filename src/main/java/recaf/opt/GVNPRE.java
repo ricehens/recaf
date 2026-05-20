@@ -77,14 +77,25 @@ public class GVNPRE extends SSATransformation {
 
         availOut.put(dt.getRoot(), new HashMap<>());
         for (CFGAddress param : method.getParams()) {
-            Temporary t = new Temporary(param);
-            Value v = new Value(t);
-            vt.add(t, v);
-            tmpGen.get(dt.getRoot()).add(t);
-            availOut.get(dt.getRoot()).put(v, t);
+            addEntryValue(param);
         }
+        for (CFGAddress addr : data.getLocalVars())
+            if (data.getDefinition(addr) == null)
+                addEntryValue(addr);
 
         buildSets1DFS(dt.getRoot());
+    }
+
+    private void addEntryValue(CFGAddress addr) {
+        if (ctx.isGlobalVar(addr))
+            return;
+        Temporary t = new Temporary(addr);
+        if (vt.lookup(t) != null)
+            return;
+        Value v = new Value(t);
+        vt.add(t, v);
+        tmpGen.get(dt.getRoot()).add(t);
+        availOut.get(dt.getRoot()).put(v, t);
     }
 
     /** Helper for buildSets1 */
