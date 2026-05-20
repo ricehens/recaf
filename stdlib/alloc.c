@@ -6,13 +6,17 @@
 #include <unistd.h>
 
 #define ALIGNMENT 16
-#define SMALL_LIMIT (1024 * 1024)
-#define CHUNK_SIZE (1024 * 1024)
+#define SMALL_LIMIT (1 << 20)
+#define CHUNK_SIZE (1 << 20)
 #define BIN_COUNT (SMALL_LIMIT / ALIGNMENT)
 
+typedef struct {
+    unsigned char *bump;
+    unsigned char *end;
+} BumpClass;
+
 static void *free_bins[BIN_COUNT];
-static unsigned char *bump;
-static unsigned char *bump_end;
+static BumpClass bump_bins[BIN_COUNT];
 static size_t page_size;
 
 static size_t align_up(size_t value, size_t alignment) {
@@ -56,18 +60,19 @@ static void *allocate_small(size_t size) {
         return ptr;
     }
 
-    if ((size_t)(bump_end - bump) < size) {
+    BumpClass *bin = &bump_bins[index];
+    if (bin->bump == NULL || (size_t)(bin->end - bin->bump) < size) {
         size_t chunk_size = CHUNK_SIZE;
         if (chunk_size < size) {
             chunk_size = align_up(size, get_page_size());
         }
 
-        bump = map_pages(chunk_size);
-        bump_end = bump + chunk_size;
+        bin->bump = map_pages(chunk_size);
+        bin->end = bin->bump + chunk_size;
     }
 
-    ptr = bump;
-    bump += size;
+    ptr = bin->bump;
+    bin->bump += size;
     return ptr;
 }
 
