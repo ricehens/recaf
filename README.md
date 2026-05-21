@@ -37,6 +37,8 @@ Keep reading below for the resolution of the asterisks and the actual performanc
 (TL;DR faster than FPC, about 75% the performance of clang O3,
 though there are still some asterisks on these claims.)
 
+This is a personal project and not intended to be of interest to anyone else.
+
 ## Quick Start
 ### Build
 Build by running `./gradlew nativeCompile` on a x86_64 machine
@@ -79,7 +81,7 @@ The subset of Pascal that Recaf supports includes:
   ```pascal
   type
       TColor = (Red, Green, Blue);
-      TImage = Array[1..10][1..10] of TColor;
+      TImage = Array[1..10, 1..10] of TColor;
       PImage = ^TImage;
       TPair = record x, y: TImage; end;
       PPair = ^TPair;
@@ -102,7 +104,7 @@ The subset of Pascal that Recaf supports includes:
   (Recall the return-value is set by assigning to a variable with the same name as the function.)
 - Standard arithmetic operations `+`, `-`, `*`, `div`, `mod` on integer types,
   relation operations `<`, `<=`, `>=`, `>` on integer types,
-  relation operations `=` and `<>` on integers and pointers,
+  relation operations `=` and `<>` on integers types, booleans, and pointers,
   and boolean operations `and`, `or`, `not`.
   Bit-level operations are not provided.
   Integer overflow is undefined behavior.
@@ -222,3 +224,15 @@ The actual data, with `btree` and `strassen` removed:
 | fpc&nbsp;&#x2011;O0   | 1.585&nbsp;s  | 0.368 |
 | clang&nbsp;&#x2011;O0 | 1.657&nbsp;s  | 0.352 |
 | recaf&nbsp;&#x2011;O0 | 5.668&nbsp;s  | 0.103 |
+
+### Acknowledgements
+A lot of optimizations are based on
+*Engineering a Compiler* by Cooper and Torczon.
+The GVN-PRE optimization is based on GVN-PRE from
+Thomas VanDrunen's dissertation.
+
+The implementation of Recaf is based on
+a smaller compiler
+for a language called [Decaf](https://6110-sp25.github.io/syllabus/)
+I wrote for the Spring 2025 iteration of 6.110 at MIT.
+I received nontrivial help during office hours from the TAs.

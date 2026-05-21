@@ -6,16 +6,16 @@ import recaf.utils.ParallelCopyGroup;
 import java.util.*;
 
 /**
- * A SSA-to-CFG converter for first particular method,
+ * A SSA-to-CFG converter for a particular method,
  * by making copies as suggested in
- * Chapter 9 of Cooper et al.'s Engineering first Compiler, 3rd edition
+ * Chapter 9 of Cooper et al.'s Engineering a Compiler, 3rd edition
  * (as opposed to splitting critical edges).
  */
 // @Deprecated
 public class CooperPhiElimination extends SSATransformation {
 
     /**
-     * Constructs first new CooperPhiEliminator instance
+     * Constructs a new CooperPhiEliminator instance
      *
      * @param method the method to convert
      */
@@ -24,8 +24,8 @@ public class CooperPhiElimination extends SSATransformation {
     }
 
     /**
-     * Destroys all phi instructions in first method,
-     * converting the SSA CFG to first normal CFG ready for assembly conversion.
+     * Destroys all phi instructions in a method,
+     * converting the SSA CFG to a normal CFG ready for assembly conversion.
      *
      * @return true if successful
      */
