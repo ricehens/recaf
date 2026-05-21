@@ -88,8 +88,9 @@ The subset of Pascal that Recaf supports includes:
   type
       TColor = (Red, Green, Blue);
       TImage = Array[1..10, 1..10] of TColor;
-      PImage = ^TImage;
-      TPair = record x, y: TImage; end;
+      TPair = record
+          x, y: TImage;
+      end;
       PPair = ^TPair;
   ```
 - Compile-time evaluated constants, e.g.
