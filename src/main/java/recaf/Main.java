@@ -20,8 +20,9 @@ public class Main {
                                       Compilation will proceed to the specified stage
                                       and print the relevant representation.
 
-              -o <outfile>            Output will be written to <outfile> instead of
-              --output <outfile>      system out.
+              -o <outfile>            Output will be written to <outfile>. The default
+              --output <outfile>      output location is a file with the .pas extension
+                                      removed if stage is "exe", and stdout otherwise.
 
               -O0                     Perform no optimizations (default).
               -O1                     Perform simple optimizations, such as
