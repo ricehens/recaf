@@ -77,10 +77,10 @@ or under `tests/good/`.
 ### Key Features
 The subset of Pascal that Recaf supports includes:
 - The following types:
-    * Primitive types `Integer` (32-bit), `Int64` (64-bit), and `Boolean`;
+    * primitive types `Integer` (32-bit), `Int64` (64-bit), and `Boolean`;
     * enumeration types;
     * fixed-size arrays (whose bounds are compile-time evaluable;
-      indexes are not bounds-checked and out-of-bounds access is undefined behavior);
+      indices are not bounds-checked and out-of-bounds access is undefined behavior);
     * records (but no variant records / tagged union); and
     * pointer types
       (which necessarily point to the heap; allocate and deallocate via `New` and `Dispose`).
