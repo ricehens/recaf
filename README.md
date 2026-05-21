@@ -89,8 +89,9 @@ The subset of Pascal that Recaf supports includes:
   ```
 - Compile-time evaluated constants, e.g.
   ```pascal
-  const N = 6 + 7;
-  const N2 = N * N;
+  const
+      N = 6 + 7;
+      N2 = N * N;
   ```
 - Top-level procedures and functions (i.e. routines), but not nested.
   Routines may have local definitions for types, constant, or variables.
@@ -112,7 +113,7 @@ The subset of Pascal that Recaf supports includes:
 - The assignment operation `:=` copies data for arrays and records and value for all other types.
 - The compiler is single-pass. You may forward-declare routines 
   with by writing `forward` instead of the body.
-  The following is legal so long as `TType` is defined in the same `type` block:
+  The following is legal so long as `TType` is defined in the same `type` block or earlier:
   ```pascal
   type
       PType = ^TType;
@@ -167,7 +168,8 @@ On O2, the above, and:
 
 On O3, the above, and:
 - Loop unrolling
-Note this may cause code-size explosion and compile time explosion,
+
+Note loop unrolling may cause code-size explosion and compile time explosion,
 as well as occasional runtime explosions
 for some programs.
 
@@ -229,7 +231,7 @@ The actual data, with `btree` and `strassen` removed:
 ## Acknowledgements
 A lot of optimizations are based on
 *Engineering a Compiler* by Cooper and Torczon.
-The GVN-PRE optimization is based on GVN-PRE from
+The GVN-PRE optimization is based on 
 Thomas VanDrunen's dissertation.
 
 The implementation of Recaf is based on
