@@ -66,6 +66,7 @@ Besides being linked to `libc`, the former is self-contained.
   For other stages, the default output is stdout.
 - There are four levels of optimization: `-O0`, `-O1`, `-O2`, and `-O3`.
 - Use `-l <library>` to static link a library. Give the full path to the library.
+  We link libc by default.
 - Use `-h` to print a more detailed help message.
 
 ## Informal Language Specification
@@ -75,10 +76,14 @@ or under `tests/good/`.
 
 ### Key Features
 The subset of Pascal that Recaf supports includes:
-- Primitive types `Integer` (32-bit), `Int64` (64-bit), and `Boolean`;
-  enumeration types; fixed-size arrays (whose bounds are compile-time evaluable);
-  records (but no variant records / tagged union); and pointer types
-  (which necessarily point to the heap; allocate and deallocate via `New` and `Dispose`).
+- The following types:
+    * Primitive types `Integer` (32-bit), `Int64` (64-bit), and `Boolean`;
+    * enumeration types;
+    * fixed-size arrays (whose bounds are compile-time evaluable;
+      indexes are not bounds-checked and out-of-bounds access is undefined behavior);
+    * records (but no variant records / tagged union); and
+    * pointer types
+      (which necessarily point to the heap; allocate and deallocate via `New` and `Dispose`).
   ```pascal
   type
       TColor = (Red, Green, Blue);
