@@ -241,6 +241,6 @@ Thomas VanDrunen's dissertation.
 
 The implementation of Recaf is based on
 a smaller compiler
-for a language called [Decaf](https://6110-sp25.github.io/syllabus/)
+for a language called [Decaf](https://6110-sp25.github.io/syllabus)
 I wrote for the Spring 2025 iteration of 6.110 at MIT.
 I received nontrivial help during office hours from the TAs.
