@@ -117,7 +117,7 @@ The subset of Pascal that Recaf supports includes:
   Bit-level operations are not provided.
   Integer overflow is undefined behavior.
 - The assignment operation `:=` copies data for arrays and records and copies value for all other types.
-- The compiler is single-pass. You may forward-declare routines 
+- Identifier recognition is single-pass. You may forward-declare routines 
   by writing `forward` instead of the body.
   The following is legal so long as `TType` is defined in the same `type` block or earlier:
   ```pascal
