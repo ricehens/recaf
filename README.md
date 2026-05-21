@@ -154,7 +154,7 @@ The subset of Pascal that Recaf supports includes:
 - Unlike standard Pascal, type annotations are everywhere optional and default to `Integer` when
   omitted. 
 ## Optimizations
-### SSA Optimization Passes
+### Passes
 The compiler performs the following optimization passes 
 on a [SSA](https://en.wikipedia.org/wiki/Static_single-assignment_form) representation.
 
