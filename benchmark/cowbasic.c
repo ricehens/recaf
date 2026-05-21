@@ -33,7 +33,7 @@ PTrie NewTrieNode(int value) {
     return node;
 }
 
-int ParseLit(void) {
+int ParseLit() {
     int val;
     val = 0;
     while (idx <= buf_len && buf[idx] >= '0' && buf[idx] <= '9') {
@@ -43,7 +43,7 @@ int ParseLit(void) {
     return val;
 }
 
-int ParseVar(void) {
+int ParseVar() {
     PTrie now;
     now = env;
     while (idx <= buf_len && buf[idx] >= 'a' && buf[idx] <= 'z') {
@@ -60,7 +60,7 @@ int ParseVar(void) {
     return now->idx;
 }
 
-PVec ParseExpr(void) {
+PVec ParseExpr() {
     PVec ParseExpr_result;
     int i;
     PVec left, right;
@@ -135,7 +135,7 @@ PMat Assign(int dest, PVec src) {
     return Assign_result;
 }
 
-PMat Eval(void) {
+PMat Eval() {
     PMat Eval_result;
     int i, dest, loop;
     char *line;
@@ -174,7 +174,7 @@ PMat Eval(void) {
     return Eval_result;
 }
 
-int main(void) {
+int main() {
     PMat prog;
     env = NewTrieNode(0);
     cnt = 1;

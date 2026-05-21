@@ -12,55 +12,67 @@ program Correlation;
 }
 
 var
+    M, N: Int32;
     A: Array[0..999, 0..999] of Int64;
     EV: Array[0..999] of Int64;
     Variance: Array[0..999] of Int64;
     Cov: Array[0..999, 0..999] of Int64;
 
-var
-    M, N, i, j, k: Int32;
-    corr: Real;
+procedure ReadMatrix;
+var i, j: Int32;
+begin
+    for i := 0 to M - 1 do
+        for j := 0 to N - 1 do
+            Read(A[i, j])
+end;
+
+procedure PrintMatrix;
+var i, j: Int32;
+var corr: Real;
+begin
+    for i := 0 to M - 1 do
+    begin
+        for j := 0 to M - 1 do
+        begin
+            corr := Cov[i, j] / Sqrt(Variance[i] * Variance[j]);
+            Write(corr:0:2, ' ')
+        end;
+        WriteLn
+    end
+end;
+
+procedure ComputeCorrelation;
+var i, j, k: Int32;
+begin
+    for i := 0 to M - 1 do
+    begin
+        EV[i] := 0;
+        for j := 0 to N - 1 do
+            EV[i] := EV[i] + A[i, j]
+    end;
+
+    for i := 0 to M - 1 do
+    begin
+        Variance[i] := -EV[i] * EV[i];
+        for j := 0 to N - 1 do
+            Variance[i] := Variance[i] + N * A[i, j] * A[i, j]
+    end;
+
+    for i := 0 to M - 1 do
+        for j := 0 to M - 1 do
+        begin
+            Cov[i, j] := -EV[i] * EV[j];
+            for k := 0 to N - 1 do
+                Cov[i, j] := Cov[i, j] + N * A[i, k] * A[j, k]
+        end
+end;
+
 begin
     Read(M, N);
-
-    if (M > 1000) or (N > 1000) then
-        WriteLn('M and N must be <= 1000')
-    else
+    if (M <= 1000) and (N <= 1000) then 
     begin
-        for i := 0 to M - 1 do
-            for j := 0 to N - 1 do
-                Read(A[i, j]);
-
-        for i := 0 to M - 1 do
-        begin
-            EV[i] := 0;
-            for j := 0 to N - 1 do
-                EV[i] := EV[i] + A[i, j]
-        end;
-
-        for i := 0 to M - 1 do
-        begin
-            Variance[i] := -EV[i] * EV[i];
-            for j := 0 to N - 1 do
-                Variance[i] := Variance[i] + N * A[i, j] * A[i, j]
-        end;
-
-        for i := 0 to M - 1 do
-            for j := 0 to M - 1 do
-            begin
-                Cov[i, j] := -EV[i] * EV[j];
-                for k := 0 to N - 1 do
-                    Cov[i, j] := Cov[i, j] + N * A[i, k] * A[j, k]
-            end;
-
-        for i := 0 to M - 1 do
-        begin
-            for j := 0 to M - 1 do
-            begin
-                corr := Cov[i, j] / Sqrt(Variance[i] * Variance[j]);
-                Write(corr:0:2, ' ')
-            end;
-            WriteLn
-        end
-    end;
+        ReadMatrix;
+        ComputeCorrelation;
+        PrintMatrix
+    end
 end.

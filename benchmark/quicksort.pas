@@ -57,6 +57,13 @@ begin
     end
 end;
 
+procedure ReadArray;
+var i;
+begin
+    for i := 1 to N do
+        Read(a[i])
+end;
+
 procedure PrintArray;
 var i;
 begin
@@ -66,14 +73,12 @@ begin
     WriteLn(a[N], ']')
 end;
 
-var i;
 begin
     ReadLn(N);
-    if N > MAX_SIZE then exit;
-
-    for i := 1 to N do
-        Read(a[i]);
-
-    QuicksortRange(1, N);
-    PrintArray
+    if N <= MAX_SIZE then 
+    begin
+        ReadArray;
+        QuicksortRange(1, N);
+        PrintArray
+    end
 end.

@@ -160,7 +160,7 @@ PMatrix Strassen(PMatrix A, PMatrix B, int dim) {
     return Strassen_result;
 }
 
-int main(void) {
+int main() {
     int N;
     PMatrix A, B, C;
     scanf("%d", &N);

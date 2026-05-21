@@ -20,6 +20,17 @@ begin
                 c[i, j] := c[i, j] + a[i, k] * b[k, j]
 end;
 
+procedure ReadMatrices;
+var i, j: Integer;
+begin
+    for i := 0 to N - 1 do
+        for j := 0 to N - 1 do
+            Read(a[i, j]);
+    for i := 0 to N - 1 do
+        for j := 0 to N - 1 do
+            Read(b[i, j])
+end;
+
 procedure PrintMatrix;
 var i, j: Integer;
 begin
@@ -31,18 +42,11 @@ begin
     end
 end;
 
-var i, j: Integer;
 begin
     ReadLn(N);
     if N <= 1024 then
     begin
-        for i := 0 to N - 1 do
-            for j := 0 to N - 1 do
-                Read(a[i, j]);
-        for i := 0 to N - 1 do
-            for j := 0 to N - 1 do
-                Read(b[i, j]);
-
+        ReadMatrices;
         MatMult;
         PrintMatrix
     end

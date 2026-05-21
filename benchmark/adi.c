@@ -84,7 +84,7 @@ void kernel_adi() {
     }
 }
 
-int main(void) {
+int main() {
     init_array();
     kernel_adi();
     print_array();

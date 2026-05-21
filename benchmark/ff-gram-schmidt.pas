@@ -78,14 +78,31 @@ begin
         Mat[j, k] := (Mat[j, k] - ((proj * Mat[i, k]) mod p) + p) mod p;
 end;
 
-var k, i, j;
+(* read input *)
+procedure ReadMatrix;
+var k, i;
 begin
-    ReadLn(d, n);
-
     for k := 0 to n - 1 do
         for i := 0 to d - 1 do
-            Read(Mat[k, i]);
+            Read(Mat[k, i])
+end;
 
+(* write output *)
+procedure PrintMatrix;
+var k, i;
+begin
+    for k := 0 to n - 1 do
+    begin
+        for i := 0 to d - 1 do
+            Write(Mat[k, i], ' ');
+        WriteLn()
+    end
+end;
+
+(* main algorithm *)
+procedure GramSchmidt;
+var k, i, j;
+begin
     for k := 0 to n - 1 do
     begin
         i := k;
@@ -133,12 +150,12 @@ begin
             end
         end
     end;
+end;
 
-    for k := 0 to n - 1 do
-    begin
-        for i := 0 to d - 1 do
-            Write(Mat[k, i], ' ');
-        WriteLn()
-    end
+begin
+    ReadLn(d, n);
+    ReadMatrix;
+    GramSchmidt;
+    PrintMatrix
 end.
 

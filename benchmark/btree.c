@@ -37,7 +37,7 @@ const int min_depth = 4;
 const int max_depth = 18;
 const int init_iter = 0x40000;
 
-int main(void) {
+int main() {
     int stretch_depth, check, depth, iter, i;
     PNode stretch_tree, long_lived_tree, current_tree;
 

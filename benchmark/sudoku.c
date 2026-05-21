@@ -52,35 +52,9 @@ void SolveSudoku(int r, int c) {
         }
 }
 
-void PrintBoard(void) {
-    int i, j;
-    for (i = 0; i <= nn - 1; i++) {
-        for (j = 0; j <= nn - 2; j++)
-            printf("%d ", Board[i][j]);
-        printf("%d\n", Board[i][nn - 1]);
-    }
-}
-
-int main(void) {
+void ReadBoard() {
     int i, j, d;
     int r, c, b;
-    scanf("%d", &n);
-    nn = n * n;
-
-    if (n > 10) return 0;
-
-    for (i = 0; i <= nn - 1; i++)
-        for (j = 0; j <= nn - 1; j++)
-            Board[i][j] = 0;
-
-    for (d = 0; d <= nn; d++)
-        for (i = 0; i <= nn - 1; i++) {
-            RowUsed[d][i] = false;
-            ColUsed[d][i] = false;
-            BlockUsed[d][i] = false;
-        }
-
-    Solved = false;
 
     for (i = 0; i <= nn - 1; i++)
         for (j = 0; j <= nn - 1; j++) {
@@ -95,8 +69,26 @@ int main(void) {
                 BlockUsed[d][b] = true;
             }
         }
+}
 
-    SolveSudoku(0, 0);
-    PrintBoard();
+void PrintBoard() {
+    int i, j;
+    for (i = 0; i <= nn - 1; i++) {
+        for (j = 0; j <= nn - 2; j++)
+            printf("%d ", Board[i][j]);
+        printf("%d\n", Board[i][nn - 1]);
+    }
+}
+
+int main() {
+    scanf("%d", &n);
+    nn = n * n;
+
+    if (n <= 10) {
+        Solved = false;
+        ReadBoard();
+        SolveSudoku(0, 0);
+        PrintBoard();
+    }
     return 0;
 }

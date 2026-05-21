@@ -10,13 +10,12 @@ program Sudoku;
 *)
 
 var
-    Board: Array[0..99, 0..99] of Int32;  
+    Board: Array[0..99, 0..99] of Int32; 
     RowUsed,   
     ColUsed,   
-    BlockUsed  
-        : Array[0..99, 0..100] of Boolean; 
+    BlockUsed: Array[0..99, 0..100] of Boolean; 
     n, 
-    nn: Int32; 
+    nn: Int32;
     Solved: Boolean;
 
 procedure SolveSudoku(r, c: Int32);
@@ -55,37 +54,9 @@ begin
         end
 end;
 
-procedure PrintBoard;
-var i, j: Int32;
+procedure ReadBoard;
+var i, j, d, r, c, b: Int32;
 begin
-    for i := 0 to nn - 1 do begin
-        for j := 0 to nn - 2 do
-            Write(Board[i, j], ' ');
-        WriteLn(Board[i, nn - 1]);
-    end
-end;
-
-var i, j, d: Int32;
-    r, c, b: Int32;
-begin
-    ReadLn(n);
-    nn := n * n;
-
-    if n > 10 then Exit;
-    
-    for i := 0 to nn - 1 do
-        for j := 0 to nn - 1 do
-            Board[i, j] := 0;
-
-    for d := 0 to nn do
-        for i := 0 to nn - 1 do begin
-            RowUsed[d, i] := False;
-            ColUsed[d, i] := False;
-            BlockUsed[d, i] := False;
-        end;
-
-    Solved := False;
-    
     for i := 0 to nn - 1 do
         for j := 0 to nn - 1 do begin
             Read(d);
@@ -96,11 +67,30 @@ begin
                 b := (r div n) * n + (c div n);
                 RowUsed[d, r] := True;
                 ColUsed[d, c] := True;
-                BlockUsed[d, b] := True;
-            end;
-        end;
-    
-    SolveSudoku(0, 0);
-    PrintBoard
+                BlockUsed[d, b] := True
+            end
+        end
+end;
+
+procedure PrintBoard;
+var i, j: Int32;
+begin
+    for i := 0 to nn - 1 do begin
+        for j := 0 to nn - 2 do
+            Write(Board[i, j], ' ');
+        WriteLn(Board[i, nn - 1]);
+    end
+end;
+
+begin
+    ReadLn(n);
+    nn := n * n;
+
+    if n <= 10 then begin
+        Solved := False;
+        ReadBoard;
+        SolveSudoku(0, 0);
+        PrintBoard
+    end
 end.
 

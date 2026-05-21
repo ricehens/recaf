@@ -50,7 +50,13 @@ void QuicksortRange(int lo, int hi) {
     }
 }
 
-void PrintArray(void) {
+void ReadArray() {
+    int i;
+    for (i = 1; i <= N; i++)
+        scanf("%d", &a[i]);
+}
+
+void PrintArray() {
     int i;
     printf("[");
     for (i = 1; i <= N - 1; i++)
@@ -58,15 +64,13 @@ void PrintArray(void) {
     printf("%d]\n", a[N]);
 }
 
-int main(void) {
+int main() {
     int i;
     scanf("%d", &N);
-    if (N > MAX_SIZE) return 0;
-
-    for (i = 1; i <= N; i++)
-        scanf("%d", &a[i]);
-
-    QuicksortRange(1, N);
-    PrintArray();
+    if (N <= MAX_SIZE) {
+        ReadArray();
+        QuicksortRange(1, N);
+        PrintArray();
+    }
     return 0;
 }

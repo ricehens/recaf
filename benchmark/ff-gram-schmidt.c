@@ -61,14 +61,24 @@ void Orthogonalize(int i, int j) {
         Mat[j][k] = (Mat[j][k] - ((proj * Mat[i][k]) % p) + p) % p;
 }
 
-int main(void) {
-    int k, i, j;
-    scanf("%d%d", &d, &n);
-
+void ReadMatrix() {
+    int k, i;
     for (k = 0; k <= n - 1; k++)
         for (i = 0; i <= d - 1; i++)
             scanf("%d", &Mat[k][i]);
+}
 
+void PrintMatrix() {
+    int k, i;
+    for (k = 0; k <= n - 1; k++) {
+        for (i = 0; i <= d - 1; i++)
+            printf("%d ", Mat[k][i]);
+        printf("\n");
+    }
+}
+
+void GramSchmidt() {
+    int k, i, j;
     for (k = 0; k <= n - 1; k++) {
         i = k;
         while (i < n) {
@@ -108,11 +118,13 @@ int main(void) {
             }
         }
     }
+}
 
-    for (k = 0; k <= n - 1; k++) {
-        for (i = 0; i <= d - 1; i++)
-            printf("%d ", Mat[k][i]);
-        printf("\n");
-    }
+int main() {
+    int k, i, j;
+    scanf("%d%d", &d, &n);
+    ReadMatrix();
+    GramSchmidt();
+    PrintMatrix();
     return 0;
 }

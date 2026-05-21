@@ -23,8 +23,9 @@ type
     PMat = ^TMat;
     TMat = Array[0..MAX] of TVec;
 
-var buf: AnsiString;
-var idx: Int32;
+var
+    buf: AnsiString;
+    idx: Int32;
 
 function ParseLit: Int32;
 var val: Int32;
@@ -59,8 +60,9 @@ begin
 end;
 
 function ParseExpr: PVec;
-var i: Int32;
-var left, right: PVec;
+var
+    i: Int32;
+    left, right: PVec;
 begin
     New(ParseExpr);
     for i := 0 to 100 do ParseExpr^[i] := 0;

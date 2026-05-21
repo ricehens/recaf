@@ -27,8 +27,9 @@ type
 type 
     String = Array[0..MAX_LINE] of Integer;
 
-var buf: String;
-var idx: Integer;
+var
+    buf: String;
+    idx: Integer;
 
 function ParseLit: Integer;
 var val: Integer;
@@ -62,9 +63,10 @@ begin
 end;
 
 function ParseExpr: PVec;
-var i: Integer;
-var lit: Int64;
-var left, right: PVec;
+var
+    i: Integer;
+    lit: Int64;
+    left, right: PVec;
 begin
     New(ParseExpr);
     for i := 0 to 100 do ParseExpr^[i] := 0;

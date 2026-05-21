@@ -5,7 +5,7 @@
 const int n = 10000;
 const int len = 10 * n / 3;
 
-int main(void) {
+int main() {
     int i, j, k, q, x, nines, predigit;
     int a[len + 1];
 
