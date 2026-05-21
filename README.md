@@ -116,7 +116,7 @@ The subset of Pascal that Recaf supports includes:
   and boolean operations `and`, `or`, `not`.
   Bit-level operations are not provided.
   Integer overflow is undefined behavior.
-- The assignment operation `:=` copies data for arrays and records and value for all other types.
+- The assignment operation `:=` copies data for arrays and records and copies value for all other types.
 - The compiler is single-pass. You may forward-declare routines 
   by writing `forward` instead of the body.
   The following is legal so long as `TType` is defined in the same `type` block or earlier:
@@ -157,7 +157,7 @@ The subset of Pascal that Recaf supports includes:
 ## Optimizations
 ### Passes
 The compiler performs the following optimization passes 
-on a [SSA](https://en.wikipedia.org/wiki/Static_single-assignment_form) representation.
+on an [SSA](https://en.wikipedia.org/wiki/Static_single-assignment_form) representation.
 
 On O1:
 - Copy propagation
