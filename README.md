@@ -123,7 +123,7 @@ The subset of Pascal that Recaf supports includes:
   ```pascal
   type
       PType = ^TType;
-      TType = ...
+      TType = Integer;
   ```
 - By writing `external`, you promise that a routine will be linked.
   For external routines, you may use `(...)` instead for its parameters
