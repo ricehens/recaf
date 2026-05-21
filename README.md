@@ -213,6 +213,7 @@ Some notes:
   thermal throttling. Sorry if inaccurate. 
 
 The actual data, with `btree` and `strassen` removed:
+
 | Compiler | Geomean | Speedup |
 | ----- | :---: | :---: |
 | clang&nbsp;&#x2011;O3 | 582.6&nbsp;ms | 1.000 |
@@ -232,6 +233,10 @@ The actual data, with `btree` and `strassen` removed:
 | fpc&nbsp;&#x2011;O0   | 1.585&nbsp;s  | 0.368 |
 | clang&nbsp;&#x2011;O0 | 1.657&nbsp;s  | 0.352 |
 | recaf&nbsp;&#x2011;O0 | 5.668&nbsp;s  | 0.103 |
+
+The benchmarks are run on a ThinkPad T490
+with Intel i7-8665U CPU 
+running Linux 6.12.86+deb13-amd64.
 
 ## Acknowledgements
 A lot of optimizations are based on
