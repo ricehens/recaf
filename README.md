@@ -142,7 +142,7 @@ The subset of Pascal that Recaf supports includes:
   uses Float64;
   ```
   The `System` module is imported by default. Do not try to import it again.
-- Strings are implemented as arrays of `integer`. 
+- Strings are implemented as arrays of `Integer`. 
   For a 0-indexed array `s`, `s[0]` stores the length of the string,
   and `s[1]` through `s[s[0]]` store the characters as 32-bit integers.
   The built-in `ReadLn`, `Write`, and `WriteLn` procedures work with this representation
@@ -213,14 +213,14 @@ Some notes:
 - I ran the benchmarks on a 7-year-old laptop that I think has nontrivial issues with 
   thermal throttling. Sorry if inaccurate. 
 
-The actual data, with `btree` and `strassen` removed:
+The benchmark data, with `btree` and `strassen` removed:
 
 | Compiler | Geomean | Speedup |
 | ----- | :---: | :---: |
 | clang&nbsp;&#x2011;O3 | 582.6&nbsp;ms | 1.000 |
 | gcc&nbsp;&#x2011;O2   | 593.1&nbsp;ms | 0.982 |
-| gcc&nbsp;&#x2011;O1   | 610.9&nbsp;ms | 0.954 |
 | clang&nbsp;&#x2011;O2 | 608.7&nbsp;ms | 0.957 |
+| gcc&nbsp;&#x2011;O1   | 610.9&nbsp;ms | 0.954 |
 | gcc&nbsp;&#x2011;O3   | 612.7&nbsp;ms | 0.951 |
 | clang&nbsp;&#x2011;O1 | 617.1&nbsp;ms | 0.944 |
 | recaf&nbsp;&#x2011;O3 | 775.6&nbsp;ms | 0.751 |
