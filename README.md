@@ -1,7 +1,7 @@
 # Recaf
 
 Recaf is an optimizing compiler for a subset of Pascal,
-targeted at x86_64.
+targeted at x86_64 Linux.
 ```pascal
 program HelloWorld;
 
@@ -38,11 +38,9 @@ there is a resolution of the asterisks and actual performance comparison below.
 (TL;DR faster than FPC, about 75% the performance of clang O3,
 though there are still some asterisks on these claims.)
 
-This is a personal project and not intended to be of interest to anyone else.
-
 ## Quick Start
 ### Build
-Build by running `./gradlew nativeCompile` on a x86_64 machine
+Build by running `./gradlew nativeCompile` on a x86_64 Linux machine
 with GraalVM JDK>=25 installed.
 This will generate the executable `recaf` in `build/native/nativeCompile/`.
 You can also generate a jar file in `build/libs/` by running `./gradlew jar`,
@@ -59,8 +57,8 @@ Besides being linked to `libc`, the former is self-contained.
 - Pass in a single file with `.pas` extension to compile.
 - Use `-t <ast|ll|ssa|assembly|exe>` to set a compilation stage.
   The default is `exe`, which will generate an executable (linked to `libc`)
-  when compiled on an x86_64 target.
-  The other stages do not require x86_64.
+  when compiled on an x86_64 Linux target.
+  The other stages do not require x86_64 Linux.
 - Use `-o <outfile>` to set the output file.
   The default output location for `exe` stage simply removes the `.pas` extension.
   For other stages, the default output is stdout.
@@ -100,7 +98,7 @@ The subset of Pascal that Recaf supports includes:
       N2 = N * N;
   ```
 - Top-level procedures and functions (i.e. routines), but not nested.
-  Routines may have local definitions for types, constant, or variables.
+  Routines may have local definitions for types, constants, or variables.
   They may take primitive types, enums, or pointers as parameters,
   and functions may return primitive types, enums, or pointers.
   Arguments are always by value (no `var` parameters),
@@ -109,10 +107,10 @@ The subset of Pascal that Recaf supports includes:
 - Most control statements, including if-else, while-do, for loops, and repeat-until.
   There are also intrinsics `Break`, `Continue`, and `Exit`.
   The `Exit` intrinsic procedure returns from a function early.
-  (Recall the return-value is set by assigning to a variable with the same name as the function.)
+  (Recall the return value is set by assigning to a variable with the same name as the function.)
 - Standard arithmetic operations `+`, `-`, `*`, `div`, `mod` on integer types,
   relation operations `<`, `<=`, `>=`, `>` on integer types,
-  relation operations `=` and `<>` on integers types, booleans, and pointers,
+  relation operations `=` and `<>` on integer types, booleans, and pointers,
   and boolean operations `and`, `or`, `not`.
   Bit-level operations are not provided.
   Integer overflow is undefined behavior.
@@ -136,7 +134,7 @@ The subset of Pascal that Recaf supports includes:
   and no pointers point to overlapping regions.
   External routines with pathological behavior such as storing a pointer
   and using it later may lead to undefined behavior.
-- You may import modules using `uses`, but no way to create modules is offered,
+- You may import modules using `uses`, but Recaf currently offers no way to create modules,
   and the only provided module so far is `Float64`:
   ```pascal
   uses Float64;
@@ -145,8 +143,8 @@ The subset of Pascal that Recaf supports includes:
 - Strings are implemented as arrays of `Integer`. 
   For a 0-indexed array `s`, `s[0]` stores the length of the string,
   and `s[1]` through `s[s[0]]` store the characters as 32-bit integers.
-  The built-in `ReadLn`, `Write`, and `WriteLn` procedures work with this representation
-  of string.
+  The built-in `ReadLn`, `Write`, and `WriteLn` procedures work with
+  this string representation.
   (String literals correspond to C-style strings and may be passed to external
   C functions. They are translated into the above string representation
   when assigned to variables.)
@@ -175,7 +173,7 @@ On O2, the above, and:
 On O3, the above, and:
 - Loop unrolling
 
-Note loop unrolling may cause code-size explosion and compile time explosion,
+Note loop unrolling may cause code-size explosion and compile-time explosion,
 as well as occasional runtime explosions
 for some programs.
 
@@ -197,11 +195,11 @@ The performance of the compiler on some benchmarks is given in the table at the 
 
 Some notes:
 - The benchmarks are run with hyperfine on `-w 1 -r 5`.
-- The benchmarks with asterisks involve many heap-allocations,
+- The benchmarks with asterisks involve many heap allocations,
   from which Recaf benefits unfairly due to its arena allocator.
   A comparison where the geometric mean is computed without those two benchmarks
   is given at the bottom.
-- O0 is hilariously bad and should not be used if some semblance of speed is desired.
+- O0 is hilariously slow and should not be used if some semblance of speed is desired.
 - Surprisingly, Recaf is much faster than FPC. I'm not sure if I'm passing in the correct flags,
   and I think FPC might be doing a bunch of runtime checks Recaf isn't doing,
   but I'm not sure how to turn those off (if they exist).
@@ -212,6 +210,7 @@ Some notes:
   which lead to the situation above.)
 - I ran the benchmarks on a 7-year-old laptop that I think has nontrivial issues with 
   thermal throttling. Sorry if inaccurate. 
+- Of course it should also be noted that I wrote the benchmarks. Bias bias bias.
 
 The benchmark data, with `btree` and `strassen` removed:
 
