@@ -210,7 +210,9 @@ Some notes:
   which lead to the situation above.)
 - I ran the benchmarks on a 7-year-old laptop that I think has nontrivial issues with 
   thermal throttling. Sorry if inaccurate. 
-- Of course it should also be noted that I wrote the benchmarks. Bias bias bias.
+- Of course it should also be noted that I wrote the benchmarks. 
+  An earlier version of the compiler did however achieve similar performance
+  on another benchmark suite that is not public.
 
 The benchmark data, with `btree` and `strassen` removed:
 
