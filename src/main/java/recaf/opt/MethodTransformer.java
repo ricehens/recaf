@@ -28,7 +28,6 @@ public class MethodTransformer {
     public enum TransformType {
         TO_SSA, // CFG -> SSA
         DE_SSA, // SSA -> CFG
-        COOPER_SSA, // SSA -> CFG (Cooper)
         CP, // global copy propagation
         DCE, // global dead code elimination
         CRITICAL_EDGE, // critical edge splitting
@@ -56,7 +55,6 @@ public class MethodTransformer {
             MethodTransformation transformation = switch (transform) {
                 case TO_SSA -> new CFGtoSSA(ctx, method);
                 case DE_SSA -> new ClassicPhiElimination(ctx, method);
-                case COOPER_SSA -> new CooperPhiElimination(ctx, method);
                 case CP -> new CopyPropagator(ctx, method);
                 case DCE -> new DeadCodeElimination(ctx, method);
                 case CRITICAL_EDGE -> new CriticalEdgeSplitting(ctx, method);
