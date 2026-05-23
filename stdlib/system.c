@@ -5,7 +5,7 @@
 #include <unistd.h>
 #include <sys/time.h>
 
-static int peekchar(void) {
+int recaf_peekchar(void) {
     int c = getchar();
 
     if (c != EOF) {
@@ -16,11 +16,11 @@ static int peekchar(void) {
 }
 
 int Eof(void) {
-    return peekchar() == EOF;
+    return recaf_peekchar() == EOF;
 }
 
 int Eoln(void) {
-    int c = peekchar();
+    int c = recaf_peekchar();
 
     return c == '\n' || c == '\r' || c == EOF;
 }

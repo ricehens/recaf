@@ -442,7 +442,6 @@ public class Linearizer {
 
             case READ, READLN -> {
                 symbolTable.addExternalMethod(SCANF);
-                boolean newlineConsumed = false;
                 for (ASTExpression arg : mc.args()) {
                     ASTLocation loc = (ASTLocation) arg;
                     ASTType type = sc.exprType(loc);
@@ -467,8 +466,6 @@ public class Linearizer {
                         cfg.offer(new CFGReadInstruction(ctx, tmp, localLongBuffer, 8, makeIntLiteral(0)));
                         write(loc, tmp);
                     } else if (type instanceof ASTArrayType at) {
-                        // by semantic checking, we know this is the only argument
-                        // and may consume until newline
                         CFGAddress arr = reduce(locate(loc));
                         symbolTable.addExternalMethod(GETCHAR);
                         int size = extractInt(at.ranges().getFirst().upper()) - extractInt(at.ranges().getFirst().lower());
@@ -486,7 +483,7 @@ public class Linearizer {
                         CFGAddress exitAddr = new CFGAddress();
 
                         loopAddr.set(cfg.newBlock().address());
-                        cfg.offer(new CFGMethodCallInstruction(ctx, chr, GETCHAR, List.of()));
+                        cfg.offer(new CFGMethodCallInstruction(ctx, chr, PEEKCHAR, List.of()));
                         cfg.offer(new CFGBinaryInstruction(ctx, check, BinaryOperator.LT, dummy, makeIntLiteral(size)));
                         cfg.offer(new CFGBranchInstruction(ctx, check, cond1Addr, exitAddr));
                         cond1Addr.set(cfg.newBlock().address());
@@ -497,15 +494,15 @@ public class Linearizer {
                         cfg.offer(new CFGBranchInstruction(ctx, cmp, exitAddr, incrementAddr));
                         incrementAddr.set(cfg.newBlock().address());
                         cfg.offer(new CFGBinaryInstruction(ctx, dummy, BinaryOperator.PLUS, dummy, makeIntLiteral(1)));
+                        cfg.offer(new CFGMethodCallInstruction(ctx, null, GETCHAR, List.of()));
                         cfg.offer(new CFGWriteInstruction(ctx, arr, 4, dummy, chr));
                         cfg.offer(new CFGJumpInstruction(ctx, loopAddr));
                         exitAddr.set(cfg.newBlock().address());
                         cfg.offer(new CFGWriteInstruction(ctx, arr, 4, makeIntLiteral(0), dummy));
 
-                        newlineConsumed = true;
                     } else throw new AssertionError("This should never happen.");
                 }
-                if (!newlineConsumed && READLN.equals(mc.id().text())) {
+                if (READLN.equals(mc.id().text())) {
                     symbolTable.addExternalMethod(GETCHAR);
                     CFGAddress chr = ctx.newAddress(Type.INT);
                     CFGAddress cmp = ctx.newAddress(Type.BOOL);
