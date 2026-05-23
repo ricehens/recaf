@@ -24,12 +24,13 @@ public class NoRegInstructionSelection implements CFGVisitor {
 
     @Override
     public void visit(CFGProgram cfg) {
-        asm.emit(new ASMDirective(ASMDirectiveOp.DATA));
+        asm.emit(new ASMDirective(ASMDirectiveOp.BSS));
         for (CFGAddress globalVar : cfg.ctx().getGlobalVars()) {
+            asm.emit(new ASMDirective(ASMDirectiveOp.ALIGN, 16));
             asm.emit(new ASMLabelInstruction(new ASMLabel(cfg.ctx().getSymbolTable().getVar(globalVar).getName())));
             asm.emit(new ASMDirective(ASMDirectiveOp.ZERO, asm.sizeof(globalVar)));
-            asm.emit(new ASMDirective(ASMDirectiveOp.ALIGN, 16));
         }
+        asm.emit(new ASMDirective(ASMDirectiveOp.DATA));
         for (String strLiteral : cfg.ctx().getSymbolTable().getAllStrings()) {
             asm.emit(new ASMDirective(ASMDirectiveOp.ALIGN, 16));
             asm.emit(new ASMLabelInstruction(asm.getStringLabel(strLiteral)));

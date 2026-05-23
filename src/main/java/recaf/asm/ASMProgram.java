@@ -37,8 +37,10 @@ public class ASMProgram {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(new ASMDirective(ASMDirectiveOp.DATA));
+        sb.append(new ASMDirective(ASMDirectiveOp.BSS));
         globalVarDecls.forEach(sb::append);
+
+        sb.append(new ASMDirective(ASMDirectiveOp.DATA));
         stringDecls.forEach(sb::append);
 
         sb.append(new ASMDirective(ASMDirectiveOp.TEXT));

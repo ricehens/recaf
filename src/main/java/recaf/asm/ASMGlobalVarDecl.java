@@ -27,9 +27,9 @@ public class ASMGlobalVarDecl {
     @Override
     public String toString() {
         return String.format("%s%s%s",
+                new ASMDirective(ASMDirectiveOp.ALIGN, 16),
                 new ASMLabelInstruction(label),
-                new ASMDirective(ASMDirectiveOp.ZERO, size),
-                new ASMDirective(ASMDirectiveOp.ALIGN, 16));
+                new ASMDirective(ASMDirectiveOp.ZERO, size));
     }
 
 }

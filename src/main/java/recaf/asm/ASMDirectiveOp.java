@@ -6,6 +6,7 @@ package recaf.asm;
 public enum ASMDirectiveOp {
 
     DATA("data", false),
+    BSS("bss", false),
     TEXT("text", false),
     GLOBL("globl", false),
     ALIGN("align", true),
