@@ -908,31 +908,29 @@ public class RegisterAllocation {
 // System.out.printf("For method %s, callee-saving %s%n", method.getName(), toCalleeSave);
 // System.out.printf("For method %s, caller-saving %s%n", method.getName(), toCallerSave);
 
-            // save and restore callee-save registers
-            if (needCalleeSave()) {
-                ASMBasicBlock prologue = method.getBlocks().peekFirst();
-                ASMInstruction lastPrepInst = prologue.getInstructions().peekFirst();
-                while (true) {
-                    ASMInstruction next = prologue.getInstructions().next(lastPrepInst);
-                    if (next == null) break;
-                    if (next.dest() != ASMRegister.RSP)
-                        break;
-                    lastPrepInst = next;
-                }
-                for (ASMRegister r : toCalleeSave) {
-                    CFGAddress addr = ctx.getCfgCtx().getSymbolTable().addVar(Type.LONG);
-                    ab.registerVariable(method, addr);
-                    prologue.getInstructions().insertAfter(lastPrepInst,
-                            new ASMInstruction(ctx, ASMOperator.MOVQ, r, ab.getMemoryLocation(method, addr))
-                    );
+// save and restore callee-save registers
+            ASMBasicBlock prologue = method.getBlocks().peekFirst();
+            ASMInstruction lastPrepInst = prologue.getInstructions().peekFirst();
+            while (true) {
+                ASMInstruction next = prologue.getInstructions().next(lastPrepInst);
+                if (next == null) break;
+                if (next.dest() != ASMRegister.RSP)
+                    break;
+                lastPrepInst = next;
+            }
+            for (ASMRegister r : toCalleeSave) {
+                CFGAddress addr = ctx.getCfgCtx().getSymbolTable().addVar(Type.LONG);
+                ab.registerVariable(method, addr);
+                prologue.getInstructions().insertAfter(lastPrepInst,
+                        new ASMInstruction(ctx, ASMOperator.MOVQ, r, ab.getMemoryLocation(method, addr))
+                        );
 
-                    for (ASMBasicBlock b : method.getBlocks()) {
-                        for (ASMInstruction inst : b.getInstructions()) {
-                            if (inst.op() == ASMOperator.LEAVE) {
-                                b.getInstructions().insertBefore(inst,
-                                        new ASMInstruction(ctx, ASMOperator.MOVQ, ab.getMemoryLocation(method, addr), r)
-                                );
-                            }
+                for (ASMBasicBlock b : method.getBlocks()) {
+                    for (ASMInstruction inst : b.getInstructions()) {
+                        if (inst.op() == ASMOperator.LEAVE) {
+                            b.getInstructions().insertBefore(inst,
+                                    new ASMInstruction(ctx, ASMOperator.MOVQ, ab.getMemoryLocation(method, addr), r)
+                                    );
                         }
                     }
                 }
@@ -974,16 +972,6 @@ public class RegisterAllocation {
                 }
             }
 
-        }
-
-        private boolean needCalleeSave() {
-            if (!method.getName().equals("main")) return true;
-            for (ASMMethod m : asm.getMethods())
-                for (ASMBasicBlock b : m.getBlocks())
-                    for (ASMInstruction inst : b.getInstructions())
-                        if (inst.op() == ASMOperator.CALL && ((ASMLabel) inst.dest()).getLabel().equals("main"))
-                            return true;
-            return false;
         }
 
         /** mov coalescing with the goal of eliminating unneeded spills */
