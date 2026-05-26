@@ -2,10 +2,10 @@ package recaf.main;
 
 import org.antlr.v4.runtime.CommonTokenStream;
 import recaf.antlr.RecafParser;
-import recaf.ast.ASTBuilder;
-import recaf.ast.Linearizer;
-import recaf.ast.SemanticChecker;
-import recaf.ast.nodes.ASTProgram;
+import recaf.parse.ASTBuilder;
+import recaf.parse.Linearizer;
+import recaf.parse.SemanticChecker;
+import recaf.ast.ASTProgram;
 import recaf.cfg.CFGProgram;
 
 import java.io.*;
