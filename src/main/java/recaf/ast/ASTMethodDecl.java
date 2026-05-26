@@ -1,6 +1,6 @@
 package recaf.ast;
 
-import recaf.parse.ASTUtils;
+import recaf.parse.ParseUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,7 +19,7 @@ public record ASTMethodDecl(
 
     @Override
     public String toString() {
-        return ASTUtils.generateToString("(MethodDecl) " + id.text(),
+        return ParseUtils.generateToString("(MethodDecl) " + id.text(),
                 params.isEmpty() ? "variadic" : params.get(),
                 returnType.isEmpty() ? "void" : returnType.get(),
                 decls,

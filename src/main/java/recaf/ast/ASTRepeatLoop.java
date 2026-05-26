@@ -1,6 +1,6 @@
 package recaf.ast;
 
-import recaf.parse.ASTUtils;
+import recaf.parse.ParseUtils;
 
 public record ASTRepeatLoop(
         ASTContext ctx,
@@ -10,7 +10,7 @@ public record ASTRepeatLoop(
 
     @Override
     public String toString() {
-        return ASTUtils.generateToString("(RepeatLoop)", body, cond);
+        return ParseUtils.generateToString("(RepeatLoop)", body, cond);
     }
 
 }

@@ -1,6 +1,6 @@
 package recaf.ast;
 
-import recaf.parse.ASTUtils;
+import recaf.parse.ParseUtils;
 
 import java.util.List;
 
@@ -8,7 +8,7 @@ public record ASTBlock(ASTContext ctx, List<ASTStatement> statements) implements
 
     @Override
     public String toString() {
-        return ASTUtils.generateToString("(Block)", statements);
+        return ParseUtils.generateToString("(Block)", statements);
     }
 
 }

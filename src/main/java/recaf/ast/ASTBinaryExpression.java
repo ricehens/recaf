@@ -1,6 +1,6 @@
 package recaf.ast;
 
-import recaf.parse.ASTUtils;
+import recaf.parse.ParseUtils;
 import recaf.general.BinaryOperator;
 
 public record ASTBinaryExpression(
@@ -9,7 +9,7 @@ public record ASTBinaryExpression(
 
     @Override
     public String toString() {
-        return ASTUtils.generateToString("(BinExpr)", op, left, right);
+        return ParseUtils.generateToString("(BinExpr)", op, left, right);
     }
 
 }

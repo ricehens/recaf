@@ -1,12 +1,12 @@
 package recaf.ast;
 
-import recaf.parse.ASTUtils;
+import recaf.parse.ParseUtils;
 
 public record ASTParameter(ASTContext ctx, ASTType type, ASTIdentifier name) {
 
     @Override
     public String toString() {
-        return ASTUtils.generateToString("(Parameter) " + name.text(), type);
+        return ParseUtils.generateToString("(Parameter) " + name.text(), type);
     }
 
 }

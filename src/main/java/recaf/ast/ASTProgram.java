@@ -1,6 +1,6 @@
 package recaf.ast;
 
-import recaf.parse.ASTUtils;
+import recaf.parse.ParseUtils;
 
 import java.util.List;
 
@@ -12,7 +12,7 @@ public record ASTProgram(
 
     @Override
     public String toString() {
-        return ASTUtils.generateToString("(Program) " + id.text(),
+        return ParseUtils.generateToString("(Program) " + id.text(),
                 decls);
     }
 

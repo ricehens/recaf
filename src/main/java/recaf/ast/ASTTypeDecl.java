@@ -1,6 +1,6 @@
 package recaf.ast;
 
-import recaf.parse.ASTUtils;
+import recaf.parse.ParseUtils;
 
 public record ASTTypeDecl(
         ASTContext ctx,
@@ -10,7 +10,7 @@ public record ASTTypeDecl(
 
     @Override
     public String toString() {
-        return ASTUtils.generateToString("(TypeDecl) " + id.text(),
+        return ParseUtils.generateToString("(TypeDecl) " + id.text(),
                 type);
     }
 

@@ -1,6 +1,6 @@
 package recaf.ast;
 
-import recaf.parse.ASTUtils;
+import recaf.parse.ParseUtils;
 
 import java.util.List;
 
@@ -8,7 +8,7 @@ public record ASTIndexAccess(ASTContext ctx, List<ASTExpression> indices) implem
 
     @Override
     public String toString() {
-        return ASTUtils.generateToString("(IndexAccess)", indices);
+        return ParseUtils.generateToString("(IndexAccess)", indices);
     }
 
 }

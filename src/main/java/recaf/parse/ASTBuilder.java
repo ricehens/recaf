@@ -13,8 +13,8 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-import static recaf.parse.ASTUtils.MAIN;
-import static recaf.parse.ASTUtils.SYSTEM;
+import static recaf.parse.ParseUtils.MAIN;
+import static recaf.parse.ParseUtils.SYSTEM;
 
 public class ASTBuilder {
 

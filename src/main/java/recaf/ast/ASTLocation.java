@@ -1,6 +1,6 @@
 package recaf.ast;
 
-import recaf.parse.ASTUtils;
+import recaf.parse.ParseUtils;
 
 import java.util.List;
 
@@ -10,7 +10,7 @@ public record ASTLocation(
 
     @Override
     public String toString() {
-        return ASTUtils.generateToString("(Location) " + id.text(), accesses);
+        return ParseUtils.generateToString("(Location) " + id.text(), accesses);
     }
 
 }

@@ -1,12 +1,12 @@
 package recaf.ast;
 
-import recaf.parse.ASTUtils;
+import recaf.parse.ParseUtils;
 
 public record ASTPointerType(ASTContext ctx, ASTBaseType type) implements ASTType {
 
     @Override
     public String toString() {
-        return ASTUtils.generateToString("(PointerType)", type);
+        return ParseUtils.generateToString("(PointerType)", type);
     }
 
 }

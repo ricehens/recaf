@@ -1,6 +1,6 @@
 package recaf.ast;
 
-import recaf.parse.ASTUtils;
+import recaf.parse.ParseUtils;
 
 import java.util.List;
 
@@ -10,7 +10,7 @@ public record ASTMethodCall(
 
     @Override
     public String toString() {
-        return ASTUtils.generateToString("(MethodCall) " + id.text(), args);
+        return ParseUtils.generateToString("(MethodCall) " + id.text(), args);
     }
 
 }

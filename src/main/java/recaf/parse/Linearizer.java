@@ -7,7 +7,7 @@ import recaf.general.*;
 import java.util.*;
 import java.util.stream.Stream;
 
-import static recaf.parse.ASTUtils.*;
+import static recaf.parse.ParseUtils.*;
 
 public class Linearizer {
 

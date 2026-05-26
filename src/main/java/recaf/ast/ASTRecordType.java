@@ -1,6 +1,6 @@
 package recaf.ast;
 
-import recaf.parse.ASTUtils;
+import recaf.parse.ParseUtils;
 
 import java.util.List;
 
@@ -8,7 +8,7 @@ public record ASTRecordType(ASTContext ctx, List<ASTVarDecl> fields) implements 
 
     @Override
     public String toString() {
-        return ASTUtils.generateToString("(RecordType)", fields);
+        return ParseUtils.generateToString("(RecordType)", fields);
     }
 
 }

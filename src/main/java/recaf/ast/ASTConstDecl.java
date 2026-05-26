@@ -1,13 +1,13 @@
 package recaf.ast;
 
-import recaf.parse.ASTUtils;
+import recaf.parse.ParseUtils;
 
 public record ASTConstDecl(ASTContext ctx, ASTIdentifier id, ASTExpression expr)
         implements ASTDeclaration {
 
     @Override
     public String toString() {
-        return ASTUtils.generateToString("(ConstDecl) " + id.text(), expr);
+        return ParseUtils.generateToString("(ConstDecl) " + id.text(), expr);
     }
 
 }

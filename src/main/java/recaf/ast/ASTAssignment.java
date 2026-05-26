@@ -1,6 +1,6 @@
 package recaf.ast;
 
-import recaf.parse.ASTUtils;
+import recaf.parse.ParseUtils;
 
 public record ASTAssignment(
         ASTContext ctx,
@@ -10,7 +10,7 @@ public record ASTAssignment(
 
     @Override
     public String toString() {
-        return ASTUtils.generateToString("(Assignment)", location, expr);
+        return ParseUtils.generateToString("(Assignment)", location, expr);
     }
 
 }

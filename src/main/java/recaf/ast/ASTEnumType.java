@@ -1,6 +1,6 @@
 package recaf.ast;
 
-import recaf.parse.ASTUtils;
+import recaf.parse.ParseUtils;
 
 import java.util.List;
 
@@ -14,6 +14,6 @@ public record ASTEnumType(ASTContext ctx, List<ASTIdentifier> members) implement
 
     @Override
     public String toString() {
-        return ASTUtils.generateToString("(EnumType)", members);
+        return ParseUtils.generateToString("(EnumType)", members);
     }
 }

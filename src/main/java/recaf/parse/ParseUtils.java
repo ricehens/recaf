@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class ASTUtils {
+public class ParseUtils {
 
     static final String PRINTF = "printf";
     static final String SCANF = "scanf";

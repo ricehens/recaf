@@ -1,13 +1,13 @@
 package recaf.ast;
 
-import recaf.parse.ASTUtils;
+import recaf.parse.ParseUtils;
 import recaf.general.UnaryOperator;
 
 public record ASTUnaryExpression(ASTContext ctx, UnaryOperator op, ASTExpression expr) implements ASTExpression {
 
     @Override
     public String toString() {
-        return ASTUtils.generateToString("(UnExpr)", op, expr);
+        return ParseUtils.generateToString("(UnExpr)", op, expr);
     }
 
 }

@@ -1,12 +1,12 @@
 package recaf.ast;
 
-import recaf.parse.ASTUtils;
+import recaf.parse.ParseUtils;
 
 public record ASTArrayRange(ASTContext ctx, ASTExpression lower, ASTExpression upper) implements AST {
 
     @Override
     public String toString() {
-        return ASTUtils.generateToString("(ArrayRange)", lower, upper);
+        return ParseUtils.generateToString("(ArrayRange)", lower, upper);
     }
 
 }

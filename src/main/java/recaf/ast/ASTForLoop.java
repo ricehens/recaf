@@ -1,6 +1,6 @@
 package recaf.ast;
 
-import recaf.parse.ASTUtils;
+import recaf.parse.ParseUtils;
 
 public record ASTForLoop(
         ASTContext ctx,
@@ -13,7 +13,7 @@ public record ASTForLoop(
 
     @Override
     public String toString() {
-        return ASTUtils.generateToString("(ForLoop)",
+        return ParseUtils.generateToString("(ForLoop)",
                 dummy, start, descending ? "(Direction) downto" : "(Direction) to", end, body);
     }
 

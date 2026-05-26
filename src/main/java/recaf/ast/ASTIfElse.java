@@ -1,6 +1,6 @@
 package recaf.ast;
 
-import recaf.parse.ASTUtils;
+import recaf.parse.ParseUtils;
 
 import java.util.Optional;
 
@@ -10,7 +10,7 @@ public record ASTIfElse(
 
     @Override
     public String toString() {
-        return ASTUtils.generateToString("(IfElse)", cond, thenBlock, elseBlock.orElse(null));
+        return ParseUtils.generateToString("(IfElse)", cond, thenBlock, elseBlock.orElse(null));
     }
 
 }
