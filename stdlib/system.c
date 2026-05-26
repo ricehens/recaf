@@ -2,8 +2,6 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <time.h>
-#include <unistd.h>
-#include <sys/time.h>
 
 int recaf_peekchar(void) {
     int c = getchar();
@@ -26,21 +24,7 @@ int Eoln(void) {
 }
 
 void Randomize(void) {
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
-
-    uint32_t seed =
-        (uint32_t)time(NULL) ^
-        (uint32_t)getpid() ^
-        (uint32_t)tv.tv_sec ^
-        (uint32_t)tv.tv_usec ^
-        (uint32_t)(uintptr_t)&tv;
-
-    if (seed == 0) {
-        seed = 2463534242u;
-    }
-
-    srandom(seed);
+    srandom(time(NULL));
 }
 
 int Random(int range) {
