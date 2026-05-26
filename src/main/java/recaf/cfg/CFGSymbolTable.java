@@ -113,6 +113,8 @@ public class CFGSymbolTable implements ParallelCopyGroup.NodeFactory<CFGAddress>
      * @return the index it is assigned
      */
     public CFGAddress addExternalMethod(String name) {
+        if (inverseMethods.containsKey(name))
+            return inverseMethods.get(name);
         CFGAddress addr = new CFGAddress(currentIndex++);
         externalMethods.add(addr);
         inverseMethods.put(name, addr);

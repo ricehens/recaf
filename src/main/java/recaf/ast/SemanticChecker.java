@@ -321,7 +321,7 @@ public class SemanticChecker {
         String key = key(id);
         if (ast.external())
             externalCalls.put(key, id.text());
-        else if (LIBC_RESERVED.contains(key))
+        else if (LIB_RESERVED.contains(key))
             id.ctx().error("identifier " + key + " is reserved for external routines");
         if (params.isEmpty() && !ast.external() && !ast.internal())
             ast.ctx().error("undeclared parameters are only permitted for external routines");
@@ -992,7 +992,7 @@ public class SemanticChecker {
         if (existsIdentifier(key)) {
             id.ctx().error("identifier " + key + " may not be redeclared");
         }
-        if (!local && LIBC_RESERVED.contains(key))
+        if (!local && LIB_RESERVED.contains(key))
             id.ctx().error("global identifier " + key + " reserved for external routines");
         return key;
     }

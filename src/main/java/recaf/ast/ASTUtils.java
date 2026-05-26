@@ -9,15 +9,17 @@ public class ASTUtils {
 
     static final String PRINTF = "printf";
     static final String SCANF = "scanf";
-    static final String GETCHAR = "getchar";
-    static final String PUTCHAR = "putchar";
     static final String MEMCPY = "memcpy";
-    static final String PEEKCHAR = "recaf_peekchar";
-    static final String ALLOCATOR_NEW = "recaf_alloc";
-    static final String ALLOCATOR_DISPOSE = "recaf_free";
-    static final Set<String> LIBC_RESERVED = Set.of(
-            PRINTF, SCANF, GETCHAR, PUTCHAR, MEMCPY, 
-            PEEKCHAR, ALLOCATOR_NEW, ALLOCATOR_DISPOSE
+    static final String INTRINSIC_WRITESTR = "recaf_writestr";
+    static final String INTRINSIC_READLN = "recaf_readln";
+    static final String INTRINSIC_READSTR = "recaf_readstr";
+    static final String INTRINSIC_ALLOC = "recaf_alloc";
+    static final String INTRINSIC_FREE = "recaf_free";
+    static final Set<String> LIB_RESERVED = Set.of(
+            PRINTF, SCANF, MEMCPY, 
+            INTRINSIC_WRITESTR,
+            INTRINSIC_READLN, INTRINSIC_READSTR,
+            INTRINSIC_ALLOC, INTRINSIC_FREE
     );
 
     static final String MAIN = "main";
