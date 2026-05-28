@@ -237,7 +237,7 @@ The benchmark data, with `btree` and `strassen` removed:
 | recaf&nbsp;&#x2011;O0 | 5.668&nbsp;s  | 0.103 |
 
 The benchmarks are run on a ThinkPad T490
-with Intel i7-8665U CPU 
+with Intel i7-8665U CPU and 16GB RAM
 running Linux 6.12.86+deb13-amd64.
 
 ## Acknowledgements
