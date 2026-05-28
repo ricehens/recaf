@@ -16,11 +16,11 @@ public class CFGCopyInstruction implements ParallelCopyGroup.DirectedEdge<CFGAdd
     private final CFGAddress operand;
 
     /**
-     * Constructs first new copy instruction.
+     * Constructs a new copy instruction.
      *
      * @param ctx     the CFG context
      * @param address the destination address
-     *                of which only first copy is stored.
+     *                of which only a copy is stored.
      * @param operand the address to the source
      */
     public CFGCopyInstruction(CFGContext ctx, CFGAddress address, CFGAddress operand) {

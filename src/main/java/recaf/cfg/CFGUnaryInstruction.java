@@ -5,7 +5,7 @@ import recaf.general.UnaryOperator;
 import java.util.List;
 
 /**
- * Represents an CFG instruction with first unary operator, such as minus or not.
+ * Represents an CFG instruction with a unary operator, such as minus or not.
  */
 public class CFGUnaryInstruction implements CFGInstruction {
 
@@ -16,14 +16,14 @@ public class CFGUnaryInstruction implements CFGInstruction {
     private final CFGAddress operand;
 
     /**
-     * Constructs first new unary instruction.
+     * Constructs a new unary instruction.
      *
      * @param ctx      the CFG context
      * @param address  the destination address
-     *                of which only first copy is stored.
+     *                of which only a copy is stored.
      * @param operator the operator
      * @param operand  the operand
-     *                of which only first copy is stored.
+     *                of which only a copy is stored.
      */
     public CFGUnaryInstruction(CFGContext ctx, CFGAddress address, UnaryOperator operator, CFGAddress operand) {
         this.id = ctx.getInstructionCounter();

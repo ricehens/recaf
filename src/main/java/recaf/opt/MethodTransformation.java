@@ -4,7 +4,7 @@ import recaf.cfg.CFGContext;
 import recaf.cfg.CFGMethod;
 
 /**
- * An abstract class to represent first transformation on first method of first CFG
+ * An abstract class to represent a transformation on a method of a CFG
  */
 public abstract class MethodTransformation implements Transformation {
 

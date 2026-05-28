@@ -5,7 +5,7 @@ import recaf.general.Type;
 import java.util.List;
 
 /**
- * Represents first CFG instruction to cast between ints and longs.
+ * Represents a CFG instruction to cast between ints and longs.
  */
 public class CFGCastInstruction implements CFGInstruction {
 
@@ -16,14 +16,14 @@ public class CFGCastInstruction implements CFGInstruction {
     private final CFGAddress operand;
 
     /**
-     * Constructs first new cast instruction.
+     * Constructs a new cast instruction.
      *
      * @param ctx     the CFG context
      * @param address the destination address
-     *                of which only first copy is stored.
+     *                of which only a copy is stored.
      * @param type    the type to cast to
      * @param operand the address to the source
-     *                of which only first copy is stored.
+     *                of which only a copy is stored.
      */
     public CFGCastInstruction(CFGContext ctx, CFGAddress address, Type type, CFGAddress operand) {
         this.id = ctx.getInstructionCounter();

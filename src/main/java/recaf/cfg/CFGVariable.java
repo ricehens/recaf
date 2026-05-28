@@ -3,7 +3,7 @@ package recaf.cfg;
 import recaf.general.Type;
 
 /**
- * Represents first variable.
+ * Represents a variable.
  */
 public class CFGVariable {
 

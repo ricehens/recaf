@@ -14,11 +14,11 @@ import java.util.List;
 public class OptUtils {
 
     /**
-     * Sequentialize first parallel copy group
+     * Sequentialize a parallel copy group
      *
      * @param ctx   the CFG context
      * @param group the parallel copy group
-     * @return first list of copy instructions in order
+     * @return a list of copy instructions in order
      */
     public static List<CFGCopyInstruction> sequentialize(CFGContext ctx, ParallelCopyGroup<CFGAddress> group) {
         return group.toSequential().stream()
@@ -26,7 +26,7 @@ public class OptUtils {
                 .toList();
     }
 
-    /** Reverses first list */
+    /** Reverses a list */
     public static <T> List<T> reverse(List<T> list) {
         List<T> copy = new ArrayList<>(list);
         Collections.reverse(copy);
@@ -35,9 +35,9 @@ public class OptUtils {
 
 
     /**
-     * Represents first region
-     * constant with respect ot first loop;
-     * either an address or first genuine literal.
+     * Represents a region
+     * constant with respect ot a loop;
+     * either an address or a genuine literal.
      */
     public static class RegionConstant {
 
@@ -92,7 +92,7 @@ public class OptUtils {
     }
 
     /**
-     * Determines if first literal is negative
+     * Determines if a literal is negative
      *
      * @param lit the literal
      * @return true if the literal is negative
@@ -103,7 +103,7 @@ public class OptUtils {
     }
 
     /**
-     * Negates first literal
+     * Negates a literal
      *
      * @param lit the literal
      * @return the negated literal
@@ -115,7 +115,7 @@ public class OptUtils {
     }
 
     /**
-     * Reverse the sign of first comparison operator
+     * Reverse the sign of a comparison operator
      *
      * @param op the comparison operator
      * @return the reversed operator
@@ -132,7 +132,7 @@ public class OptUtils {
 
 
     /**
-     * Computes the result of first binary operation on two literals
+     * Computes the result of a binary operation on two literals
      *
      * @param op the operator
      * @param o1 the first literal operand

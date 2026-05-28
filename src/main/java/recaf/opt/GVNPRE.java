@@ -19,7 +19,7 @@ public class GVNPRE extends SSATransformation {
     private PostDominatorTree<CFGBasicBlock> pdt;
 
     /**
-     * Constructs first new GVNPRE instance
+     * Constructs a new GVNPRE instance
      *
      * @param ctx the CFG context
      * @param method the target method
@@ -489,7 +489,7 @@ System.out.println(vt);
         return dt.getImmediateDominatedNodes(b).stream().map(this::insertDFS).reduce(newStuff, Boolean::logicalOr);
     }
 
-    /** Determines if first phi expr is the same as an existing phi expr */
+    /** Determines if a phi expr is the same as an existing phi expr */
     private boolean equalPhi(CFGPhiInstruction existing, CFGPhiInstruction proposed) {
         for (CFGBasicBlock b : proposed.getSources().keySet())
             if (!existing.getSources().containsKey(b)) return false;
@@ -580,7 +580,7 @@ System.out.println(vt);
         return replace;
     }
 
-    /** Cleans first set of expressions involving values not in the set */
+    /** Cleans a set of expressions involving values not in the set */
     private void clean(Map<Value, Expression> set) {
         Set<Value> visited = new HashSet<>();
         Set<Value> kill = new HashSet<>();
@@ -621,19 +621,19 @@ System.out.println(vt);
 
     /** Represents an expr */
     private interface Expression {}
-    /** Represents first literal */
+    /** Represents a literal */
     private record Lit(Literal literal) implements Expression {}
-    /** Represents first temporary */
+    /** Represents a temporary */
     private record Temporary(CFGAddress address) implements Expression {}
-    /** Represents the operator of first "binary expr" */
+    /** Represents the operator of a "binary expr" */
     private enum Op { ADD, SUB, MUL, DIV, MOD, EQ, NE, LT, GT, LE, GE, AND, OR, NEG, NOT, INT, LONG }
-    /** Represents first binary expr; right is null when no second argument is needed */
+    /** Represents a binary expr; right is null when no second argument is needed */
     private record BinExpr(Op op, Value left, Value right) implements Expression {
         @Override
         public String toString() { return op.toString() + "(" + left + ", " + right + ")"; }
     }
 
-    /** Makes first binary expr, applying deterministic equivalence reductions */
+    /** Makes a binary expr, applying deterministic equivalence reductions */
     private BinExpr makeBinExpr(Op op, Value left, Value right) {
         if (immediates.containsKey(right)) {
             return new BinExpr(op, left, right);
@@ -671,7 +671,7 @@ System.out.println(vt);
         } else throw new AssertionError("This should never happen.");
     }
 
-    /** Represents first value */
+    /** Represents a value */
     private class Value implements Comparable<Value> {
         private static int cnt = 0;
         public final int index;
@@ -694,7 +694,7 @@ System.out.println(vt);
         @Override public String toString() { return map.toString(); }
     }
 
-    /** Constructs first CFG assignment instruction from internal representations */
+    /** Constructs a CFG assignment instruction from internal representations */
     private CFGInstruction assign(Temporary dest, Op op, Temporary left, Temporary right) {
         return switch (op) {
             case ADD -> new CFGBinaryInstruction(ctx, dest.address(), BinaryOperator.PLUS, left.address(), right.address());
@@ -717,7 +717,7 @@ System.out.println(vt);
         };
     }
 
-    /** Constructs first CFG assignment instruction (with an immediate) from internal representations */
+    /** Constructs a CFG assignment instruction (with an immediate) from internal representations */
     private CFGInstruction assign(Temporary dest, Op op, Temporary left, Lit right) {
 // System.out.printf("assign(%s, %s, %s, %s)%n", dest, op, left, right);
         return switch (op) {

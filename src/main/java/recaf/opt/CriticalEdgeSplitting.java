@@ -5,14 +5,14 @@ import recaf.utils.DominatorTree;
 import recaf.utils.ParallelCopyGroup;
 
 /**
- * A critical edge splitter for first method of first SSA CFG
+ * A critical edge splitter for a method of a SSA CFG
  */
 public class CriticalEdgeSplitting extends SSATransformation {
 
     private DominatorTree<CFGBasicBlock> dt;
 
     /**
-     * Creates first critical edge splitter
+     * Creates a critical edge splitter
      *
      * @param ctx the CFG context
      * @param method the method
@@ -23,7 +23,7 @@ public class CriticalEdgeSplitting extends SSATransformation {
     }
 
     /**
-     * Splits the critical edges of the control flow graph within first method
+     * Splits the critical edges of the control flow graph within a method
      *
      * @return whether any changes were made
      */
@@ -37,7 +37,7 @@ public class CriticalEdgeSplitting extends SSATransformation {
     }
 
     /**
-     * Splits any outgoing critical edges of first block
+     * Splits any outgoing critical edges of a block
      *
      * @param block the source block
      * @return whether any changes were made

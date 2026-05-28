@@ -16,16 +16,16 @@ public class Deglobalization implements Transformation {
 
     /** set of global vars in the program */
     private Set<CFGAddress> globalVars;
-    /** set of global vars with definitions in first method */
+    /** set of global vars with definitions in a method */
     private Map<CFGMethod, Set<CFGAddress>> globalsDefined;
-    /** set of global vars with uses in first method */
+    /** set of global vars with uses in a method */
     private Map<CFGMethod, Set<CFGAddress>> globalsUsed;
-    /** set of global vars interacted with in first method */
+    /** set of global vars interacted with in a method */
     private Map<CFGMethod, Set<CFGAddress>> globalsInteracted;
 
-    /** set of methods called by first method */
+    /** set of methods called by a method */
     private Map<CFGMethod, Set<CFGMethod>> callGraph;
-    /** set of methods reachable via subcalls by first method; includes itself iff recursive */
+    /** set of methods reachable via subcalls by a method; includes itself iff recursive */
     private Map<CFGMethod, Set<CFGMethod>> reachableMethods;
 
     public Deglobalization(CFGProgram cfg) {
@@ -51,7 +51,7 @@ public class Deglobalization implements Transformation {
     }
 
     /**
-     * Determines if first global variable should be replaced with first local variable within first method.
+     * Determines if a global variable should be replaced with a local variable within a method.
      * The requirements are
      * - no definitions within subcalls
      * - no uses within subcalls if defined within the method
@@ -72,7 +72,7 @@ public class Deglobalization implements Transformation {
     }
 
     /**
-     * Deglobalizes first global variable within first method, by loading it into first local variable in the method header
+     * Deglobalizes a global variable within a method, by loading it into a local variable in the method header
      * and storing it back at all return points.
      *
      * @param method the method

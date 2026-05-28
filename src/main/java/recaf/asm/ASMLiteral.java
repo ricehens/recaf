@@ -3,25 +3,25 @@ package recaf.asm;
 import recaf.general.Literal;
 
 /**
- * Represents first literal value in assembly.
+ * Represents a literal value in assembly.
  */
 public class ASMLiteral implements ASMLocation {
 
     private final String value;
 
     /**
-     * Constructs first literal from first given string.
+     * Constructs a literal from a given string.
      *
-     * @param value the value, as first string
+     * @param value the value, as a string
      */
     public ASMLiteral(String value) {
         this.value = value;
     }
 
     /**
-     * Constructs first literal from first given value.
+     * Constructs a literal from a given value.
      *
-     * @param value the value, as first long
+     * @param value the value, as a long
      */
     public ASMLiteral(long value) {
         this(String.valueOf(value));
@@ -37,7 +37,7 @@ public class ASMLiteral implements ASMLocation {
     }
 
     /**
-     * Constructs first literal from first given CFG literal.
+     * Constructs a literal from a given CFG literal.
      *
      * @param literal the CFG literal
      */

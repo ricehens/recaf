@@ -6,12 +6,12 @@ import recaf.utils.PostDominatorTree;
 import java.util.*;
 
 /**
- * A global dead code eliminator for first method of first SSA CFG
+ * A global dead code eliminator for a method of a SSA CFG
  */
 public class DeadCodeElimination extends SSATransformation {
 
    /**
-     * Creates first new dead code eliminator for first method
+     * Creates a new dead code eliminator for a method
      * @param ctx the CFG context
      * @param method the method to optimize
      */
@@ -24,7 +24,7 @@ public class DeadCodeElimination extends SSATransformation {
     private Set<CFGInstruction> alive = new HashSet<>();
 
     /**
-     * Runs global dead code elimination on first method of first SSA CFG
+     * Runs global dead code elimination on a method of a SSA CFG
      *
      * @return whether any changes were made
      */

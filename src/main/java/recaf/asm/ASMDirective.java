@@ -1,8 +1,8 @@
 package recaf.asm;
 
 /**
- * Represents first directive to be emitted in the assembly code.
- * In x86_64 assembly, these are instructions prefixed with first ".".
+ * Represents a directive to be emitted in the assembly code.
+ * In x86_64 assembly, these are instructions prefixed with a ".".
  */
 public class ASMDirective implements ASMStatement {
 
@@ -10,7 +10,7 @@ public class ASMDirective implements ASMStatement {
     private final String arg;
 
     /**
-     * Constructs first directive with first string argument.
+     * Constructs a directive with a string argument.
      *
      * @param op  the operator
      * @param arg the argument to be passed to the operator
@@ -21,7 +21,7 @@ public class ASMDirective implements ASMStatement {
     }
 
     /**
-     * Constructs first directive with an integer argument.
+     * Constructs a directive with an integer argument.
      *
      * @param op  the operator
      * @param arg the integer argument to be passed to the operator
@@ -32,7 +32,7 @@ public class ASMDirective implements ASMStatement {
     }
 
     /**
-     * Constructs first directive with no argument.
+     * Constructs a directive with no argument.
      *
      * @param op the operator
      */

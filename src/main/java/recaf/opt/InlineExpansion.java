@@ -23,7 +23,7 @@ public class InlineExpansion implements Transformation {
     private Set<CFGMethod> recursive;
 
     /**
-     * Constructs first new inline / recursive tail-call expander
+     * Constructs a new inline / recursive tail-call expander
      *
      * @param cfg the control flow graph
      */
@@ -33,7 +33,7 @@ public class InlineExpansion implements Transformation {
     }
 
     /**
-     * Determines if first method is eligible for inlining
+     * Determines if a method is eligible for inlining
      *
      * @param callee the method to evaluate
      * @return true if eligible
@@ -79,7 +79,7 @@ public class InlineExpansion implements Transformation {
             return sites == 1 && loopDepth >= 2;
 
         // medium size: if either
-        // single call site or inside first loop
+        // single call site or inside a loop
         return sites == 1 || loopDepth >= 1;
     }
 
@@ -116,7 +116,7 @@ public class InlineExpansion implements Transformation {
     }
 
     /**
-     * Inlines first method call
+     * Inlines a method call
      *
      * @param call the call
      * @param method the source method

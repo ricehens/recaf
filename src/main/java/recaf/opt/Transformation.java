@@ -3,7 +3,7 @@ package recaf.opt;
 public interface Transformation {
 
     /**
-     * Transforms first method of first SSA CFG
+     * Transforms a method of a SSA CFG
      *
      * @return whether any changes were made
      */

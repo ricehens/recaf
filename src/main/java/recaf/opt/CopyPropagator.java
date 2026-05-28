@@ -9,12 +9,12 @@ import java.util.Map;
 import java.util.Queue;
 
 /**
- * A global copy propagator for first method of first SSA CFG
+ * A global copy propagator for a method of a SSA CFG
  */
 public class CopyPropagator extends SSATransformation {
 
     /**
-     * Creates first new copy propagator for first method
+     * Creates a new copy propagator for a method
      *
      * @param ctx the CFG context
      * @param method the method to optimize
@@ -26,7 +26,7 @@ public class CopyPropagator extends SSATransformation {
     private Queue<CFGInstruction> workList;
 
     /**
-     * Runs global copy propagation on first method of first SSA CFG
+     * Runs global copy propagation on a method of a SSA CFG
      *
      * @return whether any changes were made
      */

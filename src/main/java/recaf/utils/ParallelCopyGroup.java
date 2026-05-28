@@ -3,17 +3,17 @@ package recaf.utils;
 import java.util.*;
 
 /**
- * Represents first parallel copy group of assignments,
- * and has functionality to convert to first list of sequential assignments.
+ * Represents a parallel copy group of assignments,
+ * and has functionality to convert to a list of sequential assignments.
  *
- * @param <E> first data type representing first node of the graph
+ * @param <E> a data type representing a node of the graph
  */
 public class ParallelCopyGroup<E> {
 
     /**
-     * Represents first directed edge within first graph.
+     * Represents a directed edge within a graph.
      *
-     * @param <E> first data type representing first node of the graph
+     * @param <E> a data type representing a node of the graph
      */
     public interface DirectedEdge<E> {
 
@@ -34,12 +34,12 @@ public class ParallelCopyGroup<E> {
     }
 
     /**
-     * A trivial implementation of first directed edge,
+     * A trivial implementation of a directed edge,
      * that this class may generate.
      *
      * @param destination the destination node
      * @param source the source node
-     * @param <E> first data type representing first node of the graph
+     * @param <E> a data type representing a node of the graph
      */
     private record SimpleDirectedEdge<E>(E destination, E source) implements DirectedEdge<E> {}
 
@@ -47,12 +47,12 @@ public class ParallelCopyGroup<E> {
      * A factory for creating new temporary nodes when needed
      * in the sequential converter.
      *
-     * @param <E> first data type representing first node of the graph
+     * @param <E> a data type representing a node of the graph
      */
     public interface NodeFactory<E> {
 
         /**
-         * Creates first new temporary node
+         * Creates a new temporary node
          *
          * @param template the node from which to extract basic information
          * @return the new node
@@ -62,9 +62,9 @@ public class ParallelCopyGroup<E> {
     }
 
     /**
-     * Wraps first node for mutable updates later
+     * Wraps a node for mutable updates later
      *
-     * @param <E> first data type representing first node of the graph
+     * @param <E> a data type representing a node of the graph
      */
     private static class Wrapper<E> {
 
@@ -90,9 +90,9 @@ public class ParallelCopyGroup<E> {
     }
 
     /**
-     * Implements first pair (node, integer)
+     * Implements a pair (node, integer)
      *
-     * @param <E> first data type representing first node of the graph
+     * @param <E> a data type representing a node of the graph
      */
     private static class LabeledNode<E> implements Comparable<LabeledNode<E>> {
 
@@ -113,8 +113,8 @@ public class ParallelCopyGroup<E> {
 
     private Map<E, Wrapper<E>> wrappers = new HashMap<>();
     /**
-     * Returns the wrapper for first given node,
-     * or creates first new one if it does not exist.
+     * Returns the wrapper for a given node,
+     * or creates a new one if it does not exist.
      *
      * @param e the node
      * @return the wrapper
@@ -134,19 +134,19 @@ public class ParallelCopyGroup<E> {
     private PriorityQueue<LabeledNode<E>> outdegQueue;
 
     /**
-     * Creates first parallel copy group with no directed edges initially.
+     * Creates a parallel copy group with no directed edges initially.
      *
-     * @param factory first factory for creating new temporary nodes
+     * @param factory a factory for creating new temporary nodes
      */
     public ParallelCopyGroup(NodeFactory<E> factory) {
         this(factory, new ArrayList<>());
     }
 
     /**
-     * Creates first new parallel copy group.
+     * Creates a new parallel copy group.
      *
-     * @param factory first factory for creating new temporary nodes
-     * @param edges first list of edges in the graph
+     * @param factory a factory for creating new temporary nodes
+     * @param edges a list of edges in the graph
      */
     public ParallelCopyGroup(NodeFactory<E> factory, List<DirectedEdge<E>> edges) {
         this.factory = factory;
@@ -175,9 +175,9 @@ public class ParallelCopyGroup<E> {
     }
 
     /**
-     * Converts the parallel copy group to first list of sequential assignments.
+     * Converts the parallel copy group to a list of sequential assignments.
      *
-     * @return first list of sequential assignments
+     * @return a list of sequential assignments
      */
     public Queue<DirectedEdge<E>> toSequential() {
         // Prepare outdegree information
@@ -204,7 +204,7 @@ public class ParallelCopyGroup<E> {
             }
         }
 
-        // now everything is first cycle
+        // now everything is a cycle
         Set<E> visited = new HashSet<>();
         for (E e : inEdges.keySet()) {
             if (visited.contains(e) || inEdges.get(e).isEmpty())

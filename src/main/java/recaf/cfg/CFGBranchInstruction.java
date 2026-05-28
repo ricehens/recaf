@@ -3,7 +3,7 @@ package recaf.cfg;
 import java.util.List;
 
 /**
- * Represents first branch point in the control flow graph.
+ * Represents a branch point in the control flow graph.
  */
 public class CFGBranchInstruction implements CFGLastInstruction {
 
@@ -14,11 +14,11 @@ public class CFGBranchInstruction implements CFGLastInstruction {
     private final CFGAddress elseAddr;
 
     /**
-     * Constructs first new CFG binary instruction.
+     * Constructs a new CFG binary instruction.
      *
      * @param ctx the CFG context
      * @param boolAddr the address to the conditional,
-     *                 of which only first copy is stored
+     *                 of which only a copy is stored
      * @param thenAddr the address to the block to jump to if the conditional is true;
      *                 the address is not cloned upon call to the constructor
      *                 and will reflect changes made by the client

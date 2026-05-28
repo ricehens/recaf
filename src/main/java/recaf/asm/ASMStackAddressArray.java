@@ -12,7 +12,7 @@ public class ASMStackAddressArray implements ASMMemoryLocation {
     private final int align;
 
     /**
-     * Constructs first stack array-index from first custom register.
+     * Constructs a stack array-index from a custom register.
      *
      * @param offset    the offset from the value in the given register
      * @param register  the register containing the stack address,
@@ -30,7 +30,7 @@ public class ASMStackAddressArray implements ASMMemoryLocation {
     }
 
     /**
-     * Constructs first stack array-index from first custom register.
+     * Constructs a stack array-index from a custom register.
      *
      * @param offset    the offset from the value in the given register
      * @param register  the register containing the stack address,
@@ -43,7 +43,7 @@ public class ASMStackAddressArray implements ASMMemoryLocation {
     }
 
     /**
-     * Constructs first stack array-index.
+     * Constructs a stack array-index.
      *
      * @param offset    the offset from the base pointer %rbp
      * @param register2 the register containing the index

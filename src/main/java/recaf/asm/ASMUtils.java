@@ -6,7 +6,7 @@ package recaf.asm;
 public class ASMUtils {
 
     /**
-     * Adds spaces to the end of first string until the length is first
+     * Adds spaces to the end of a string until the length is a
      * multiple 8.
      *
      * @param str the input string

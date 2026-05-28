@@ -1,7 +1,7 @@
 package recaf.asm;
 
 /**
- * Represents first statement within an x86_64 assembly program.
+ * Represents a statement within an x86_64 assembly program.
  */
 public interface ASMStatement {
 

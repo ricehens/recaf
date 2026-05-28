@@ -1,7 +1,7 @@
 package recaf.asm;
 
 /**
- * Represents indexing into first global array.
+ * Represents indexing into a global array.
  */
 public class ASMGlobalAddressArray implements ASMMemoryLocation {
 

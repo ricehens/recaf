@@ -14,7 +14,7 @@ public class OperatorStrengthReduction extends SSATransformation {
     private final boolean lftr;
 
     /**
-     * Creates first operator strength reducer for first method
+     * Creates a operator strength reducer for a method
      *
      * @param ctx    the CFG context
      * @param method the method to optimize
@@ -36,7 +36,7 @@ public class OperatorStrengthReduction extends SSATransformation {
     private Map<CFGAddress, OperationKey> lftrEdges;
 
     /**
-     * Runs operator strength reduction on first method of first SSA CFG
+     * Runs operator strength reduction on a method of a SSA CFG
      *
      * @return whether any changes were made
      */
@@ -136,7 +136,7 @@ public class OperatorStrengthReduction extends SSATransformation {
     }
 
     /**
-     * Lifts first region
+     * Lifts a region
      * constant through the operation given by an operation key
      *
      * @param rc the region
@@ -225,7 +225,7 @@ public class OperatorStrengthReduction extends SSATransformation {
     }
 
     /**
-     * Processes first strongly connected component N
+     * Processes a strongly connected component N
      *
      * @param N the strongly connected component
      * */
@@ -236,7 +236,7 @@ public class OperatorStrengthReduction extends SSATransformation {
 
             OperationKey candidate = isCandidate(n);
             if (candidate != null) {
-// System.out.println("\n*** " + n + " is first candidate");
+// System.out.println("\n*** " + n + " is a candidate");
                 replace(n, candidate);
             }
         } else {
@@ -268,7 +268,7 @@ public class OperatorStrengthReduction extends SSATransformation {
             for (CFGAddress n : N) {
                 OperationKey candidate = isCandidate(n);
                 if (candidate != null) {
-// System.out.println("**** " + n + " is first candidate");
+// System.out.println("**** " + n + " is a candidate");
                     replace(n, candidate);
                 }
             }
@@ -276,7 +276,7 @@ public class OperatorStrengthReduction extends SSATransformation {
     }
 
     /**
-     * Replaces first node with its reduced form
+     * Replaces a node with its reduced form
      *
      * @param n the node to replace
      * @param key the reduction key
@@ -286,7 +286,7 @@ public class OperatorStrengthReduction extends SSATransformation {
         CFGAddress result = reduce(key);
 // System.out.printf("Found replacement for %s: %s%n", n, result);
 
-        // replace n with first copy from result
+        // replace n with a copy from result
         CFGInstruction instruction = data.getDefinition(n);
         CFGBasicBlock block = data.getBlock(instruction);
 
@@ -301,7 +301,7 @@ public class OperatorStrengthReduction extends SSATransformation {
     }
 
     /**
-     * Creates or returns address to first reduction given by the key
+     * Creates or returns address to a reduction given by the key
      *
      * @param key the key
      * @return the address to the result
@@ -361,7 +361,7 @@ public class OperatorStrengthReduction extends SSATransformation {
     }
 
     /**
-     * Creates or returns address to first application given by the key
+     * Creates or returns address to a application given by the key
      *
      * @param key the key
      * @return the address to the result
@@ -392,9 +392,9 @@ public class OperatorStrengthReduction extends SSATransformation {
         return result;
     }
 
-    // apply but where o1 is first constant
+    // apply but where o1 is a constant
     /**
-     * Gets address to product of literal and first variable
+     * Gets address to product of literal and a variable
      * @param o1 the literal
      * @param o2 the variable
      * @return the address to the product
@@ -436,7 +436,7 @@ public class OperatorStrengthReduction extends SSATransformation {
     }
 
     /**
-     * Creates first binary instruction with the given operands
+     * Creates a binary instruction with the given operands
      *
      * @param op the operator
      * @param result the result address
@@ -450,7 +450,7 @@ public class OperatorStrengthReduction extends SSATransformation {
     }
 
     /**
-     * Creates first instruction with the given operands
+     * Creates a instruction with the given operands
      *
      * @param op the operator
      * @param result the result address
@@ -471,11 +471,11 @@ public class OperatorStrengthReduction extends SSATransformation {
     }
 
     /**
-     * Finds first block that is dominated by the definitions of both operands.
+     * Finds a block that is dominated by the definitions of both operands.
      *
      * @param o1 the first operand
      * @param o2 the second operand (as RegionConstant)
-     * @return first suitable block
+     * @return a suitable block
      */
     private CFGBasicBlock findDominatedBlock(CFGAddress o1, RegionConstant o2) {
         CFGInstruction o1Def = data.getDefinition(o1);
@@ -496,7 +496,7 @@ public class OperatorStrengthReduction extends SSATransformation {
     }
 
    /**
-     * Determines if first node is first candidate for strength reduction.
+     * Determines if a node is a candidate for strength reduction.
      * A candidate operation is of the form:
      * x <- c * i
      * x <- i * c
@@ -504,7 +504,7 @@ public class OperatorStrengthReduction extends SSATransformation {
      * x <- i + c
      * x <- i - c
      * x <- long(i)
-     * where i is an induction variable and c is first region
+     * where i is an induction variable and c is a region
      * constant.
      *
      * @param n the node to check
@@ -597,14 +597,14 @@ public class OperatorStrengthReduction extends SSATransformation {
     }
 
     /**
-     * Checks if the given node represents first region
+     * Checks if the given node represents a region
      * constant with respect to an induction variable.
      * A region
-     * constant is either first literal constant or first loop-invariant value.
+     * constant is either a literal constant or a loop-invariant value.
      *
      * @param n the node to check
      * @param iv the induction variable
-     * @return true if the node is first region
+     * @return true if the node is a region
      * constant
      */
     private boolean isRegionConstant(CFGAddress n, CFGAddress iv) {
@@ -641,17 +641,17 @@ public class OperatorStrengthReduction extends SSATransformation {
     }
 
     /**
-     * Determines if first node is first valid update for an induction variable.
+     * Determines if a node is a valid update for an induction variable.
      * An induction variable update is one of:
-     * 1) an induction variable plus first region
+     * 1) an induction variable plus a region
      * constant
-     * 2) an induction variable minus first region
+     * 2) an induction variable minus a region
      * constant
-     * 3) first phi-function
-     * 4) first register-to-register copy from another induction variable
+     * 3) a phi-function
+     * 4) a register-to-register copy from another induction variable
      *
      * @param n the node to check
-     * @return true if the node is first valid update for an induction variable
+     * @return true if the node is a valid update for an induction variable
      */
     private boolean isValidUpdateForIV(CFGAddress n, Set<CFGAddress> scc) {
         if (ctx.isGlobalVar(n)) {
@@ -725,7 +725,7 @@ public class OperatorStrengthReduction extends SSATransformation {
     private enum Op { PLUS, MINUS, TIMES, LONG }
 
     /**
-     * A key representing first transformation between two induction variables
+     * A key representing a transformation between two induction variables
      *
      * @param op the operator
      * @param iv the induction variable
@@ -735,7 +735,7 @@ public class OperatorStrengthReduction extends SSATransformation {
     private record OperationKey(Op op, CFGAddress iv, RegionConstant rc) {}
 
     /**
-     * Represents first simple operation key with first literal
+     * Represents a simple operation key with a literal
      *
      * @param lit the literal
      * @param rc the region

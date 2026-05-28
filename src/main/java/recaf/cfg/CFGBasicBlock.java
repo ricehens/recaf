@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 /**
- * Represents first basic block within the control flow graph.
+ * Represents a basic block within the control flow graph.
  */
 public class CFGBasicBlock implements CFG, DominatorTree.Node<CFGBasicBlock> {
 
@@ -20,7 +20,7 @@ public class CFGBasicBlock implements CFG, DominatorTree.Node<CFGBasicBlock> {
     private final CFGAddress address;
 
     /**
-     * Constructs first new basic block.
+     * Constructs a new basic block.
      *
      * @param ctx the CFG context
      */
@@ -32,7 +32,7 @@ public class CFGBasicBlock implements CFG, DominatorTree.Node<CFGBasicBlock> {
     }
 
     /**
-     * Appends first new instruction to the basic block.
+     * Appends a new instruction to the basic block.
      *
      * @param instruction the instruction to add
      */
@@ -52,7 +52,7 @@ public class CFGBasicBlock implements CFG, DominatorTree.Node<CFGBasicBlock> {
     /**
      * Returns all instructions in the basic block
      *
-     * @return first doubly-linked list of instructions
+     * @return a doubly-linked list of instructions
      */
     public DoublyLinkedList<CFGInstruction> getInstructions() {
         return instructions;
@@ -61,7 +61,7 @@ public class CFGBasicBlock implements CFG, DominatorTree.Node<CFGBasicBlock> {
     /**
      * Return all phi instructions in the basic block
      *
-     * @return first doubly-linked list of phi instructions
+     * @return a doubly-linked list of phi instructions
      */
     public DoublyLinkedList<CFGPhiInstruction> getPhiInstructions() {
         return phiInstructions;
@@ -86,9 +86,9 @@ public class CFGBasicBlock implements CFG, DominatorTree.Node<CFGBasicBlock> {
     }
 
     /**
-     * Returns first list of all phi instructions and normal instructions in the basic block
+     * Returns a list of all phi instructions and normal instructions in the basic block
      *
-     * @return first list of instructions
+     * @return a list of instructions
      */
     public List<CFGInstruction> getAllInstructions() {
         Stream<CFGInstruction> most = Stream.concat(phiInstructions.stream(), instructions.stream());
@@ -116,7 +116,7 @@ public class CFGBasicBlock implements CFG, DominatorTree.Node<CFGBasicBlock> {
     /**
      * Returns all blocks that can be directly reached from the current block.
      *
-     * @return first list of successors
+     * @return a list of successors
      */
     @Override
     public List<CFGBasicBlock> successors() {

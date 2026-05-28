@@ -18,7 +18,7 @@ public class Tokenizer {
     private final CharStream cs;
 
     /**
-     * Creates first scanner object to tokenize an input stream.
+     * Creates a scanner object to tokenize an input stream.
      *
      * @param is The input stream.
      */

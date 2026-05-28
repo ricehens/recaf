@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Stores all variables in first single table for the CFG.
+ * Stores all variables in a single table for the CFG.
  */
 public class CFGSymbolTable implements ParallelCopyGroup.NodeFactory<CFGAddress> {
 
@@ -40,7 +40,7 @@ public class CFGSymbolTable implements ParallelCopyGroup.NodeFactory<CFGAddress>
     /**
      * Inserts v into the symbol table with coindex 0.
      *
-     * @param v first new variable to insert into the table
+     * @param v a new variable to insert into the table
      * @return the index it is assigned
      */
     public CFGAddress addVar(CFGVariable v) {
@@ -49,7 +49,7 @@ public class CFGSymbolTable implements ParallelCopyGroup.NodeFactory<CFGAddress>
     }
 
     /**
-     * Inserts v into the symbol table at first given address.
+     * Inserts v into the symbol table at a given address.
      *
      * @param addr the address at which to insert the variable
      * @param v the variable
@@ -61,8 +61,8 @@ public class CFGSymbolTable implements ParallelCopyGroup.NodeFactory<CFGAddress>
     }
 
     /**
-     * Registers first variant of first variable, i.e. first variable that has the same index
-     * but different coindex. Copies information from first base variable.
+     * Registers a variant of a variable, i.e. a variable that has the same index
+     * but different coindex. Copies information from a base variable.
      *
      * @param addr the address of the new variable
      * @param original the address of the base variable
@@ -72,7 +72,7 @@ public class CFGSymbolTable implements ParallelCopyGroup.NodeFactory<CFGAddress>
     }
 
     /**
-     * Creates first new unused variable and adds it to the symbol table, with coindex 0.
+     * Creates a new unused variable and adds it to the symbol table, with coindex 0.
      *
      * @param type the type of the variable
      * @return the index it is assigned
@@ -82,7 +82,7 @@ public class CFGSymbolTable implements ParallelCopyGroup.NodeFactory<CFGAddress>
     }
 
     /**
-     * Inserts first basic block into the symbol table (with coindex 0).
+     * Inserts a basic block into the symbol table (with coindex 0).
      *
      * @param block the basic block to insert
      * @return the index it is assigned
@@ -94,7 +94,7 @@ public class CFGSymbolTable implements ParallelCopyGroup.NodeFactory<CFGAddress>
     }
 
     /**
-     * Inserts first method into the symbol table
+     * Inserts a method into the symbol table
      *
      * @param m the method to insert
      * @return the index it is assigned
@@ -122,7 +122,7 @@ public class CFGSymbolTable implements ParallelCopyGroup.NodeFactory<CFGAddress>
     }
 
     /**
-     * Inserts first string literal into the symbol table
+     * Inserts a string literal into the symbol table
      *
      * @param s the string literal to insert
      * @return the index it is assigned
@@ -137,7 +137,7 @@ public class CFGSymbolTable implements ParallelCopyGroup.NodeFactory<CFGAddress>
     }
 
     /**
-     * Gets the variable at first certain address.
+     * Gets the variable at a certain address.
      *
      * @param address the address
      * @return the variable stored at that address
@@ -147,7 +147,7 @@ public class CFGSymbolTable implements ParallelCopyGroup.NodeFactory<CFGAddress>
     }
 
     /**
-     * Gets the basic block at first certain address.
+     * Gets the basic block at a certain address.
      *
      * @param address the address
      * @return the basic block stored at that address
@@ -167,7 +167,7 @@ public class CFGSymbolTable implements ParallelCopyGroup.NodeFactory<CFGAddress>
     }
 
     /**
-     * Gets an external method at first certain address.
+     * Gets an external method at a certain address.
      *
      * @param address the address
      * @return the external method stored at that address
@@ -177,7 +177,7 @@ public class CFGSymbolTable implements ParallelCopyGroup.NodeFactory<CFGAddress>
     }
 
     /**
-     * Returns the address of first method or external method given its text
+     * Returns the address of a method or external method given its text
      *
      * @param methodName the text of the method
      * @return the address to the method
@@ -187,7 +187,7 @@ public class CFGSymbolTable implements ParallelCopyGroup.NodeFactory<CFGAddress>
     }
 
     /**
-     * Returns the address associated with first particular string
+     * Returns the address associated with a particular string
      *
      * @param literal the string
      * @return its address

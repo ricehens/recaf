@@ -1,7 +1,7 @@
 package recaf.general;
 
 /**
- * Represents first unary operator, i.e. - or !.
+ * Represents a unary operator, i.e. - or !.
  */
 public enum UnaryOperator {
 

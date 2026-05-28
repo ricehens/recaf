@@ -1,7 +1,7 @@
 package recaf.general;
 
 /**
- * Represents first binary operator in Decaf, e.g. +.
+ * Represents a binary operator in Decaf, e.g. +.
  */
 public enum BinaryOperator {
 

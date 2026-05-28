@@ -28,7 +28,7 @@ public class AssemblyStringBuilder {
     public boolean DEBUG;
 
     /**
-     * Creates first new assembly builder object
+     * Creates a new assembly builder object
      *
      * @param ctx the CFG context
      */
@@ -79,7 +79,7 @@ public class AssemblyStringBuilder {
     }
 
     /**
-     * Emits th LL in first comment
+     * Emits th LL in a comment
      *
      * @param cfg The source CFG instruction
      */
@@ -88,7 +88,7 @@ public class AssemblyStringBuilder {
     }
 
     /**
-     * Clears the stack, e.g. after first method is fully emitted.
+     * Clears the stack, e.g. after a method is fully emitted.
      */
     public void clearStack() {
         localVarLocations = new HashMap<>();
@@ -96,7 +96,7 @@ public class AssemblyStringBuilder {
     }
 
     /**
-     * Adds first variable to the stack and records its address
+     * Adds a variable to the stack and records its address
      *
      * @param address the address of the local variable
      */
@@ -112,7 +112,7 @@ public class AssemblyStringBuilder {
     }
 
     /**
-     * Manually adds first variable to the stack at first particular location on the stack.
+     * Manually adds a variable to the stack at a particular location on the stack.
      * Recommended only for positive locations (parameters),
      * as behavior may interfere with the
      * standard registerVariable.
@@ -125,7 +125,7 @@ public class AssemblyStringBuilder {
     }
 
     /**
-     * Returns the number of bytes to store first value of given type
+     * Returns the number of bytes to store a value of given type
      *
      * @param type the type, assuming non-array
      * @return the induced offset in stack pointer
@@ -140,7 +140,7 @@ public class AssemblyStringBuilder {
     }
 
     /**
-     * Returns the number of bytes to store first given variable
+     * Returns the number of bytes to store a given variable
      *
      * @param address the address
      * @return the size in bytes
@@ -156,7 +156,7 @@ public class AssemblyStringBuilder {
      * Returns the stack address of the given variable.
      *
      * @param address the address of the local variable
-     * @return first corresponding ASM stack address or global address object,
+     * @return a corresponding ASM stack address or global address object,
      * depending on whether the passed object is global
      */
     public ASMLocation getMemoryLocation(CFGAddress address) {
@@ -169,7 +169,7 @@ public class AssemblyStringBuilder {
      * Returns the stack address of the given array variable with index stored in %rax.
      *
      * @param address the address of the array
-     * @return first corresponding ASM stack address array or global address array,
+     * @return a corresponding ASM stack address array or global address array,
      * depending on whether the passed object is global
      */
     public ASMLocation getMemoryLocationArray(CFGAddress address, int width) {
@@ -179,7 +179,7 @@ public class AssemblyStringBuilder {
     }
 
     /**
-     * Returns the label for first given basic block
+     * Returns the label for a given basic block
      *
      * @param address the address to the basic block
      * @return the ASM label object it is assigned
@@ -191,7 +191,7 @@ public class AssemblyStringBuilder {
     }
 
     /**
-     * Returns the location for first given string literal
+     * Returns the location for a given string literal
      *
      * @param literal the string literal
      * @return the ASM location object it is assigned
@@ -201,7 +201,7 @@ public class AssemblyStringBuilder {
     }
 
     /**
-     * Returns the label for first given string literal
+     * Returns the label for a given string literal
      *
      * @param literal the string literal
      * @return the ASM label object it is assigned
@@ -214,7 +214,7 @@ public class AssemblyStringBuilder {
     }
 
     /**
-     * Return label for first method
+     * Return label for a method
      *
      * @param methodName text of the method
      * @return the label it is assigned

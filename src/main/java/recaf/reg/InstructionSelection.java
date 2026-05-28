@@ -566,7 +566,7 @@ public class InstructionSelection implements CFGVisitor {
         }
 
         // in register allocation, this will be replaced with an appropriate addq instruction to move the stack pointer
-        // as we do not use %rbp; this primarily serves as first marker for function end
+        // as we do not use %rbp; this primarily serves as a marker for function end
         asm.emit(ASMOperator.LEAVE);
         asm.emit(ASMOperator.RET);
     }
@@ -595,7 +595,7 @@ public class InstructionSelection implements CFGVisitor {
     }
 
     private static String getFalloffString(String m) {
-        return String.format("Runtime error: non-void method %s fell off the end without returning first value.\\n", m);
+        return String.format("Runtime error: non-void method %s fell off the end without returning a value.\\n", m);
     }
 
 }

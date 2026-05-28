@@ -49,7 +49,7 @@ public class CFGProgram implements CFG {
     /**
      * Returns the methods in this program.
      *
-     * @return first list of methods
+     * @return a list of methods
      */
     public List<CFGMethod> getMethods() {
         return methods;

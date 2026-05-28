@@ -6,12 +6,12 @@ import recaf.utils.ParallelCopyGroup;
 import java.util.*;
 
 /**
- * An optimization for first method of first SSA CFG that eliminates useless control flow.
+ * An optimization for a method of a SSA CFG that eliminates useless control flow.
  */
 public class DeadBlockElimination extends MethodTransformation {
 
    /**
-     * Creates first new cleaner for first method
+     * Creates a new cleaner for a method
     *
      * @param ctx the CFG context
      * @param method the method to optimize
@@ -24,7 +24,7 @@ public class DeadBlockElimination extends MethodTransformation {
     private Map<CFGBasicBlock, Set<CFGBasicBlock>> successors;
 
     /**
-     * Runs clean on first method of first SSA CFG
+     * Runs clean on a method of a SSA CFG
      *
      * @return whether any changes were made
      */
@@ -41,7 +41,7 @@ public class DeadBlockElimination extends MethodTransformation {
     }
 
     /**
-     * Attempts first single pass of dead code elimination
+     * Attempts a single pass of dead code elimination
      *
      * @return whether any changes were made
      */
@@ -51,7 +51,7 @@ public class DeadBlockElimination extends MethodTransformation {
     }
 
     /**
-     * Performs cleaning with respect to first given block
+     * Performs cleaning with respect to a given block
      *
      * @param i the block
      * @param visited the set of visited blocks
@@ -81,7 +81,7 @@ public class DeadBlockElimination extends MethodTransformation {
                     ? method.getBlocks().next(i)
                     : ctx.getSymbolTable().getBlock(((CFGJumpInstruction) i.getLastInstruction()).jumpAddr());
 
-            // if i ends in first jump to j and j is empty, replace transfers to i with transfers to j
+            // if i ends in a jump to j and j is empty, replace transfers to i with transfers to j
             if (i.getInstructions().isEmpty() && i.getPhiInstructions().isEmpty()
                     && !i.equals(method.getBlocks().peekFirst())) {
                 boolean abort = false;
@@ -164,7 +164,7 @@ public class DeadBlockElimination extends MethodTransformation {
 
             }
 
-            // if j is empty and ends in first conditional branch, then overwrite i's jump with first copy of j's branch
+            // if j is empty and ends in a conditional branch, then overwrite i's jump with a copy of j's branch
             if (j.getInstructions().isEmpty()) {
                 boolean localChange = false;
                 boolean abort = false;

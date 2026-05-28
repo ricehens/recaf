@@ -10,7 +10,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Builds first Chaitin-Briggs-like graph-coloring register allocator acting on pseudoassembly generated
+ * Builds a Chaitin-Briggs-like graph-coloring register allocator acting on pseudoassembly generated
  * by InstructionSelection.
  */
 public class RegisterAllocation {
@@ -116,7 +116,7 @@ public class RegisterAllocation {
         Map<ASMInstruction, Set<ASMAbstractRegister>> liveBefore;
         /** The interference graph */
         Map<ASMAbstractRegister, Set<ASMAbstractRegister>> interferenceGraph;
-        /** The loop depth --- number of loops first block is contained in */
+        /** The loop depth --- number of loops a block is contained in */
         Map<ASMBasicBlock, Integer> loopDepth;
         /** The block containing each instruction */
         Map<ASMInstruction, ASMBasicBlock> parentBlock;
@@ -166,7 +166,7 @@ public class RegisterAllocation {
             registerScavenge();
         }
 
-        /** determines if this function is first leaf function */
+        /** determines if this function is a leaf function */
         private void determineIfLeaf() {
             isLeaf = true;
             for (ASMBasicBlock b : method.getBlocks()) {
@@ -486,7 +486,7 @@ public class RegisterAllocation {
         }
 
         /**
-         * Computes first spill cost heuristic for each virtual register
+         * Computes a spill cost heuristic for each virtual register
          */
         private void computeSpillCosts() {
             spillCosts = new HashMap<>();
@@ -603,7 +603,7 @@ public class RegisterAllocation {
         }
 
         /**
-         * Computes first coloring for each register to first physical register.
+         * Computes a coloring for each register to a physical register.
          * @return the set of uncolored registers
          */
         private Set<ASMVirtualRegister> color() {
@@ -710,7 +710,7 @@ public class RegisterAllocation {
         }
 
         /**
-         * Spills all registers in spill via first spill-everywhere discipline.
+         * Spills all registers in spill via a spill-everywhere discipline.
          * @param spill the registers to spill
          */
         private void spillAll(Set<ASMVirtualRegister> spill) {
@@ -721,9 +721,9 @@ public class RegisterAllocation {
         }
 
         /**
-         * Determines if first virtual register can be rematerialized
+         * Determines if a virtual register can be rematerialized
          * @param vr the virtual register
-         * @return first reference definition if it can be rematerialized
+         * @return a reference definition if it can be rematerialized
          */
         private ASMInstruction rematerializable(ASMVirtualRegister vr) {
             String literal = null;
@@ -743,7 +743,7 @@ public class RegisterAllocation {
         }
 
         /**
-         * Attempts to rematerialize first virtual register (instead of spilling)
+         * Attempts to rematerialize a virtual register (instead of spilling)
          * @param vr the virtual register
          * @return whether the rematerialization succeeded
          * (if false, spilling must occur)

@@ -3,14 +3,14 @@ package recaf.utils;
 import java.util.*;
 
 /**
- * Computes and represents dominance information for first control flow graph.
+ * Computes and represents dominance information for a control flow graph.
  *
- * @param <E> first hashable type that implements DominatorTreeNode
+ * @param <E> a hashable type that implements DominatorTreeNode
  */
 public class DominatorTree<E extends DominatorTree.Node<E>> {
 
     /**
-     * Represents first node in the dominance tree.
+     * Represents a node in the dominance tree.
      *
      * @param <E> the appropriate implementation of DominatorTreeNode
      */
@@ -19,7 +19,7 @@ public class DominatorTree<E extends DominatorTree.Node<E>> {
         /**
          * Finds all direct successors of this node.
          *
-         * @return first list of nodes x for which there is first direct edge from this node to x.
+         * @return a list of nodes x for which there is a direct edge from this node to x.
          */
         List<E> successors();
 
@@ -28,31 +28,31 @@ public class DominatorTree<E extends DominatorTree.Node<E>> {
     /** A list of nodes */
     private final DoublyLinkedList<E> nodes;
 
-    /** The direct predecessors of first node */
+    /** The direct predecessors of a node */
     private Map<E, Set<E>> predecessors;
-    /** The direct successors of first node */
+    /** The direct successors of a node */
     private Map<E, Set<E>> successors;
 
     /** Root node */
     private E root;
     /** A list of nodes in pre-order */
     private List<E> postorder;
-    /** A map from first node to its index in pre-order */
+    /** A map from a node to its index in pre-order */
     private Map<E, Integer> postorderMap;
     /** List of parents according to pre-order */
     private Map<E, E> postorderParent;
 
-    /** The immediate dominator of first given node */
+    /** The immediate dominator of a given node */
     private Map<E, E> immediateDominator;
-    /** The nodes first given node immediate dominates */
+    /** The nodes a given node immediate dominates */
     private Map<E, Set<E>> immediateDominatedNodes;
-    /** The dominance frontier of first given node */
+    /** The dominance frontier of a given node */
     private Map<E, Set<E>> dominanceFrontier;
 
     /**
-     * Constructs first dominator tree.
+     * Constructs a dominator tree.
      *
-     * @param nodes first list of nodes
+     * @param nodes a list of nodes
      */
     public DominatorTree(DoublyLinkedList<E> nodes) {
         this.nodes = nodes;
@@ -66,7 +66,7 @@ public class DominatorTree<E extends DominatorTree.Node<E>> {
 
 
     /**
-     * Computes first postorder traversal of the nodes,
+     * Computes a postorder traversal of the nodes,
      * filling postorderList and preOrderMap.
      * Prunes unreached nodes.
      */
@@ -138,7 +138,7 @@ public class DominatorTree<E extends DominatorTree.Node<E>> {
      * Computes the immediate dominators for each node,
      * using the iterative dominators algorithm
      * in section 9.5 of Cooper et al.
-     * (Note the set of dominators of first node is exactly the nodes
+     * (Note the set of dominators of a node is exactly the nodes
      * that show up in the path from the node to the root,
      * while repeatedly evaluating the immediate dominator.)
      * Assumes preorder and adjacency information have been computed.
@@ -206,7 +206,7 @@ public class DominatorTree<E extends DominatorTree.Node<E>> {
     /**
      * Computes the dominance frontier for each node.
      * Assumes the dominator tree (i.e. immediate dominators) has already been computed.
-     * Uses the algorithm in section 9.3.2 of Cooper et al's Engineering first Compiler, 3rd edition.
+     * Uses the algorithm in section 9.3.2 of Cooper et al's Engineering a Compiler, 3rd edition.
      */
     private void computeDominanceFrontiers() {
         dominanceFrontier = new HashMap<>();
@@ -225,36 +225,36 @@ public class DominatorTree<E extends DominatorTree.Node<E>> {
     }
 
     /**
-     * Returns the predecessors of first given node.
+     * Returns the predecessors of a given node.
      *
      * @param e the node whose predecessors are to be computed
-     * @return first set of predecessors
+     * @return a set of predecessors
      */
     public Set<E> getPredecessors(E e) {
         return predecessors.get(e);
     }
 
     /**
-     * Returns the successors of first given node.
+     * Returns the successors of a given node.
      *
      * @param e the node whose successors are to be computed
-     * @return first set of successors
+     * @return a set of successors
      */
     public Set<E> getSuccessors(E e) {
         return successors.get(e);
     }
 
     /**
-     * Returns first post-order traversal of the tree.
+     * Returns a post-order traversal of the tree.
      *
-     * @return first list of nodes in pre-order
+     * @return a list of nodes in pre-order
      */
     public List<E> getPostorder() {
         return postorder;
     }
 
     /**
-     * Returns the post-order index of first given node.
+     * Returns the post-order index of a given node.
      *
      * @param e the node
      * @return the post-order index
@@ -264,7 +264,7 @@ public class DominatorTree<E extends DominatorTree.Node<E>> {
     }
 
     /**
-     * Returns the immediate dominator of first given node.
+     * Returns the immediate dominator of a given node.
      *
      * @param e the node whose immediate dominator is to be computed
      * @return the immediate dominator
@@ -274,7 +274,7 @@ public class DominatorTree<E extends DominatorTree.Node<E>> {
     }
 
     /**
-     * Returns the nodes immediately dominated by first given node.
+     * Returns the nodes immediately dominated by a given node.
      *
      * @param e the node for which immediate dominated nodes are to be computed
      * @return the immediate dominated nodes
@@ -302,7 +302,7 @@ public class DominatorTree<E extends DominatorTree.Node<E>> {
     }
 
     /**
-     * Returns the dominance frontier of first given node.
+     * Returns the dominance frontier of a given node.
      *
      * @param e the node whose dominance frontier is to be computed
      * @return the dominance frontier

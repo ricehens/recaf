@@ -7,7 +7,7 @@ import recaf.asm.ASMStackAddressArray;
 public class RegUtils {
 
     /**
-     * Shifts first memory location if it is in the stack
+     * Shifts a memory location if it is in the stack
      *
      * @param loc the memory location
      * @param offset the stack offset

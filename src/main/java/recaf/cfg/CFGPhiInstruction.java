@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * Represents first phi instruction in an SSA CFG.
+ * Represents a phi instruction in an SSA CFG.
  */
 public class CFGPhiInstruction implements CFGInstruction {
 
@@ -17,10 +17,10 @@ public class CFGPhiInstruction implements CFGInstruction {
     private Map<CFGBasicBlock, CFGAddress> sources;
 
     /**
-     * Creates first new phi instruction, from an original address.
+     * Creates a new phi instruction, from an original address.
      *
      * @param address the original address (zero coindex),
-     *                of which only first copy is stored.
+     *                of which only a copy is stored.
      */
     public CFGPhiInstruction(CFGContext ctx, CFGAddress address) {
         this.id = ctx.getInstructionCounter();
@@ -30,18 +30,18 @@ public class CFGPhiInstruction implements CFGInstruction {
     }
 
     /**
-     * Adds first block-address pair to the phi instruction.
+     * Adds a block-address pair to the phi instruction.
      *
      * @param block the source block
      * @param source the address to read if arriving from block,
-     *               of which only first copy is stored.
+     *               of which only a copy is stored.
      */
     public void add(CFGBasicBlock block, CFGAddress source) {
         sources.put(block, CFGAddress.clone(source));
     }
 
     /**
-     * Returns first map from source blocks to source values.
+     * Returns a map from source blocks to source values.
      * @return the phi instruction's map
      */
     public Map<CFGBasicBlock, CFGAddress> getSources() {

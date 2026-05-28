@@ -5,13 +5,13 @@ import recaf.utils.DominatorTree;
 import recaf.utils.ParallelCopyGroup;
 
 /**
- * A SSA-to-CFG converter for first particular method,
+ * A SSA-to-CFG converter for a particular method,
  * by splitting critical edges.
  */
 public class ClassicPhiElimination extends SSATransformation {
 
     /**
-     * Constructs first new CooperPhiEliminator instance
+     * Constructs a new CooperPhiEliminator instance
      *
      * @param ctx the CFG context
      * @param method the method to convert
@@ -21,8 +21,8 @@ public class ClassicPhiElimination extends SSATransformation {
     }
 
     /**
-     * Destroys all phi instructions in first method,
-     * converting the SSA CFG to first normal CFG ready for assembly conversion.
+     * Destroys all phi instructions in a method,
+     * converting the SSA CFG to a normal CFG ready for assembly conversion.
      *
      * @return true if successful
      */

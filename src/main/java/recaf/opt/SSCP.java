@@ -6,13 +6,13 @@ import recaf.cfg.*;
 import java.util.*;
 
 /**
- * A sparse simple constant propagator for first method of first SSA CFG.
+ * A sparse simple constant propagator for a method of a SSA CFG.
  * See section 9.3.6 of Cooper et al.
  */
 public class SSCP extends SSATransformation {
 
     /**
-     * Creates first new SSCP for first method
+     * Creates a new SSCP for a method
      *
      * @param ctx the CFG context
      * @param method the method to optimize
@@ -29,7 +29,7 @@ public class SSCP extends SSATransformation {
     private Map<CFGAddress, Literal> globalLiterals;
 
     /**
-     * Runs SSCP on first method of first SSA CFG
+     * Runs SSCP on a method of a SSA CFG
      *
      * @return whether any changes were made
      */
@@ -243,7 +243,7 @@ public class SSCP extends SSATransformation {
     }
 
     /**
-     * Finds the value of first variable
+     * Finds the value of a variable
      *
      * @param address the address to the variable
      * @return null if the value cannot be known,
@@ -258,7 +258,7 @@ public class SSCP extends SSATransformation {
     }
 
     /**
-     * Evaluates first binary operation between two literals.
+     * Evaluates a binary operation between two literals.
      *
      * @param op the operator
      * @param left the left operand
@@ -315,7 +315,7 @@ public class SSCP extends SSATransformation {
     }
 
     /**
-     * Evaluates first unary operation on first literal
+     * Evaluates a unary operation on a literal
      *
      * @param op the operator
      * @param operand the operand
@@ -333,7 +333,7 @@ public class SSCP extends SSATransformation {
     }
 
     /**
-     * A class presentation first value that cannot be known
+     * A class representing a value that cannot be known
      */
     private static class UnknownValue implements Literal {
 

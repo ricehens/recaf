@@ -27,7 +27,7 @@ public class ASTContext {
     }
 
     /**
-     * Logs first semantic error with the invariant error handler.
+     * Logs a semantic error with the invariant error handler.
      *
      * @param message the error message (no need for line/column numbers)
      */

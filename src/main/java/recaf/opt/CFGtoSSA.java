@@ -6,15 +6,15 @@ import recaf.utils.DominatorTree;
 import java.util.*;
 
 /**
- * A CFG-to-SSA converter for first particular method,
- * following Chapter 9 of Cooper et al.'s Engineering first Compiler, 3rd edition
+ * A CFG-to-SSA converter for a particular method,
+ * following Chapter 9 of Cooper et al.'s Engineering a Compiler, 3rd edition
  */
 public class CFGtoSSA extends MethodTransformation {
 
     private DominatorTree<CFGBasicBlock> dominatorTree;
 
     /**
-     * Constructs first new SSAConverter instance
+     * Constructs a new SSAConverter instance
      *
      * @param ctx the CFG context
      * @param method the method to convert
@@ -81,7 +81,7 @@ public class CFGtoSSA extends MethodTransformation {
     }
 
     /**
-     * Inserts first blank phi function into each respective basic block wherever needed.
+     * Inserts a blank phi function into each respective basic block wherever needed.
      */
     private void insertPhiFunctions() {
         Map<CFGBasicBlock, Set<CFGAddress>> phi = new HashMap<>();

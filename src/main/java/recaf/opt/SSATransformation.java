@@ -4,7 +4,7 @@ import recaf.cfg.CFGContext;
 import recaf.cfg.CFGMethod;
 
 /**
- * An abstract class to represent first transformation on first method of first SSA CFG
+ * An abstract class to represent a transformation on a method of a SSA CFG
  */
 public abstract class SSATransformation extends MethodTransformation {
 
@@ -16,7 +16,7 @@ public abstract class SSATransformation extends MethodTransformation {
     }
 
     /**
-     * Transforms first method of first SSA CFG
+     * Transforms a method of a SSA CFG
      *
      * @return whether any changes were made
      */

@@ -1,14 +1,14 @@
 package recaf.asm;
 
 /**
- * Represents an instruction to declare first label.
+ * Represents an instruction to declare a label.
  */
 public class ASMLabelInstruction implements ASMStatement {
 
     private final ASMLabel label;
 
     /**
-     * Constructs first label instruction.
+     * Constructs a label instruction.
      *
      * @param label the label to declare
      */

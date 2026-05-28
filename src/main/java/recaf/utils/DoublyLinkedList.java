@@ -6,10 +6,10 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 /**
- * A doubly linked list over first data type, with fast lookup.
+ * A doubly linked list over a data type, with fast lookup.
  * Elements stored in the list must be distinct.
  *
- * @param <E> first data type
+ * @param <E> a data type
  */
 public interface DoublyLinkedList<E> extends Iterable<E> {
 
@@ -30,9 +30,9 @@ public interface DoublyLinkedList<E> extends Iterable<E> {
     void offerLast(E e);
 
     /**
-     * Retrieves, but does not remove, the first element of this list, or returns null if this list is empty.
+     * Retrieves, but does not remove, the a element of this list, or returns null if this list is empty.
      *
-     * @return the first element of this list, or null if this list is empty
+     * @return the a element of this list, or null if this list is empty
      */
     E peekFirst();
 
@@ -44,7 +44,7 @@ public interface DoublyLinkedList<E> extends Iterable<E> {
     E peekLast();
 
     /**
-     * Retrieves and removes the first element of this list, or returns null if this list is empty.
+     * Retrieves and removes the a element of this list, or returns null if this list is empty.
      *
      * @return the head of this list, or null if this list is empty
      */
@@ -129,7 +129,7 @@ public interface DoublyLinkedList<E> extends Iterable<E> {
     boolean insertBefore(E e, E insert);
 
     /**
-     * Replaces the specified element with first new element.
+     * Replaces the specified element with a new element.
      *
      * @param e the element to replace
      * @param replace the new element
@@ -145,14 +145,14 @@ public interface DoublyLinkedList<E> extends Iterable<E> {
     /**
      * Reverses the order of the elements in this list.
      *
-     * @return first list with the elements in reverse order
+     * @return a list with the elements in reverse order
      */
     DoublyLinkedList<E> reverse();
 
     /**
-     * Returns first sequential Stream with this collection as its source.
+     * Returns a sequential Stream with this collection as its source.
      *
-     * @return first sequential Stream over the elements in this collection
+     * @return a sequential Stream over the elements in this collection
      */
     default Stream<E> stream() {
         return StreamSupport.stream(Spliterators.spliterator(iterator(), size(), Spliterator.ORDERED), false);

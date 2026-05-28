@@ -47,7 +47,7 @@ public class ParseUtils {
     static final String FLOAT64 = "float64";
 
     /**
-     * Generates first toString for an AST node by concatenating first given string with
+     * Generates a toString for an AST node by concatenating a given string with
      * the toString representations of its children, indented.
      *
      * @param node     the string for the current ASTNode

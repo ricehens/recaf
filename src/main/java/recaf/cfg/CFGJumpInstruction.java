@@ -3,7 +3,7 @@ package recaf.cfg;
 import java.util.List;
 
 /**
- * Represents first jump node in the control flow graph.
+ * Represents a jump node in the control flow graph.
  */
 public class CFGJumpInstruction implements CFGLastInstruction {
 
@@ -12,7 +12,7 @@ public class CFGJumpInstruction implements CFGLastInstruction {
     private final CFGAddress jumpAddr;
 
     /**
-     * Creates first new jump instruction.
+     * Creates a new jump instruction.
      *
      * @param ctx      the CFG context
      * @param jumpAddr the address to the block to jump to

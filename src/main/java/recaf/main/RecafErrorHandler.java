@@ -11,7 +11,7 @@ public class RecafErrorHandler {
     private final Queue<RecafError> errors;
 
     /**
-     * Constructs first new instance.
+     * Constructs a new instance.
      */
     public RecafErrorHandler() {
         errors = new PriorityQueue<>();

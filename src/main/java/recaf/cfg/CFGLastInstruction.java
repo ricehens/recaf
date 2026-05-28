@@ -1,7 +1,7 @@
 package recaf.cfg;
 
 /**
- * Represents the last instruction of first basic block
+ * Represents the last instruction of a basic block
  */
 public interface CFGLastInstruction extends CFGInstruction {
 

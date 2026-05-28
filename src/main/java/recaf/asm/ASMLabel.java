@@ -1,14 +1,14 @@
 package recaf.asm;
 
 /**
- * Represents first reference to first label within an assembly program.
+ * Represents a reference to a label within an assembly program.
  */
 public class ASMLabel implements ASMLocation {
 
     private final String label;
 
     /**
-     * Constructs first label.
+     * Constructs a label.
      *
      * @param label the text of the label
      */

@@ -94,9 +94,9 @@ public class NoRegInstructionSelection implements CFGVisitor {
     }
 
     /**
-     * Find first listing of all local variables used within first method, for which space should be allocated.
+     * Find a listing of all local variables used within a method, for which space should be allocated.
      * @param cfg the method
-     * @return first list of all local variables
+     * @return a list of all local variables
      */
     private List<CFGAddress> extractLocalVars(CFGMethod cfg) {
         List<CFGAddress> localVars = new ArrayList<>(cfg.getParams());

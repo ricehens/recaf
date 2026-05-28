@@ -15,7 +15,7 @@ import java.util.Set;
 public class RecursiveTailCallElimination extends SSATransformation {
 
     /**
-     * Constructs first new inline / recursive tail-call expander
+     * Constructs a new inline / recursive tail-call expander
      *
      * @param ctx the context
      * @param method the method

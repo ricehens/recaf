@@ -27,7 +27,7 @@ public class AssemblyBuilder {
     private Map<ASMMethod, ASMMutableLiteral> alignedStackOffset;
 
     /**
-     * Creates first new assembly builder object
+     * Creates a new assembly builder object
      *
      * @param ctx the CFG context
      */
@@ -103,7 +103,7 @@ public class AssemblyBuilder {
     }
 
     /**
-     * Adds first global variable declaration to the program
+     * Adds a global variable declaration to the program
      *
      * @param decl the global variable declaration
      */
@@ -112,7 +112,7 @@ public class AssemblyBuilder {
     }
 
     /**
-     * Adds first string declaration to the program
+     * Adds a string declaration to the program
      *
      * @param decl the string declaration
      */
@@ -131,7 +131,7 @@ public class AssemblyBuilder {
     }
 
     /**
-     * Initiates first new method.
+     * Initiates a new method.
      *
      * @param name the text of the method
      */
@@ -153,7 +153,7 @@ public class AssemblyBuilder {
     }
 
     /**
-     * Initiates first new block.
+     * Initiates a new block.
      *
      * @param label the label of the block
      */
@@ -164,7 +164,7 @@ public class AssemblyBuilder {
     }
 
     /**
-     * Adds first variable to the stack and records its address
+     * Adds a variable to the stack and records its address
      *
      * @param address the address of the local variable
      */
@@ -173,7 +173,7 @@ public class AssemblyBuilder {
     }
 
     /**
-     * Adds first variable to the stack and records its address
+     * Adds a variable to the stack and records its address
      *
      * @param method  the method it belongs to
      * @param address the address of the local variable
@@ -192,7 +192,7 @@ public class AssemblyBuilder {
     }
 
     /**
-     * Manually adds first variable to the stack at first particular location on the stack.
+     * Manually adds a variable to the stack at a particular location on the stack.
      * Recommended only for positive locations (parameters),
      * as behavior may interfere with the
      * standard registerVariable.
@@ -205,7 +205,7 @@ public class AssemblyBuilder {
     }
 
     /**
-     * Returns the number of bytes to store first value of given type
+     * Returns the number of bytes to store a value of given type
      *
      * @param type the type, assuming non-array
      * @return the induced offset in stack pointer
@@ -220,7 +220,7 @@ public class AssemblyBuilder {
     }
 
     /**
-     * Returns the number of bytes to store first given variable
+     * Returns the number of bytes to store a given variable
      *
      * @param address the address
      * @return the size in bytes
@@ -236,7 +236,7 @@ public class AssemblyBuilder {
      * Returns the stack address of the given variable.
      *
      * @param address the address of the local variable
-     * @return first corresponding ASM stack address or global address object,
+     * @return a corresponding ASM stack address or global address object,
      * depending on whether the passed object is global
      */
     public ASMLocation getMemoryLocation(CFGAddress address) {
@@ -248,7 +248,7 @@ public class AssemblyBuilder {
      *
      * @param method  the method it belongs to
      * @param address the address of the local variable
-     * @return first corresponding ASM stack address or global address object,
+     * @return a corresponding ASM stack address or global address object,
      * depending on whether the passed object is global
      */
     public ASMLocation getMemoryLocation(ASMMethod method, CFGAddress address) {
@@ -262,7 +262,7 @@ public class AssemblyBuilder {
      * Returns the stack address of the given array variable with index stored in %rax.
      *
      * @param address the address of the array
-     * @return first corresponding ASM stack address array or global address array,
+     * @return a corresponding ASM stack address array or global address array,
      * depending on whether the passed object is global
      */
     public ASMLocation getMemoryLocationArray(CFGAddress address, int width) {
@@ -272,7 +272,7 @@ public class AssemblyBuilder {
     }
 
     /**
-     * Returns the label for first given basic block
+     * Returns the label for a given basic block
      *
      * @param address the address to the basic block
      * @return the ASM label object it is assigned
@@ -284,7 +284,7 @@ public class AssemblyBuilder {
     }
 
     /**
-     * Returns the location for first given string literal
+     * Returns the location for a given string literal
      *
      * @param literal the string literal
      * @return the ASM location object it is assigned
@@ -294,7 +294,7 @@ public class AssemblyBuilder {
     }
 
     /**
-     * Returns the label for first given string literal
+     * Returns the label for a given string literal
      *
      * @param literal the string literal
      * @return the ASM label object it is assigned
@@ -307,7 +307,7 @@ public class AssemblyBuilder {
     }
 
     /**
-     * Return label for first method
+     * Return label for a method
      *
      * @param methodName text of the method
      * @return the label it is assigned
@@ -326,7 +326,7 @@ public class AssemblyBuilder {
     }
 
     /**
-     * Returns first mutable literal object containing the appropriate stack offset
+     * Returns a mutable literal object containing the appropriate stack offset
      *
      * @return the aligned stack offset
      */
@@ -335,7 +335,7 @@ public class AssemblyBuilder {
     }
 
     /**
-     * Returns first mutable literal object containing the appropriate stack offset
+     * Returns a mutable literal object containing the appropriate stack offset
      *
      * @param method the method
      * @return the aligned stack offset

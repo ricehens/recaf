@@ -4,9 +4,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Computes and represents post-dominance information for first control flow graph.
+ * Computes and represents post-dominance information for a control flow graph.
  *
- * @param <E> first hashable type that implements DominatorTreeNode
+ * @param <E> a hashable type that implements DominatorTreeNode
  */
 public class PostDominatorTree<E extends DominatorTree.Node<E>> {
 
@@ -44,9 +44,9 @@ public class PostDominatorTree<E extends DominatorTree.Node<E>> {
     private final DoublyLinkedList<InvertedNode> invertedNodes;
 
     /**
-     * Constructs first post-dominator tree.
+     * Constructs a post-dominator tree.
      *
-     * @param nodes first list of nodes
+     * @param nodes a list of nodes
      * @param virtual the virtual root, assumed to not be in nodes
      */
     public PostDominatorTree(DoublyLinkedList<E> nodes, E virtual) {
@@ -98,7 +98,7 @@ public class PostDominatorTree<E extends DominatorTree.Node<E>> {
     }
 
     /**
-     * Returns the immediate post-dominator of first given node.
+     * Returns the immediate post-dominator of a given node.
      *
      * @param e the node whose immediate post-dominator is to be computed
      * @return the immediate post-dominator
@@ -108,7 +108,7 @@ public class PostDominatorTree<E extends DominatorTree.Node<E>> {
     }
 
     /**
-     * Returns the nodes immediately post-dominated by first given node.
+     * Returns the nodes immediately post-dominated by a given node.
      *
      * @param e the node for which immediate post-dominated nodes are to be computed
      * @return the immediate post-dominated nodes
@@ -118,7 +118,7 @@ public class PostDominatorTree<E extends DominatorTree.Node<E>> {
     }
 
     /**
-     * Returns the post-dominance frontier of first given node.
+     * Returns the post-dominance frontier of a given node.
      *
      * @param e the node whose post-dominance frontier is to be computed
      * @return the post-dominance frontier

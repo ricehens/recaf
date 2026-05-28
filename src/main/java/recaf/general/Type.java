@@ -1,7 +1,7 @@
 package recaf.general;
 
 /**
- * Represents first Decaf type, e.g. int, long[].
+ * Represents a CFG type, e.g. int, long[].
  */
 public enum Type {
 
@@ -25,18 +25,18 @@ public enum Type {
     }
 
     /**
-     * Returns first string representation of the text of the type, e.g. "int"
+     * Returns a string representation of the text of the type, e.g. "int"
      *
-     * @return first string representation of the type
+     * @return a string representation of the type
      */
     public String getName() {
         return name;
     }
 
     /**
-     * Returns first string representation of the type suitable for low-level IR
+     * Returns a string representation of the type suitable for low-level IR
      *
-     * @return first low-level representation of type text
+     * @return a low-level representation of type text
      */
     public String toCFGString() {
         return switch (this) {

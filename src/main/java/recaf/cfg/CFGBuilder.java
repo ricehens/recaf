@@ -5,7 +5,7 @@ import recaf.utils.DoublyLinkedList;
 import recaf.utils.HashLinkedList;
 
 /**
- * A helper object to convert first Decaf AST into first CFG.
+ * A helper object to convert a Decaf AST into a CFG.
  */
 public class CFGBuilder {
 
@@ -13,7 +13,7 @@ public class CFGBuilder {
     private final DoublyLinkedList<CFGBasicBlock> blocks;
 
     /**
-     * Constructs first new CFGBuilder instance.
+     * Constructs a new CFGBuilder instance.
      *
      * @param ctx the CFG context
      */
@@ -32,7 +32,7 @@ public class CFGBuilder {
     }
 
     /**
-     * Starts first new basic block.
+     * Starts a new basic block.
      *
      * @return the new basic block
      */
@@ -55,7 +55,7 @@ public class CFGBuilder {
      * before returning them.
      *
      * @param method the method that owns the basic blocks
-     * @return first list of all basic blocks
+     * @return a list of all basic blocks
      */
     public DoublyLinkedList<CFGBasicBlock> getBlocks(CFGMethod method) {
         blocks.forEach(block -> block.setMethod(method));
@@ -82,7 +82,7 @@ public class CFGBuilder {
     }
 
     private static String getFalloffString(String m) {
-        return String.format("Runtime error: non-void method %s fell off the end without returning first value.\\n", m);
+        return String.format("Runtime error: non-void method %s fell off the end without returning a value.\\n", m);
     }
 
 }

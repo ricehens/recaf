@@ -2,7 +2,7 @@ package recaf.asm;
 
 public class ASMInstructionContext {
 
-    /** number of parameters to first call instruction */
+    /** number of parameters to a call instruction */
     public final int numParams;
     /** nececssary subq %rsp before call due to passing > 6 parameters */
     public final int subq;

@@ -13,15 +13,15 @@ public interface CFGInstruction extends CFG {
 
     /**
      * Returns the operands for the instruction.
-     * @return first list of addresses for the operands
+     * @return a list of addresses for the operands
      */
     List<CFGAddress> operands();
 
 
     /**
-     * Returns first copy of the instruction
+     * Returns a copy of the instruction
      *
-     * @return first copy of the instruction
+     * @return a copy of the instruction
      */
     CFGInstruction copy();
 

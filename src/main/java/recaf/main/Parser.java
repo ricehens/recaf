@@ -8,7 +8,7 @@ import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 
 /**
- * Parses first token stream into first concrete syntax tree.
+ * Parses a token stream into a concrete syntax tree.
  *
  * @author Eric Shen
  */

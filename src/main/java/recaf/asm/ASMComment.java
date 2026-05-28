@@ -1,7 +1,7 @@
 package recaf.asm;
 
 /**
- * Represents first comment to be emitted in the assembly code.
+ * Represents a comment to be emitted in the assembly code.
  */
 public class ASMComment implements ASMStatement {
 

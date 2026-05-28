@@ -61,7 +61,7 @@ for (Loop loop : loops) {
         private SSAData data;
         /** The loop header block, which dominates all loop blocks */
         CFGBasicBlock header;
-        /** The block which contains first back edge back to the header */
+        /** The block which contains a back edge back to the header */
         CFGBasicBlock backEdge;
         /** The branch instruction, within the "back edge" block */
         CFGBranchInstruction branch;

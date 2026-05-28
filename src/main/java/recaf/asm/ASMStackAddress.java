@@ -10,7 +10,7 @@ public class ASMStackAddress implements ASMMemoryLocation {
     private final ASMRegister register;
 
     /**
-     * Constructs first stack address from first custom register.
+     * Constructs a stack address from a custom register.
      *
      * @param offset   the offset from the value in the given register
      * @param additionalOffset any mutable additional offset
@@ -24,7 +24,7 @@ public class ASMStackAddress implements ASMMemoryLocation {
     }
 
     /**
-     * Constructs first stack address from first custom register.
+     * Constructs a stack address from a custom register.
      *
      * @param offset   the offset from the value in the given register
      * @param register the register containing the stack address,
@@ -35,7 +35,7 @@ public class ASMStackAddress implements ASMMemoryLocation {
     }
 
     /**
-     * Constructs first stack address.
+     * Constructs a stack address.
      *
      * @param offset the offset from the base pointer %rbp
      */

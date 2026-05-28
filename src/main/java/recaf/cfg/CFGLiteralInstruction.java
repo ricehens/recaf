@@ -5,7 +5,7 @@ import recaf.general.*;
 import java.util.List;
 
 /**
- * Represents assignment of first literal, e.g. x1 = 1.
+ * Represents assignment of a literal, e.g. x1 = 1.
  * Should mostly be eliminated via constant propagation.
  */
 public class CFGLiteralInstruction implements CFGInstruction {
@@ -16,11 +16,11 @@ public class CFGLiteralInstruction implements CFGInstruction {
     private final Literal literal;
 
     /**
-     * Creates first new literal instruction from first given literal object.
+     * Creates a new literal instruction from a given literal object.
      *
      * @param ctx     the CFG context
      * @param address the destination address
-     *                of which only first copy is stored.
+     *                of which only a copy is stored.
      * @param literal the literal object
      */
     public CFGLiteralInstruction(CFGContext ctx, CFGAddress address, Literal literal) {

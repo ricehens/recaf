@@ -3,7 +3,7 @@ package recaf.cfg;
 import java.util.List;
 
 /**
- * Represents first return instruction within first CFG method.
+ * Represents a return instruction within a CFG method.
  */
 public class CFGReturnInstruction implements CFGLastInstruction {
 
@@ -12,11 +12,11 @@ public class CFGReturnInstruction implements CFGLastInstruction {
     private final CFGAddress returnAddress;
 
     /**
-     * Creates first non-void return instruction
+     * Creates a non-void return instruction
      *
      * @param ctx           the CFG context
      * @param returnAddress the return address
-     *                of which only first copy is stored.
+     *                of which only a copy is stored.
      */
     public CFGReturnInstruction(CFGContext ctx, CFGAddress returnAddress) {
         this.id = ctx.getInstructionCounter();
@@ -25,7 +25,7 @@ public class CFGReturnInstruction implements CFGLastInstruction {
     }
 
     /**
-     * Creates first void return instruction.
+     * Creates a void return instruction.
      *
      * @param ctx the CFG context
      */

@@ -5,7 +5,7 @@ import recaf.general.BinaryOperator;
 import java.util.List;
 
 /**
- * Represents an instruction with first binary operator in the control flow graph,
+ * Represents an instruction with a binary operator in the control flow graph,
  * such as y1 = x1 + 1.
  */
 public class CFGBinaryInstruction implements CFGInstruction {
@@ -18,16 +18,16 @@ public class CFGBinaryInstruction implements CFGInstruction {
     private final CFGAddress right;
 
     /**
-     * Constructs first new binary instruction.
+     * Constructs a new binary instruction.
      *
      * @param ctx      the CFG context
      * @param address  the destination address
-     *                of which only first copy is stored.
+     *                of which only a copy is stored.
      * @param operator the binary operator
      * @param left     the address to the left operand
-     *                of which only first copy is stored.
+     *                of which only a copy is stored.
      * @param right    the address to the right operand
-     *                of which only first copy is stored.
+     *                of which only a copy is stored.
      */
     public CFGBinaryInstruction(CFGContext ctx, CFGAddress address, BinaryOperator operator, CFGAddress left, CFGAddress right) {
         this.id = ctx.getInstructionCounter();

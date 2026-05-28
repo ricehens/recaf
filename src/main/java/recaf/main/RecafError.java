@@ -1,7 +1,7 @@
 package recaf.main;
 
 /**
- * Denotes first compilation error in first Decaf program.
+ * Denotes a compilation error in a Recaf program.
  */
 public class RecafError implements Comparable<RecafError> {
 
@@ -15,7 +15,7 @@ public class RecafError implements Comparable<RecafError> {
     private static final String ANSI_RED_BOLD = "\u001B[1;31m";
 
     /**
-     * Declares first new Decaf error.
+     * Declares a new Recaf error.
      *
      * @param file               file text
      * @param line               line number

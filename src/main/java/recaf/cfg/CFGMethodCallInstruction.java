@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Represents first method call instruction in the CFG.
+ * Represents a method call instruction in the CFG.
  */
 public class CFGMethodCallInstruction implements CFGInstruction {
 
@@ -15,13 +15,13 @@ public class CFGMethodCallInstruction implements CFGInstruction {
     private final List<CFGAddress> args;
 
     /**
-     * Constructs first new method call instruction.
+     * Constructs a new method call instruction.
      *
      * @param ctx the CFG context
      * @param address the destination address
-     *                of which only first copy is stored.
+     *                of which only a copy is stored.
      * @param methodName the text of the method
-     * @param args first list of arguments to pass in
+     * @param args a list of arguments to pass in
      *                of which only copies are stored.
      */
     public CFGMethodCallInstruction(CFGContext ctx, CFGAddress address, String methodName, List<CFGAddress> args) {

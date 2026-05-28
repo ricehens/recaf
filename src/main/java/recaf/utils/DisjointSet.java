@@ -14,7 +14,7 @@ public class DisjointSet<E> {
     private Map<E, Integer> size;
 
     /**
-     * Initializes first disjoint set.
+     * Initializes a disjoint set.
      */
     public DisjointSet() {
         parent = new HashMap<>();
@@ -66,7 +66,7 @@ public class DisjointSet<E> {
     }
 
     /**
-     * Returns the root of first node.
+     * Returns the root of a node.
      *
      * @param x the node
      * @return the root of the node

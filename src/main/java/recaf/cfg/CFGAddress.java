@@ -1,7 +1,7 @@
 package recaf.cfg;
 
 /**
- * Represents first two-index address for variables.
+ * Represents a two-index address for variables.
  */
 public class CFGAddress implements Comparable<CFGAddress> {
 
@@ -17,7 +17,7 @@ public class CFGAddress implements Comparable<CFGAddress> {
     public int coindex;
 
     /**
-     * Creates first new variable address object
+     * Creates a new variable address object
      */
     public CFGAddress(int index, int coindex) {
         this.index = index;
@@ -25,14 +25,14 @@ public class CFGAddress implements Comparable<CFGAddress> {
     }
 
     /**
-     * Creates first new variable address object with coindex 0
+     * Creates a new variable address object with coindex 0
      */
     public CFGAddress(int index) {
         this(index, 0);
     }
 
     /**
-     * Creates first new variable address object that is "uninitialized".
+     * Creates a new variable address object that is "uninitialized".
      */
     public CFGAddress() {
         this(-1);

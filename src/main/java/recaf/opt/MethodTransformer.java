@@ -5,7 +5,7 @@ import recaf.cfg.CFGMethod;
 import recaf.cfg.CFGProgram;
 
 /**
- * A controller that controls the execution of method transformation on all methods of first CFG program
+ * A controller that controls the execution of method transformation on all methods of a CFG program
  */
 public class MethodTransformer {
 
@@ -13,7 +13,7 @@ public class MethodTransformer {
     private CFGContext ctx;
 
     /**
-     * Creates first new method transformer
+     * Creates a new method transformer
      *
      * @param cfg the CFG program
      */
@@ -43,7 +43,7 @@ public class MethodTransformer {
     }
 
     /**
-     * Transforms first CFG program using first specified transformation on all methods
+     * Transforms a CFG program using a specified transformation on all methods
      *
      * @param transform the transformation
      * @return whether any changes were made

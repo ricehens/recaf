@@ -18,7 +18,7 @@ public class SSAData {
     private Map<CFGInstruction, CFGBasicBlock> blocks;
 
     /**
-     * Computes first new SSA data instance for first given method.
+     * Computes a new SSA data instance for a given method.
      *
      * @param method the given method
      */
@@ -46,7 +46,7 @@ public class SSAData {
     }
 
     /**
-     * Gets first set of local variables defined/used within this method,
+     * Gets a set of local variables defined/used within this method,
      * including method parameters.
      *
      * @return the set of local variables
@@ -85,7 +85,7 @@ public class SSAData {
     }
 
     /**
-     * Finds the block containing first particular instruction.
+     * Finds the block containing a particular instruction.
      *
      * @param instruction the instruction to locate
      * @return the block containing the instruction
@@ -110,7 +110,7 @@ public class SSAData {
     }
 
     /**
-     * Updates the use-def chains given first newly added instruction.
+     * Updates the use-def chains given a newly added instruction.
      *
      * @param block the block containing the new instruction
      * @param newInstruction the new instruction

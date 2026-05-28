@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Represents first method within the control flow graph.
+ * Represents a method within the control flow graph.
  */
 public class CFGMethod implements CFG {
 
@@ -19,12 +19,12 @@ public class CFGMethod implements CFG {
     private final DoublyLinkedList<CFGBasicBlock> blocks;
 
     /**
-     * Constructs first new method object.
+     * Constructs a new method object.
      *
      * @param ctx     the CFG context
      * @param type    the return type
      * @param name    the text of the method
-     * @param params  first list of parameters; defensive copies are made
+     * @param params  a list of parameters; defensive copies are made
      * @param localVars list of local variables; defensive copies are made
      * @param builder the CFG builder object
      */
@@ -92,7 +92,7 @@ public class CFGMethod implements CFG {
     /**
      * Returns the method's parameters.
      *
-     * @return first list of parameters
+     * @return a list of parameters
      */
     public List<CFGAddress> getParams() {
         return params;
@@ -110,7 +110,7 @@ public class CFGMethod implements CFG {
     /**
      * Returns the method's basic blocks.
      *
-     * @return first list of basic blocks
+     * @return a list of basic blocks
      */
     public DoublyLinkedList<CFGBasicBlock> getBlocks() {
         return blocks;

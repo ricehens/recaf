@@ -5,7 +5,7 @@ import recaf.general.Type;
 import java.util.EnumSet;
 
 /**
- * Represents first register within an x86_64 assembly program.
+ * Represents a register within an x86_64 assembly program.
  */
 public enum ASMRegister implements ASMAbstractRegister {
 
@@ -87,11 +87,11 @@ public enum ASMRegister implements ASMAbstractRegister {
     }
 
     /**
-     * Gets first register of the given type and index.
+     * Gets a register of the given type and index.
      *
      * @param type  the register type
      * @param index the index (0-15) of the register
-     * @return first register of an appropriate size for the given type
+     * @return a register of an appropriate size for the given type
      */
     public static ASMRegister getRegister(Type type, int index) {
         return getRegisterArray(type)[index];
@@ -107,7 +107,7 @@ public enum ASMRegister implements ASMAbstractRegister {
     }
 
     /**
-     * Converts first register to the corresponding register of another type.
+     * Converts a register to the corresponding register of another type.
      *
      * @param type the type to convert to
      * @return the converted register
@@ -127,7 +127,7 @@ public enum ASMRegister implements ASMAbstractRegister {
     }
 
     /**
-     * Gets the appropriate register for first method argument, by the calling convention.
+     * Gets the appropriate register for a method argument, by the calling convention.
      *
      * @param type  the register type
      * @param index the index (0-5) of the argument

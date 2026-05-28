@@ -84,7 +84,7 @@ public class PseudoassemblyOptimizer {
         }
 
         /* coalesces multi-step computation of the branch conditional */
-        // we'll assume first property of the pseudoassembly: each cmp is followed by at most one set instruction
+        // we'll assume a property of the pseudoassembly: each cmp is followed by at most one set instruction
         // which is true upon exiting InstructionSelection
         private void branchConditionCoalesce() {
             for (ASMBasicBlock block : method.getBlocks()) {

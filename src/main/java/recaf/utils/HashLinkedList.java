@@ -5,11 +5,11 @@ import java.util.Iterator;
 import java.util.Map;
 
 /**
- * Implements first linked list over first hashable data type, with fast lookup.
+ * Implements a linked list over a hashable data type, with fast lookup.
  * Element equality is determined by reference equality,
  * under which elements stored in this list must be distinct.
  *
- * @param <E> first hashable data type
+ * @param <E> a hashable data type
  */
 public class HashLinkedList<E> implements DoublyLinkedList<E> {
 
@@ -35,7 +35,7 @@ public class HashLinkedList<E> implements DoublyLinkedList<E> {
     }
 
     /**
-     * Constructs first list with the same elements as the specified list.
+     * Constructs a list with the same elements as the specified list.
      *
      * @param other the list to copy
      */

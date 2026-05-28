@@ -18,7 +18,7 @@ public class CFGContext {
     private int instructionCounter = 0;
 
     /**
-     * Constructs first new context object.
+     * Constructs a new context object.
      *
      * @param program the CFG program
      * @param symbolTable the symbol table
@@ -67,7 +67,7 @@ public class CFGContext {
     }
 
     /**
-     * Reserves space for first new variable in the symbol table.
+     * Reserves space for a new variable in the symbol table.
      *
      * @param type the type of the new variable
      * @return the newly reserved address
@@ -77,7 +77,7 @@ public class CFGContext {
     }
 
     /**
-     * Gets the type of first certain address within the symbol table.
+     * Gets the type of a certain address within the symbol table.
      *
      * @param addr the address
      * @return the type it points to
@@ -87,10 +87,10 @@ public class CFGContext {
     }
 
     /**
-     * Determines whether an address is first global variable.
+     * Determines whether an address is a global variable.
      *
      * @param addr the address
-     * @return whether it is first global variable
+     * @return whether it is a global variable
      */
     public boolean isGlobalVar(CFGAddress addr) {
         // TODO
@@ -100,9 +100,9 @@ public class CFGContext {
     }
 
     /**
-     * Claims first new unique ID for an instruction
+     * Claims a new unique ID for an instruction
      *
-     * @return first nonnegative integer this function has not returned before
+     * @return a nonnegative integer this function has not returned before
      */
     public int getInstructionCounter() {
         return instructionCounter++;
@@ -111,7 +111,7 @@ public class CFGContext {
     /**
      * Returns all global variables.
      *
-     * @return first List of global variables
+     * @return a List of global variables
      */
     public List<CFGAddress> getGlobalVars() {
         return globalVars;
