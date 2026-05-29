@@ -1,4 +1,4 @@
-package recaf.general;
+package recaf.common;
 
 /**
  * Represents a unary operator, i.e. - or !.

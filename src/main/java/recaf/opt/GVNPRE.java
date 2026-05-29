@@ -1,10 +1,10 @@
 package recaf.opt;
 
 import recaf.cfg.*;
-import recaf.general.BinaryOperator;
-import recaf.general.Literal;
-import recaf.general.Type;
-import recaf.general.UnaryOperator;
+import recaf.common.BinaryOperator;
+import recaf.common.Literal;
+import recaf.common.Type;
+import recaf.common.UnaryOperator;
 import recaf.utils.DominatorTree;
 import recaf.utils.PostDominatorTree;
 

@@ -1,7 +1,7 @@
 package recaf.opt;
 
 import recaf.cfg.*;
-import recaf.general.Type;
+import recaf.common.Type;
 import recaf.opt.LoopUtils.Loop;
 
 import java.util.*;

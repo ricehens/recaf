@@ -1,6 +1,6 @@
 package recaf.opt;
 
-import recaf.general.*;
+import recaf.common.*;
 import recaf.cfg.*;
 import recaf.opt.OptUtils.RegionConstant;
 import recaf.utils.NumUtils;

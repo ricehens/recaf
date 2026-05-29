@@ -1,7 +1,7 @@
 package recaf.opt;
 
 import recaf.cfg.*;
-import recaf.general.Type;
+import recaf.common.Type;
 
 import java.util.LinkedList;
 import java.util.Queue;

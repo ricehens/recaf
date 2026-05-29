@@ -1,9 +1,9 @@
-package recaf.asm;
+package recaf.codegen;
 
-import recaf.general.Type;
+import recaf.asm.*;
+import recaf.common.Type;
 import recaf.cfg.CFGAddress;
 import recaf.cfg.CFGContext;
-import recaf.reg.RegUtils;
 
 import java.io.PrintStream;
 import java.util.HashMap;

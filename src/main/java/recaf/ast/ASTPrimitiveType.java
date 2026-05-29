@@ -1,7 +1,7 @@
 package recaf.ast;
 
 import recaf.parse.ParseUtils;
-import recaf.general.Type;
+import recaf.common.Type;
 
 public record ASTPrimitiveType(ASTContext ctx, Type type) implements ASTType {
 

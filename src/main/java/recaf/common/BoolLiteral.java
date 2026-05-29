@@ -1,4 +1,4 @@
-package recaf.general;
+package recaf.common;
 
 public record BoolLiteral(boolean value) implements Literal {
 

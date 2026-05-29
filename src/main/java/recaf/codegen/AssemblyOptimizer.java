@@ -1,7 +1,7 @@
-package recaf.reg;
+package recaf.codegen;
 
 import recaf.asm.*;
-import recaf.general.Type;
+import recaf.common.Type;
 
 import java.util.*;
 import java.util.stream.Collectors;

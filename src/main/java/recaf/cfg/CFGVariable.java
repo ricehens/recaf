@@ -1,6 +1,6 @@
 package recaf.cfg;
 
-import recaf.general.Type;
+import recaf.common.Type;
 
 /**
  * Represents a variable.

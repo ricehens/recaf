@@ -1,17 +1,17 @@
 package recaf.main;
 
-import recaf.asm.AssemblyBuilder;
-import recaf.asm.AssemblyStringBuilder;
-import recaf.reg.NoRegInstructionSelection;
+import recaf.codegen.AssemblyBuilder;
+import recaf.codegen.AssemblyStringBuilder;
+import recaf.codegen.NoRegInstructionSelection;
 import recaf.cfg.CFGProgram;
 import recaf.opt.Deglobalization;
 import recaf.opt.InlineExpansion;
 import recaf.opt.MethodTransformer;
 import recaf.opt.MethodTransformer.TransformType;
-import recaf.reg.AssemblyOptimizer;
-import recaf.reg.InstructionSelection;
-import recaf.reg.PseudoassemblyOptimizer;
-import recaf.reg.RegisterAllocation;
+import recaf.codegen.AssemblyOptimizer;
+import recaf.codegen.InstructionSelection;
+import recaf.codegen.PseudoassemblyOptimizer;
+import recaf.codegen.RegisterAllocation;
 
 import java.io.PrintStream;
 

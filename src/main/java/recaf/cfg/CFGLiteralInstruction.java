@@ -1,6 +1,6 @@
 package recaf.cfg;
 
-import recaf.general.*;
+import recaf.common.*;
 
 import java.util.List;
 

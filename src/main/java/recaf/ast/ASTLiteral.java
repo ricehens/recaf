@@ -1,6 +1,6 @@
 package recaf.ast;
 
-import recaf.general.Literal;
+import recaf.common.Literal;
 
 public record ASTLiteral(ASTContext ctx, Literal literal) implements ASTExpression {
 

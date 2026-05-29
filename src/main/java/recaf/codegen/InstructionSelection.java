@@ -1,8 +1,8 @@
-package recaf.reg;
+package recaf.codegen;
 
 import recaf.asm.*;
 import recaf.cfg.*;
-import recaf.general.*;
+import recaf.common.*;
 import recaf.utils.MagicUtils;
 import recaf.utils.NumUtils;
 

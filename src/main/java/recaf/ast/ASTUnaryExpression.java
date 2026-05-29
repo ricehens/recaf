@@ -1,7 +1,7 @@
 package recaf.ast;
 
 import recaf.parse.ParseUtils;
-import recaf.general.UnaryOperator;
+import recaf.common.UnaryOperator;
 
 public record ASTUnaryExpression(ASTContext ctx, UnaryOperator op, ASTExpression expr) implements ASTExpression {
 

@@ -1,6 +1,7 @@
-package recaf.asm;
+package recaf.codegen;
 
-import recaf.general.Type;
+import recaf.asm.*;
+import recaf.common.Type;
 import recaf.cfg.CFG;
 import recaf.cfg.CFGAddress;
 import recaf.cfg.CFGContext;

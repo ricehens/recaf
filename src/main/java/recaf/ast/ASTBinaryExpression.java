@@ -1,7 +1,7 @@
 package recaf.ast;
 
 import recaf.parse.ParseUtils;
-import recaf.general.BinaryOperator;
+import recaf.common.BinaryOperator;
 
 public record ASTBinaryExpression(
         ASTContext ctx, BinaryOperator op, ASTExpression left, ASTExpression right

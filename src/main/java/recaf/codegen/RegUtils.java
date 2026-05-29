@@ -1,4 +1,4 @@
-package recaf.reg;
+package recaf.codegen;
 
 import recaf.asm.ASMLocation;
 import recaf.asm.ASMStackAddress;

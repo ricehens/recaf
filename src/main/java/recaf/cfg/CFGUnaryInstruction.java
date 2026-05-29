@@ -1,6 +1,6 @@
 package recaf.cfg;
 
-import recaf.general.UnaryOperator;
+import recaf.common.UnaryOperator;
 
 import java.util.List;
 

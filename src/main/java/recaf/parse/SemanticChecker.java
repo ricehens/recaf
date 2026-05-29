@@ -1,7 +1,7 @@
 package recaf.parse;
 
 import recaf.ast.*;
-import recaf.general.*;
+import recaf.common.*;
 
 import java.util.*;
 import java.util.stream.Stream;

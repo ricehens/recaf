@@ -1,4 +1,4 @@
-package recaf.general;
+package recaf.common;
 
 public interface Literal {
 

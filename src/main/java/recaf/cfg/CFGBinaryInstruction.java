@@ -1,6 +1,6 @@
 package recaf.cfg;
 
-import recaf.general.BinaryOperator;
+import recaf.common.BinaryOperator;
 
 import java.util.List;
 

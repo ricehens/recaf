@@ -1,7 +1,7 @@
 package recaf.cfg;
 
-import recaf.general.BinaryOperator;
-import recaf.general.Literal;
+import recaf.common.BinaryOperator;
+import recaf.common.Literal;
 
 import java.util.List;
 

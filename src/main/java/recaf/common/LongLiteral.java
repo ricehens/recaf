@@ -1,10 +1,10 @@
-package recaf.general;
+package recaf.common;
 
-public record IntLiteral(int value) implements Literal {
+public record LongLiteral(long value) implements Literal {
 
     @Override
     public Type type() {
-        return Type.INT;
+        return Type.LONG;
     }
 
     @Override
@@ -14,12 +14,12 @@ public record IntLiteral(int value) implements Literal {
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof IntLiteral that && value == that.value;
+        return obj instanceof LongLiteral that && value == that.value;
     }
 
     @Override
     public int hashCode() {
-        return value;
+        return Long.hashCode(value);
     }
 
 }

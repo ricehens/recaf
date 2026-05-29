@@ -1,8 +1,8 @@
 package recaf.utils;
 
-import recaf.general.IntLiteral;
-import recaf.general.Literal;
-import recaf.general.LongLiteral;
+import recaf.common.IntLiteral;
+import recaf.common.Literal;
+import recaf.common.LongLiteral;
 
 public class NumUtils {
 

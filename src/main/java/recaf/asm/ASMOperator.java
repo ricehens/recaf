@@ -1,6 +1,6 @@
 package recaf.asm;
 
-import recaf.general.Type;
+import recaf.common.Type;
 
 import java.util.Collections;
 import java.util.Set;

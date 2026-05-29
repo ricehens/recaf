@@ -4,7 +4,7 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import recaf.antlr.RecafParser;
 import recaf.ast.*;
-import recaf.general.*;
+import recaf.common.*;
 import recaf.main.RecafErrorHandler;
 
 import java.math.BigInteger;

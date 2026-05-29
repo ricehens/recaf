@@ -1,6 +1,6 @@
 package recaf.asm;
 
-import recaf.general.Literal;
+import recaf.common.Literal;
 
 /**
  * Represents a literal value in assembly.

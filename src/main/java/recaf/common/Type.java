@@ -1,4 +1,4 @@
-package recaf.general;
+package recaf.common;
 
 /**
  * Represents a CFG type, e.g. int, long[].
