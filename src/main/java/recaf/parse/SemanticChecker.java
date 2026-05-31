@@ -504,7 +504,10 @@ public class SemanticChecker {
     }
 
     private ASTMethodCall castLong(ASTExpression expr) {
-        return check(new ASTMethodCall(expr.ctx(), new ASTIdentifier(expr.ctx(), INT64), List.of(expr)));
+        ASTMethodCall ret = new ASTMethodCall(expr.ctx(),
+                new ASTIdentifier(expr.ctx(), INT64), List.of(expr));
+        exprTypes.put(ret, primitiveType(Type.LONG));
+        return ret;
     }
 
     private ASTExpression reduce(ASTLocation loc) {
