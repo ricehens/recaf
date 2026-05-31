@@ -99,11 +99,8 @@ The subset of Pascal that Recaf supports includes:
   ```
 - Top-level procedures and functions (i.e. routines), but not nested.
   Routines may have local definitions for types, constants, or variables.
-  They may take primitive types, enums, or pointers as parameters,
-  and functions may return primitive types, enums, or pointers.
-  Arguments are always by value (no `var` parameters),
-  which is not that inconvenient because arrays/records cannot be passed
-  (use heap instead).
+  Routines may take all types as parameters, by value or by reference (var parameters).
+  Functions may return primitive types, enums, or pointers.
 - Most control statements, including if-else, while-do, for loops, and repeat-until.
   There are also intrinsics `Break`, `Continue`, and `Exit`.
   The `Exit` intrinsic procedure returns from a function early.

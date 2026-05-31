@@ -8,7 +8,7 @@ end;
 var 
     t: Integer;
 begin
-    t := 4;
+    t := 6;
     Inc(t);
     WriteLn(t)
 end.
