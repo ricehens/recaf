@@ -80,15 +80,14 @@ public class Linearizer {
             case ASTArrayType _, ASTRecordType _ ->
                 new CFGVariable(symbolTable, vd.id().text(), Type.RECORD, sizeof(vd.type()));
             case ASTEnumType _ ->
-                    new CFGVariable(symbolTable, vd.id().text(), Type.INT);
+                new CFGVariable(symbolTable, vd.id().text(), Type.INT);
             case ASTPointerType _ ->
-                    new CFGVariable(symbolTable, vd.id().text(), Type.LONG);
+                new CFGVariable(symbolTable, vd.id().text(), Type.LONG);
             case ASTPrimitiveType pr ->
                 new CFGVariable(symbolTable, vd.id().text(), pr.type());
             // already reduced
             default -> throw new AssertionError("This should never happen.");
         };
-
         (local ? localVars : globalVars).put(vd.id().text(), vd);
         symbols.put(vd, variable);
     }
@@ -106,7 +105,7 @@ public class Linearizer {
         localVars = new HashMap<>();
         buffers = new ArrayList<>();
 
-        md.params().orElseThrow().stream().map(ASTParameter::vd).forEach(this::linearize);
+        md.params().orElseThrow().stream().forEach(this::linearize);
         for (ASTDeclaration decl : md.decls()) {
             if (decl instanceof ASTVarDecl vd) linearize(vd);
             else if (decl instanceof ASTTypeDecl td) linearize(td);
@@ -123,6 +122,7 @@ public class Linearizer {
                 md.returnType().map(this::reduceType).orElse(Type.VOID),
                 md.id().text(),
                 md.params().orElseThrow().stream()
+                        .map(ASTParameter::vd)
                         .map(symbols::get)
                         .map(CFGVariable::getAddress)
                         .toList(),
@@ -131,6 +131,15 @@ public class Linearizer {
                         localVars.values().stream().map(symbols::get).map(CFGVariable::getAddress)
                 ).toList(),
                 cfg));
+    }
+
+    private void linearize(ASTParameter param) {
+        if (param.byReference()) {
+            ASTType type = param.vd().type();
+            CFGVariable variable = new CFGVariable(symbolTable, param.vd().id().text(), Type.LONG);
+            localVars.put(param.vd().id().text(), param.vd());
+            symbols.put(param.vd(), variable);
+        } else linearize(param.vd());
     }
 
     private void linearize(ASTBlock blk) {
@@ -188,6 +197,12 @@ public class Linearizer {
         cfg.offer(new CFGBinaryInstruction(ctx, ret, BinaryOperator.PLUS,
                 tmp, base));
         return ret;
+    }
+
+    private CFGAddress newBuffer(int size) {
+        CFGAddress buf = new CFGVariable(symbolTable, "@buf", Type.RECORD, size).getAddress();
+        buffers.add(buf);
+        return buf;
     }
 
     private void linearize(ASTIfElse ifElse) {
@@ -429,9 +444,7 @@ public class Linearizer {
                     ASTType type = sc.exprType(loc);
                     if (type instanceof ASTPrimitiveType pr && pr.type() == Type.INT) {
                         CFGAddress tmp = ctx.newAddress(Type.INT);
-                        CFGAddress buf = new CFGVariable(symbolTable, "@buf",
-                                    Type.RECORD, 4).getAddress();
-                        buffers.add(buf);
+                        CFGAddress buf = newBuffer(4);
                         CFGAddress fmt = makeStringLiteral("%d");
                         cfg.offer(new CFGMethodCallInstruction(ctx, null, SCANF,
                                 List.of(fmt, buf)));
@@ -439,9 +452,7 @@ public class Linearizer {
                         write(loc, tmp);
                     } else if (type instanceof ASTPrimitiveType pr && pr.type() == Type.LONG) {
                         CFGAddress tmp = ctx.newAddress(Type.LONG);
-                        CFGAddress buf = new CFGVariable(symbolTable, "@buf",
-                                    Type.RECORD, 8).getAddress();
-                        buffers.add(buf);
+                        CFGAddress buf = newBuffer(8);
                         CFGAddress fmt = makeStringLiteral("%lld");
                         cfg.offer(new CFGMethodCallInstruction(ctx, null, SCANF,
                                 List.of(fmt, buf)));
@@ -465,31 +476,55 @@ public class Linearizer {
             default -> {
                 Optional<ASTType> returnType = methods.get(mc.id().text());
                 List<CFGAddress> args = new ArrayList<>();
+                List<WriteBack> wb = new ArrayList<>();
                 for (ASTExpression arg : mc.args()) {
                     if (arg instanceof ASTReference ref) {
                         ASTLocation loc = ref.loc();
                         ASTType type = sc.exprType(loc);
-                        if (type instanceof ASTArrayType at || type instanceof ASTRecordType rt)
+                        if (type instanceof ASTArrayType || type instanceof ASTRecordType)
                             args.add(reduce(locate(loc)));
                         else {
-                            CFGAddress buf = new CFGVariable(symbolTable, "@buf",
-                                    Type.RECORD, 4).getAddress();
+                            int size = sizeof(type);
+                            CFGAddress value = linearize(loc);
+                            CFGAddress buf = newBuffer(size);
+                            cfg.offer(new CFGWriteInstruction(ctx, buf, size, makeIntLiteral(0), value));
+
+                            CFGAddress ptr = ctx.newAddress(Type.LONG);
+                            cfg.offer(new CFGCastInstruction(ctx, ptr, Type.LONG, buf));
+                            args.add(ptr);
+                            wb.add(new WriteBack(loc, type, buf));
                         }
                     } else {
                         ASTType type = sc.exprType(arg);
-                        if (type instanceof ASTArrayType at || type instanceof ASTRecordType rt) {
-                            // copy into buffer
+                        if (type instanceof ASTArrayType || type instanceof ASTRecordType) {
+                            symbolTable.addExternalMethod(MEMCPY);
+                            CFGAddress buf = newBuffer(sizeof(type));
+                            cfg.offer(new CFGMethodCallInstruction(ctx, null, MEMCPY,
+                                    List.of(buf, reduce(locate((ASTLocation) arg)),
+                                            makeLongLiteral(sizeof(type)))));
+                            CFGAddress ptr = ctx.newAddress(Type.LONG);
+                            cfg.offer(new CFGCastInstruction(ctx, ptr, Type.LONG, buf));
+                            args.add(ptr);
                         } else args.add(linearize(arg));
                     }
                 }
+
                 cfg.offer(new CFGMethodCallInstruction(ctx,
                         returnType.isEmpty() ? null : dest,
                         mc.id().text(),
                         args));
-                // TODO copy back from buffers
+
+                for (WriteBack copyBack : wb) {
+                    CFGAddress tmp = ctx.newAddress(reduceType(copyBack.type()));
+                    cfg.offer(new CFGReadInstruction(ctx, tmp, copyBack.buffer(),
+                            sizeof(copyBack.type()), makeIntLiteral(0)));
+                    write(copyBack.loc(), tmp);
+                }
             }
         }
     }
+
+    private record WriteBack(ASTLocation loc, ASTType type, CFGAddress buffer) {}
 
     private void linearize(CFGAddress dest, ASTLiteral lit) {
         cfg.offer(new CFGLiteralInstruction(ctx, dest, lit.literal()));
@@ -554,7 +589,7 @@ public class Linearizer {
         ASTVarDecl root = getVar(loc.id());
 
         int lastDeref = -1;
-        for (int i = loc.accesses().size(); i-- > 0; ) {
+        for (int i = loc.accesses().size(); i --> 0;) {
             if (loc.accesses().get(i) instanceof ASTDerefAccess) {
                 lastDeref = i;
                 break;

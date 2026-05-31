@@ -2,7 +2,7 @@ package recaf.ast;
 
 import recaf.parse.ParseUtils;
 
-public record ASTPointerType(ASTContext ctx, ASTBaseType type) implements ASTType {
+public record ASTPointerType(ASTContext ctx, ASTType type) implements ASTType {
 
     @Override
     public String toString() {

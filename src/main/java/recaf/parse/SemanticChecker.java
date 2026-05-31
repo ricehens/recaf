@@ -23,7 +23,8 @@ public class SemanticChecker {
     private boolean local;
     private Map<String, ASTType> localTypes;
     private Map<String, ASTType> localVariables;
-    private Map<String, ASTType> localReferences;
+    private Map<String, ASTType> localScalarRef;
+    private Map<String, ASTType> localCompositeRef;
     private Map<String, ASTExpression> localConstants;
 
     private int loopDepth;
@@ -270,9 +271,11 @@ public class SemanticChecker {
     }
 
     private ASTPointerType check(ASTPointerType ast) {
-        ASTBaseType halfChecked = check1(ast.type());
-        promisedTypes.add(halfChecked);
-        return new ASTPointerType(ast.ctx(), halfChecked);
+        if (ast.type() instanceof ASTBaseType bt) {
+            ASTBaseType halfChecked = check1(bt);
+            promisedTypes.add(halfChecked);
+            return new ASTPointerType(ast.ctx(), halfChecked);
+        } else return new ASTPointerType(ast.ctx(), dispatch(ast.type()));
     }
 
     private void flushPromises() {
@@ -352,7 +355,8 @@ public class SemanticChecker {
         local = true;
         localTypes = new HashMap<>();
         localVariables = new HashMap<>();
-        localReferences = new HashMap<>();
+        localScalarRef = new HashMap<>();
+        localCompositeRef = new HashMap<>();
         localConstants = new HashMap<>();
 
         returnType = returnType.map(this::resolveType);
@@ -371,10 +375,20 @@ public class SemanticChecker {
         }
 
         if (params.isPresent()) {
+            ArrayList<ASTParameter> reducedParams = new ArrayList<>();
             for (ASTParameter p : params.get()) {
-                if (p.byReference()) registerRef(p.vd().id(), p.vd().type());
-                else registerVar(p.vd().id(), p.vd().type());
+                if (p.byReference()) {
+                    registerRef(p.vd().id(), p.vd().type());
+                    reducedParams.add(new ASTParameter(
+                                p.ctx(),
+                                new ASTVarDecl(p.vd().ctx(), getVar(p.vd().id()), p.vd().id()),
+                                false));
+                } else {
+                    registerVar(p.vd().id(), p.vd().type());
+                    reducedParams.add(p);
+                }
             }
+            params = Optional.of(reducedParams);
         }
 
         List<ASTDeclaration> decls = Stream.concat(
@@ -491,7 +505,6 @@ public class SemanticChecker {
         return check(new ASTMethodCall(expr.ctx(), new ASTIdentifier(expr.ctx(), INT64), List.of(expr)));
     }
 
-    // checked + placed in exprtypes iff return type is not ASTLocation
     private ASTExpression reduce(ASTLocation loc) {
         String key = key(loc.id());
         if (local) {
@@ -501,15 +514,8 @@ public class SemanticChecker {
                 return loc;
             }
 
-            if (localReferences.containsKey(key)) {
-                ASTType type = localReferences.get(key);
-                ASTAccessor firstAccess = type instanceof ASTArrayType || type instanceof ASTRecordType
-                    ? new ASTDerefAccess(loc.ctx())
-                    : new ASTIndexAccess(loc.ctx(), List.of(new ASTLiteral(loc.ctx(), new IntLiteral(0))));
-
-                return new ASTLocation(loc.ctx(), loc.id(),
-                        Stream.concat(Stream.of(firstAccess), loc.accesses().stream()).toList());
-            }
+            if (localScalarRef.containsKey(key) || localCompositeRef.containsKey(key))
+                return loc;
 
             if (localConstants.containsKey(key))
                 return localConstants.get(key);
@@ -575,6 +581,20 @@ public class SemanticChecker {
         }
 
         List<ASTAccessor> accesses = new ArrayList<>();
+
+        if (localCompositeRef.containsKey(key(id))) {
+            type = resolveType(((ASTPointerType) type).type());
+            accesses.add(new ASTDerefAccess(ast.ctx()));
+        } else if (localScalarRef.containsKey(key(id))) {
+            type = resolveType(((ASTPointerType) type).type());
+            accesses.add(new ASTDerefAccess(ast.ctx()));
+            type = resolveType(((ASTArrayType) type).type());
+            ASTLiteral index = new ASTLiteral(ast.ctx(), new IntLiteral(0));
+            exprTypes.put(index, primitiveType(Type.INT));
+            accesses.add(new ASTIndexAccess(ast.ctx(),
+                        List.of(index)));
+        }
+
         for (ASTAccessor access : ast.accesses()) {
             switch (access) {
                 case ASTIndexAccess index -> {
@@ -968,7 +988,15 @@ public class SemanticChecker {
 
     private void registerRef(ASTIdentifier id, ASTType type) {
         String key = declareId(id);
-        localReferences.put(key, type);
+        Map<String, ASTType> dest = localCompositeRef;
+        if (!(type instanceof ASTArrayType || type instanceof ASTRecordType)) {
+            type = new ASTArrayType(id.ctx(), type,
+                    List.of(new ASTArrayRange(id.ctx(), new ASTLiteral(id.ctx(), new IntLiteral(0)),
+                            new ASTLiteral(id.ctx(), new IntLiteral(0)))));
+            dest = localScalarRef;
+        }
+
+        dest.put(key, new ASTPointerType(id.ctx(), type));
     }
 
     private void registerConst(ASTIdentifier id, ASTExpression lit) {
@@ -987,6 +1015,8 @@ public class SemanticChecker {
         String key = key(id);
         if (local) {
             if (localVariables.containsKey(key)) return resolveType(localVariables.get(key));
+            if (localScalarRef.containsKey(key)) return resolveType(localScalarRef.get(key));
+            if (localCompositeRef.containsKey(key)) return resolveType(localCompositeRef.get(key));
             if (localConstants.containsKey(key))
                 return exprType(localConstants.get(key));
         }
