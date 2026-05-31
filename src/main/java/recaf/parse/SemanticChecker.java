@@ -377,7 +377,9 @@ public class SemanticChecker {
         if (params.isPresent()) {
             ArrayList<ASTParameter> reducedParams = new ArrayList<>();
             for (ASTParameter p : params.get()) {
-                if (p.byReference()) {
+                if (p.byReference()
+                        || p.vd().type() instanceof ASTArrayType
+                        || p.vd().type() instanceof ASTRecordType) {
                     registerRef(p.vd().id(), p.vd().type());
                     reducedParams.add(new ASTParameter(
                                 p.ctx(),
