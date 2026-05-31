@@ -184,7 +184,13 @@ public class Linearizer {
     }
 
     private CFGAddress reduce(LocationTarget target) {
-        if (target.simple()) return target.base();
+        if (target.simple()) {
+            if (ctx.getType(target.base()) != Type.RECORD)
+                return target.base();
+            CFGAddress ret = ctx.newAddress(Type.LONG);
+            cfg.offer(new CFGCastInstruction(ctx, ret, Type.LONG, target.base()));
+            return ret;
+        }
 
         CFGAddress ret = ctx.newAddress(Type.LONG);
         CFGAddress tmp = ctx.newAddress(Type.LONG);
