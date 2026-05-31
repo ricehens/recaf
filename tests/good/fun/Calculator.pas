@@ -91,7 +91,6 @@ end;
 (* stdio *)
 const MAX_LEN = 255;
 type
-    PBuffer = ^TBuffer;
     TBuffer = Array[0..MAX_LEN] of Integer;
 
 (* lexer *)
@@ -108,15 +107,15 @@ type
         Next: PTokenList;
     end;
 
-function Lex(s: PBuffer; idx: Integer): PTokenList;
+function Lex(var s: TBuffer; idx: Integer): PTokenList;
 var c, v: Integer;
 begin
     Lex := Nil;
-    while (idx <= s^[0]) and (s^[idx] = Char(' ')) do idx := idx + 1;
-    if idx <= s^[0] then begin
+    while (idx <= s[0]) and (s[idx] = Char(' ')) do idx := idx + 1;
+    if idx <= s[0] then begin
         New(Lex);
         Lex^.Token.Value := idx;
-        c := s^[idx];
+        c := s[idx];
         if c = Char('+') then Lex^.Token.Kind := TokenPlus
         else if c = Char('-') then Lex^.Token.Kind := TokenMinus
         else if c = Char('*') then Lex^.Token.Kind := TokenTimes
@@ -126,8 +125,8 @@ begin
         else if (c >= Char('0')) and (c <= Char('9')) then begin
             Lex^.Token.Kind := TokenLit;
             v := 0;
-            while (idx <= s^[0]) and (s^[idx] >= Char('0')) and (s^[idx] <= Char('9')) do begin
-                v := v * 10 + s^[idx] - Char('0');
+            while (idx <= s[0]) and (s[idx] >= Char('0')) and (s[idx] <= Char('9')) do begin
+                v := v * 10 + s[idx] - Char('0');
                 idx := idx + 1
             end;
             Lex^.Token.Value := v;
@@ -304,7 +303,7 @@ begin
 end;
 
 (* main *)
-var Buf: PBuffer;
+var Buf: TBuffer;
     Tokens: PTokenList;
     Expr: PExpr;
 begin
@@ -315,12 +314,10 @@ begin
             Break
         end;
 
-        New(Buf);
-        ReadLn(Buf^);
-        if Buf^[0] = 0 then Continue;
+        ReadLn(Buf);
+        if Buf[0] = 0 then Continue;
 
         Tokens := Lex(Buf, 1);
-        Dispose(Buf);
         { PrintTokens(Tokens); }
 
         Expr := Parse(Tokens);
