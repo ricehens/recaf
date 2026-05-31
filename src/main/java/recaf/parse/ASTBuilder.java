@@ -169,8 +169,14 @@ public class ASTBuilder {
         );
     }
 
-    private Stream<ASTVarDecl> visit(RecafParser.Param_declsContext cst) {
-        return cst.var_decl().stream().flatMap(this::visit);
+    private Stream<ASTParameter> visit(RecafParser.Param_declsContext cst) {
+        return cst.param_decl().stream().flatMap(this::visit);
+    }
+
+    private Stream<ASTParameter> visit(RecafParser.Param_declContext cst) {
+        return visit(cst.var_decl()).map(
+                x -> new ASTParameter(ctx(cst), x, cst.VAR() != null)
+       );
     }
 
     private Stream<ASTDeclaration> visit(RecafParser.Local_declarationContext cst) {

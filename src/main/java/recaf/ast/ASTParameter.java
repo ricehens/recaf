@@ -2,11 +2,11 @@ package recaf.ast;
 
 import recaf.parse.ParseUtils;
 
-public record ASTParameter(ASTContext ctx, ASTType type, ASTIdentifier name) {
+public record ASTParameter(ASTContext ctx, ASTVarDecl vd, boolean byReference) implements AST {
 
     @Override
     public String toString() {
-        return ParseUtils.generateToString("(Parameter) " + name.text(), type);
+        return ParseUtils.generateToString(byReference ? "(&Parameter)" : "(Parameter)", vd);
     }
 
 }

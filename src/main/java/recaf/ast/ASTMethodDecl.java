@@ -9,7 +9,7 @@ public record ASTMethodDecl(
         ASTContext ctx,
         Optional<ASTType> returnType, // null if void
         ASTIdentifier id,
-        Optional<List<ASTVarDecl>> params, // null if variadic
+        Optional<List<ASTParameter>> params, // null if variadic
         List<ASTDeclaration> decls,
         Optional<ASTBlock> block, // null if external, forward, or native
         boolean forward,

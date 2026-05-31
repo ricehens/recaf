@@ -38,7 +38,8 @@ id_list: ID (COMMA ID)*;
 function_decl: FUNCTION ID formal_params? (COLON type_ref)? SEMICOLON (EXTERNAL | FORWARD | routine_block) SEMICOLON;
 procedure_decl: PROCEDURE ID formal_params? SEMICOLON (EXTERNAL | FORWARD | routine_block) SEMICOLON;
 formal_params: LPAREN (ELLIPSIS | param_decls?) RPAREN;
-param_decls: var_decl (SEMICOLON var_decl)*;
+param_decl: VAR? var_decl;
+param_decls: param_decl (SEMICOLON param_decl)*;
 
 routine_block: local_declaration* block;
 local_declaration: type_section | const_section | var_section;

@@ -23,6 +23,7 @@ public class SemanticChecker {
     private boolean local;
     private Map<String, ASTType> localTypes;
     private Map<String, ASTType> localVariables;
+    private Map<String, ASTType> localReferences;
     private Map<String, ASTExpression> localConstants;
 
     private int loopDepth;
@@ -178,16 +179,16 @@ public class SemanticChecker {
     }
 
     private ASTMethodDecl makeInternal(ASTContext ctx, ASTType returnType,
-                                       String name, List<ASTVarDecl> params) {
+                                       String name, List<ASTParameter> params) {
         return new ASTMethodDecl(ctx, Optional.ofNullable(returnType), new ASTIdentifier(ctx, name),
                 Optional.ofNullable(params),
                 List.of(), Optional.empty(), false, false, true);
     }
 
     private ASTMethodDecl makeExternal(ASTContext ctx, ASTType returnType, String name, ASTType... params) {
-        List<ASTVarDecl> args = new ArrayList<>();
+        List<ASTParameter> args = new ArrayList<>();
         for (int i = 0 ; i < params.length; i++)
-            args.add(new ASTVarDecl(ctx, params[i], new ASTIdentifier(ctx, "_" + i)));
+            args.add(new ASTParameter(ctx, new ASTVarDecl(ctx, params[i], new ASTIdentifier(ctx, "_" + i)), false));
         return new ASTMethodDecl(ctx,
                 Optional.ofNullable(returnType), new ASTIdentifier(ctx, name), Optional.of(args),
                 List.of(), Optional.empty(), false, true, false);
@@ -314,7 +315,7 @@ public class SemanticChecker {
         ASTIdentifier id = new ASTIdentifier(ast.ctx(),
                 ast.external() ? ast.id().text() : key(ast.id()));
         Optional<ASTType> returnType = ast.returnType().map(this::dispatch);
-        Optional<List<ASTVarDecl>> params = ast.params().map(
+        Optional<List<ASTParameter>> params = ast.params().map(
                 x -> x.stream().map(this::check).toList()
         );
 
@@ -339,7 +340,9 @@ public class SemanticChecker {
                 if (params.get().size() != forward.params().get().size())
                     id.ctx().error("forward signature mismatch for routine " + key);
                 else for (int i = 0; i < params.get().size(); i++) {
-                    if (!equalTypes(params.get().get(i).type(), forward.params().get().get(i).type()))
+                    ASTParameter left = params.get().get(i);
+                    ASTParameter right = forward.params().get().get(i);
+                    if (!equalTypes(left.vd().type(), right.vd().type()) || left.byReference() != right.byReference())
                         id.ctx().error("forward signature mismatch for routine " + key);
                 }
             }
@@ -349,6 +352,7 @@ public class SemanticChecker {
         local = true;
         localTypes = new HashMap<>();
         localVariables = new HashMap<>();
+        localReferences = new HashMap<>();
         localConstants = new HashMap<>();
 
         returnType = returnType.map(this::resolveType);
@@ -367,13 +371,9 @@ public class SemanticChecker {
         }
 
         if (params.isPresent()) {
-            for (ASTVarDecl vd : params.get()) {
-                ASTVarDecl vd2 = check(vd);
-                if (vd2.type() instanceof ASTArrayType)
-                    vd2.ctx().error("passing arrays to routines is currently unsupported");
-                if (vd2.type() instanceof ASTRecordType)
-                    vd2.ctx().error("passing records to routines is currently unsupported");
-                registerVar(vd2.id(), vd2.type());
+            for (ASTParameter p : params.get()) {
+                if (p.byReference()) registerRef(p.vd().id(), p.vd().type());
+                else registerVar(p.vd().id(), p.vd().type());
             }
         }
 
@@ -390,6 +390,10 @@ public class SemanticChecker {
         return new ASTMethodDecl(ast.ctx(),
                 returnType, id, params, decls, block,
                 ast.forward(), ast.external(), ast.internal());
+    }
+
+    private ASTParameter check(ASTParameter ast) {
+        return new ASTParameter(ast.ctx(), check(ast.vd()), ast.byReference());
     }
 
     private boolean equalTypes(ASTType t1, ASTType t2) {
@@ -487,7 +491,7 @@ public class SemanticChecker {
         return check(new ASTMethodCall(expr.ctx(), new ASTIdentifier(expr.ctx(), INT64), List.of(expr)));
     }
 
-    // checked + placed in exprtypes iff reduced, i.e. iff return type is not ASTLocation
+    // checked + placed in exprtypes iff return type is not ASTLocation
     private ASTExpression reduce(ASTLocation loc) {
         String key = key(loc.id());
         if (local) {
@@ -495,6 +499,16 @@ public class SemanticChecker {
                 if (localVariables.get(key) instanceof ASTEnumType et)
                     return reduceEnum(loc, et);
                 return loc;
+            }
+
+            if (localReferences.containsKey(key)) {
+                ASTType type = localReferences.get(key);
+                ASTAccessor firstAccess = type instanceof ASTArrayType || type instanceof ASTRecordType
+                    ? new ASTDerefAccess(loc.ctx())
+                    : new ASTIndexAccess(loc.ctx(), List.of(new ASTLiteral(loc.ctx(), new IntLiteral(0))));
+
+                return new ASTLocation(loc.ctx(), loc.id(),
+                        Stream.concat(Stream.of(firstAccess), loc.accesses().stream()).toList());
             }
 
             if (localConstants.containsKey(key))
@@ -653,7 +667,8 @@ public class SemanticChecker {
             ASTExpression e = dispatch(ast.args().get(i));
             ASTType type = exprType(e);
             if (md.params().isPresent()) {
-                ASTType expectedType = md.params().get().get(i).type();
+                ASTParameter param = md.params().get().get(i);
+                ASTType expectedType = param.vd().type();
                 if (equalTypesStrict(expectedType, primitiveType(Type.LONG))
                         && equalTypesStrict(type, primitiveType(Type.INT))) {
                     e = castLong(e);
@@ -663,11 +678,13 @@ public class SemanticChecker {
                     ast.ctx().error("type mismatch for " + i + "th argument");
                     return ast;
                 }
-            } else if (md.external()) {
-                if (type instanceof ASTArrayType)
-                    ast.ctx().error("cannot pass array to external routine");
-                if (type instanceof ASTRecordType)
-                    ast.ctx().error("cannot pass record to external routine");
+                if (param.byReference()) {
+                    if (!(e instanceof ASTLocation loc)) {
+                        ast.ctx().error("expected location for " + i + "th argument");
+                        return ast;
+                    }
+                    e = new ASTReference(ast.ctx(), loc);
+                }
             }
             args.add(e);
         }
@@ -947,6 +964,11 @@ public class SemanticChecker {
     private void registerVar(ASTIdentifier id, ASTType type) {
         String key = declareId(id);
         (local ? localVariables : globalVariables).put(key, type);
+    }
+
+    private void registerRef(ASTIdentifier id, ASTType type) {
+        String key = declareId(id);
+        localReferences.put(key, type);
     }
 
     private void registerConst(ASTIdentifier id, ASTExpression lit) {
