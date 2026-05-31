@@ -171,53 +171,50 @@ end;
 
 (* parser *)
 type
-    PParserState = ^TParserState;
     TParserState = record
         tokens: PTokenList;
     end;
 
-function ParseAddSub(state: PParserState): PExpr; forward;
-function ParseMulDiv(state: PParserState): PExpr; forward;
-function ParseUnaryMinus(state: PParserState): PExpr; forward;
-function ParsePrimary(state: PParserState): PExpr; forward;
+function ParseAddSub(var state: TParserState): PExpr; forward;
+function ParseMulDiv(var state: TParserState): PExpr; forward;
+function ParseUnaryMinus(var state: TParserState): PExpr; forward;
+function ParsePrimary(var state: TParserState): PExpr; forward;
 
-procedure NextToken(state: PParserState);
+procedure NextToken(var state: TParserState);
 begin
-    state^.tokens := state^.tokens^.Next
+    state.tokens := state.tokens^.Next
 end;
 
-function ErrorToken(state: PParserState): PExpr;
+function ErrorToken(var state: TParserState): PExpr;
 begin
     New(ErrorToken);
     ErrorToken^.Kind := ExprError;
-    if state^.tokens = Nil then ErrorToken^.Value := -1
+    if state.tokens = Nil then ErrorToken^.Value := -1
     else begin
-        ErrorToken^.Value := state^.tokens^.Token.Value;
+        ErrorToken^.Value := state.tokens^.Token.Value;
         NextToken(state)
     end
 end;
 
 function Parse(tokens: PTokenList): PExpr;
-var state: PParserState;
+var state: TParserState;
 begin
-    New(state);
-    state^.tokens := tokens;
+    state.tokens := tokens;
     Parse := ParseAddSub(state);
 
-    if state^.tokens <> Nil then begin
+    if state.tokens <> Nil then begin
         DisposeExpr(Parse);
         Parse := ErrorToken(state)
-    end;
-    Dispose(state)
+    end
 end;
 
-function GetTokenKind(state: PParserState): TokenKind;
+function GetTokenKind(var state: TParserState): TokenKind;
 begin
-    if state^.tokens = Nil then GetTokenKind := TokenError
-    else GetTokenKind := state^.tokens^.Token.Kind
+    if state.tokens = Nil then GetTokenKind := TokenError
+    else GetTokenKind := state.tokens^.Token.Kind
 end;
 
-function ParseAddSub(state: PParserState): PExpr;
+function ParseAddSub(var state: TParserState): PExpr;
 var right: PExpr;
 begin
     ParseAddSub := ParseMulDiv(state);
@@ -244,7 +241,7 @@ begin
         end else Break
 end;
 
-function ParseMulDiv(state: PParserState): PExpr;
+function ParseMulDiv(var state: TParserState): PExpr;
 var right: PExpr;
 begin
     ParseMulDiv := ParseUnaryMinus(state);
@@ -271,7 +268,7 @@ begin
         end else Break
 end;
 
-function ParseUnaryMinus(state: PParserState): PExpr;
+function ParseUnaryMinus(var state: TParserState): PExpr;
 var right: PExpr;
 begin
     if GetTokenKind(state) = TokenMinus then begin
@@ -282,12 +279,12 @@ begin
     end else ParseUnaryMinus := ParsePrimary(state)
 end;
 
-function ParsePrimary(state: PParserState): PExpr;
+function ParsePrimary(var state: TParserState): PExpr;
 begin
     if GetTokenKind(state) = TokenLit then begin
         New(ParsePrimary);
         ParsePrimary^.Kind := ExprLit;
-        ParsePrimary^.Value := state^.tokens^.Token.Value;
+        ParsePrimary^.Value := state.tokens^.Token.Value;
         NextToken(state)
     end else if GetTokenKind(state) = TokenLParen then begin
         NextToken(state);
