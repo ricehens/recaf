@@ -14,11 +14,11 @@ static int peekchar(void) {
     return c;
 }
 
-int Eof(void) {
+bool Eof(void) {
     return peekchar() == EOF;
 }
 
-int Eoln(void) {
+bool Eoln(void) {
     int c = peekchar();
 
     return c == '\n' || c == '\r' || c == EOF;
