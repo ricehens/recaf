@@ -35,8 +35,7 @@ I first provide the following benchmark data.
 | recaf&nbsp;&#x2011;O0 | 4.725&nbsp;s  | 10.290&nbsp;s | 1.787&nbsp;s | 6.408&nbsp;s  | 33.606&nbsp;s | 4.166&nbsp;s  | 26.155&nbsp;s | 579.9&nbsp;ms | 5.474&nbsp;s | 2.914&nbsp;s  | 1.390&nbsp;s  |
 
 See explanation for the asterisks and actual performance comparison below.
-(TL;DR faster than FPC, about 75% the performance of clang O3,
-though there are still some asterisks on these claims.)
+(TL;DR faster than FPC, about 75% the performance of clang O3.)
 
 ## Quick Start
 ### Build
