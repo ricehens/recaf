@@ -10,7 +10,8 @@ begin
 end.
 ```
 
-As is common practice in industry nowadays,
+As is [common practice](https://www.vibechart.net/)
+in industry nowadays,
 I first provide the following benchmark data.
 
 | Compiler | Geomean  | adi | btree* | correlation | cowbasic | ff&#x2011;gram&#x2011;schmidt | mat&#x2011;mult | quicksort |&nbsp;spigot |&nbsp;strassen* |&nbsp;sudoku |
@@ -33,8 +34,7 @@ I first provide the following benchmark data.
 | fpc&nbsp;&#x2011;O0   | 1.819&nbsp;s  | 1.840&nbsp;s | 1.409&nbsp;s  | 659.6&nbsp;ms | 10.410&nbsp;s | 2.436&nbsp;s  | 2.374&nbsp;s  | 288.1&nbsp;ms | 5.477&nbsp;s | 7.069&nbsp;s  | 345.7&nbsp;ms |
 | recaf&nbsp;&#x2011;O0 | 4.725&nbsp;s  | 10.290&nbsp;s | 1.787&nbsp;s | 6.408&nbsp;s  | 33.606&nbsp;s | 4.166&nbsp;s  | 26.155&nbsp;s | 579.9&nbsp;ms | 5.474&nbsp;s | 2.914&nbsp;s  | 1.390&nbsp;s  |
 
-If this raises eyebrows,
-there is a resolution of the asterisks and actual performance comparison below.
+See explanation for the asterisks and actual performance comparison below.
 (TL;DR faster than FPC, about 75% the performance of clang O3,
 though there are still some asterisks on these claims.)
 
