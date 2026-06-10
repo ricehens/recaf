@@ -45,6 +45,7 @@ public class ParseUtils {
 
     static final String SYSTEM = "system";
     static final String FLOAT64 = "float64";
+    static final String BITS = "bits";
 
     /**
      * Generates a toString for an AST node by concatenating a given string with

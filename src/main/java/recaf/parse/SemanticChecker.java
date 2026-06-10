@@ -172,6 +172,27 @@ public class SemanticChecker {
                 );
             }
 
+            case BITS -> {
+                ASTType intType = primitiveType(Type.INT);
+                ASTType longType = primitiveType(Type.LONG);
+                yield Stream.of(
+                        makeExternal(ctx, longType, "andq", longType, longType),
+                        makeExternal(ctx, intType, "andl", intType, intType),
+                        makeExternal(ctx, longType, "orq", longType, longType),
+                        makeExternal(ctx, intType, "orl", intType, intType),
+                        makeExternal(ctx, longType, "xorq", longType, longType),
+                        makeExternal(ctx, intType, "xorl", intType, intType),
+                        makeExternal(ctx, longType, "notq", longType),
+                        makeExternal(ctx, intType, "notl", intType),
+                        makeExternal(ctx, longType, "shlq", longType, intType),
+                        makeExternal(ctx, intType, "shll", intType, intType),
+                        makeExternal(ctx, longType, "shrq", longType, intType),
+                        makeExternal(ctx, intType, "shrl", intType, intType),
+                        makeExternal(ctx, longType, "sarq", longType, intType),
+                        makeExternal(ctx, intType, "sarl", intType, intType)
+                );
+            }
+
             default -> {
                 ctx.error("Module " + id.text() + " not found");
                 yield Stream.of();
