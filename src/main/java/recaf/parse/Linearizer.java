@@ -591,7 +591,10 @@ public class Linearizer {
             return new LocationTarget(symbols.get(getVar(loc.id())).getAddress(),
                     -1, null, true);
 
-        int finalWidth = sizeof(sc.exprType(loc));
+        ASTType finalType = sc.exprType(loc);
+        int finalWidth = finalType instanceof ASTArrayType || finalType instanceof ASTRecordType
+                ? 1
+                : sizeof(finalType);
         ASTVarDecl root = getVar(loc.id());
 
         int lastDeref = -1;
